@@ -19,7 +19,7 @@ export const store: ReduxStore<Store.All> = createStore(reduce, initialState, ap
 
 export const init = (debug: boolean = false) => {
     if (debug) {
-        console.warn(`[${APP_NAME}] Debug mode enabled`);
+        console.warn(`[${APP_NAME}] Debug mode enabled.`);
     }
 
     ReactDOM.render(

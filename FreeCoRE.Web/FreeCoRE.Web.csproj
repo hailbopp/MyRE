@@ -3,20 +3,32 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp2.0</TargetFramework>
     <DockerComposeProjectPath>..\docker-compose.dcproj</DockerComposeProjectPath>
+    <TypeScriptCompileBlocked>true</TypeScriptCompileBlocked>
+    <TypeScriptToolsVersion>2.5</TypeScriptToolsVersion>
+    <DisableFastUpToDateCheck>true</DisableFastUpToDateCheck>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <PreBuildEvent>npm run build</PreBuildEvent>
   </PropertyGroup>
 
   <ItemGroup>
     <None Remove="ClientSrc\FreeCoRE\Actions\index.ts" />
+    <None Remove="ClientSrc\FreeCoRE\Actions\Nav.ts" />
     <None Remove="ClientSrc\FreeCoRE\Components\Application.tsx" />
+    <None Remove="ClientSrc\FreeCoRE\Components\AppMainPanel.tsx" />
     <None Remove="ClientSrc\FreeCoRE\Components\Dashboard.tsx" />
+    <None Remove="ClientSrc\FreeCoRE\Components\Navbar.tsx" />
     <None Remove="ClientSrc\FreeCoRE\index.tsx" />
     <None Remove="ClientSrc\FreeCoRE\Middleware\Logging.ts" />
     <None Remove="ClientSrc\FreeCoRE\Models\Store.ts" />
     <None Remove="ClientSrc\FreeCoRE\Reducers\index.ts" />
+    <None Remove="ClientSrc\FreeCoRE\Reducers\Nav.ts" />
     <None Remove="ClientSrc\index.ts" />
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="ClientSrc\typings\" />
     <Folder Include="wwwroot\" />
   </ItemGroup>
 
@@ -30,13 +42,16 @@
 
   <ItemGroup>
     <TypeScriptCompile Include="ClientSrc\FreeCoRE\Actions\index.ts" />
+    <TypeScriptCompile Include="ClientSrc\FreeCoRE\Actions\Nav.ts" />
     <TypeScriptCompile Include="ClientSrc\FreeCoRE\Components\Application.tsx" />
+    <TypeScriptCompile Include="ClientSrc\FreeCoRE\Components\AppMainPanel.tsx" />
     <TypeScriptCompile Include="ClientSrc\FreeCoRE\Components\Dashboard.tsx" />
+    <TypeScriptCompile Include="ClientSrc\FreeCoRE\Components\Navbar.tsx" />
     <TypeScriptCompile Include="ClientSrc\FreeCoRE\index.tsx" />
     <TypeScriptCompile Include="ClientSrc\FreeCoRE\Middleware\Logging.ts" />
     <TypeScriptCompile Include="ClientSrc\FreeCoRE\Models\Store.ts" />
     <TypeScriptCompile Include="ClientSrc\FreeCoRE\Reducers\index.ts" />
+    <TypeScriptCompile Include="ClientSrc\FreeCoRE\Reducers\Nav.ts" />
     <TypeScriptCompile Include="ClientSrc\index.ts" />
   </ItemGroup>
-
 </Project>
