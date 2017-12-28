@@ -1,0 +1,5 @@
+bin/
+obj/
+.vs/
+FreeCoRE.Web/wwwroot/*
+FreeCoRE.Web/node_modules/
