@@ -4,3 +4,4 @@ obj/
 .vscode/
 FreeCoRE.Web/wwwroot/*
 FreeCoRE.Web/node_modules/
+PublishProfiles/

@@ -3,5 +3,6 @@
   <PropertyGroup>
     <ShowAllFiles>false</ShowAllFiles>
     <ToolsVersionPromptShown>0.0</ToolsVersionPromptShown>
+    <NameOfLastUsedPublishProfile>FreeCoREWeb - Web Deploy</NameOfLastUsedPublishProfile>
   </PropertyGroup>
 </Project>
