@@ -56,8 +56,8 @@ def pageTopLevel() {
                 href "pageWebConsole", title: "Management Console", description: "Tap to initialize", image: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience.png", required: false
             } else {
                 //trace "*** DO NOT SHARE THIS LINK WITH ANYONE *** Dashboard URL: ${getDashboardInitUrl()}"
-                href "", title: "Management Console", style: "external", url: getDashboardInitUrl(), description: "Tap to open", image: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience.png", required: false
-                href "", title: "Authenticate a client", style: "embedded", url: getDashboardInitUrl(true), description: "Tap to open", image: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience.png", required: false
+                href "", title: "Management Console", style: "external", url: getConsoleInitUrl(), description: "Tap to open", image: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience.png", required: false
+                href "", title: "Authenticate a client", style: "embedded", url: getConsoleInitUrl(true), description: "Tap to open", image: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience.png", required: false
             }
         }
 
@@ -119,14 +119,15 @@ private pageDeviceSelect() {
 
 		section ('Select devices by type') {
         	paragraph "Most devices should fall into one of these two categories"
-			input "dev:actuator", "capability.actuator", multiple: true, title: "Which actuators", required: false
-			input "dev:sensor", "capability.sensor", multiple: true, title: "Which sensors", required: false
+			input "dev:actuator", "capability.actuator", multiple: true, title: "Which actuators?", required: false
+			input "dev:sensor", "capability.sensor", multiple: true, title: "Which sensors?", required: false
 		}
 
 		section ('Select devices by capability') {
         	paragraph "If you cannot find a device by type, you may try looking for it by category below"
+            def d
 			for (capability in capabilities().findAll{ (!(it.value.d in [null, 'actuators', 'sensors'])) }.sort{ it.value.d }) {
-				if (capability.value.d != d) input "dev:${capability.key}", "capability.${capability.key}", multiple: true, title: "Which ${capability.value.d}", required: false
+				if (capability.value.d != d) input "dev:${capability.key}", "capability.${capability.key}", multiple: true, title: "Which ${capability.value.d}?", required: false
 				d = capability.value.d
 			}
 		}
@@ -170,6 +171,17 @@ private subscribeToEvents() {
 }
 
 /// Registration with server
+private String getConsoleInitUrl(register = false) {
+	def url = getConsoleBaseUrl()
+    if (!url) return null
+    return url + (register ? "registration/" : "init/") + (apiServerUrl("").replace("https://", '').replace(".api.smartthings.com", "").replace(":443", "").replace("/", "") + ((hubUID ?: state.accessToken) + app.id).replace("-", "") + (hubUID ? '/?access_token=' + state.accessToken : '')).bytes.encodeBase64()
+}
+
+public String getConsoleBaseUrl() {
+	if (!state.endpoint) return null
+	return "${settings.apiDomain}/"
+}
+
 def registerInstance() {
     //TODO
 }
@@ -192,7 +204,7 @@ private initialize() {
     subscribeToEvents()    
     state.vars = state.vars ?: [:]
     state.version = version()
-    if (state.installed && settings.agreement) {
+    if (state.installed) {
     	registerInstance()
     }
 }
