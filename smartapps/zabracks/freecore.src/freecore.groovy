@@ -14,6 +14,13 @@ definition(
     iconX3Url: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience@2x.png"
 )
 
+preferences {
+    page(name: "pageTopLevel")
+    page(name: "pageWebConsole")
+    page(name: "pageDeviceSelect")
+    page(name: "pageFinishInstall")
+}
+
 def pageToplevel() {
 	def endpoint = getHubEndpoint()
 	if (!state.installed) {
