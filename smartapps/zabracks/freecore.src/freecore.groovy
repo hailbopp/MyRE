@@ -1,6 +1,6 @@
 public static String version() { return "v0.0.1" }
 
-private final String APP_NAME = "FreeCoRE"
+def APP_NAME = "FreeCoRE"
 
 definition(
     name: APP_NAME,
@@ -13,20 +13,6 @@ definition(
     iconX2Url: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience@2x.png",
     iconX3Url: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience@2x.png"
 )
-
-private getHubEndpoint() {
-    if (!state.endpoint) {
-        try {
-            def accessToken = createAccessToken()
-            if (accessToken) {
-                state.endpoint = hubUID ? apiServerUrl("$hubUID/apps/${app.id}/?access_token=${state.accessToken}") : apiServerUrl("/api/token/${accessToken}/smartapps/installations/${app.id}/")
-            }
-        } catch(e) {
-            state.endpoint = null
-        }
-    }
-    return state.endpoint
-}
 
 def pageToplevel() {
 	def endpoint = getHubEndpoint()
@@ -106,7 +92,7 @@ private pageWebConsole() {
                 }
             } else {
                 section() {
-                    paragraph "OAuth is not enabled. After it has been enabled, retry." required: true
+                    paragraph "OAuth is not enabled. After it has been enabled, retry.", required: true
                 }
                 return
             }
@@ -156,4 +142,62 @@ private pageFinishInstall() {
 
 private void initTokens() {
 	state.securityTokens = [:]
+}
+
+/// Handlers
+def primaryHandler(event) {
+    if (!event || (!event.name.endsWith(APP_NAME))) return;
+    def data = event.jsonData ?: null
+
+}
+
+/// Subscription management
+private subscribeToEvents() {
+    subscribe(location, "${APP_NAME}.poll", primaryHandler)
+	subscribe(location, "${'@@' + APP_NAME}", primaryHandler)
+    //subscribe(location, "HubUpdated", hubUpdatedHandler, [filterEvents: false])
+    //subscribe(location, "summary", summaryHandler, [filterEvents: false])
+    //setPowerSource(getHub()?.isBatteryInUse() ? 'battery' : 'mains')
+}
+
+/// Registration with server
+def registerInstance() {
+    //TODO
+}
+
+/// Initialization
+def installed() {
+	state.installed = true
+	initialize()
+	return true
+}
+
+def updated() {
+	unsubscribe()
+    unschedule()
+	initialize()
+    return true
+}
+
+private initialize() {
+    subscribeToEvents()    
+    state.vars = state.vars ?: [:]
+    state.version = version()
+    if (state.installed && settings.agreement) {
+    	registerInstance()
+    }
+}
+
+private getHubEndpoint() {
+    if (!state.endpoint) {
+        try {
+            def accessToken = createAccessToken()
+            if (accessToken) {
+                state.endpoint = hubUID ? apiServerUrl("$hubUID/apps/${app.id}/?access_token=${state.accessToken}") : apiServerUrl("/api/token/${accessToken}/smartapps/installations/${app.id}/")
+            }
+        } catch(e) {
+            state.endpoint = null
+        }
+    }
+    return state.endpoint
 }

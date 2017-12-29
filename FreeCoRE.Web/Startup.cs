@@ -29,16 +29,16 @@ namespace FreeCoRE.Web
         {
             services.AddMvc();
 
-            services.AddDbContext<ApplicationDbContext>(options =>
+            services.AddDbContext<FreeCoreContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
 
             services.AddIdentity<ApplicationUser, IdentityRole>()
-                .AddEntityFrameworkStores<ApplicationDbContext>()
+                .AddEntityFrameworkStores<FreeCoreContext>()
                 .AddDefaultTokenProviders();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ApplicationDbContext db)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env, FreeCoreContext db)
         {
             if (env.IsDevelopment())
             {

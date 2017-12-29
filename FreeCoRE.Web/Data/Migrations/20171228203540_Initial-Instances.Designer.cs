@@ -11,9 +11,10 @@ using System;
 namespace FreeCoRE.Web.Data.Migrations
 {
     [DbContext(typeof(FreeCoreContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20171228203540_Initial-Instances")]
+    partial class InitialInstances
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

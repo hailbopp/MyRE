@@ -7,6 +7,8 @@ namespace FreeCoRE.Web.Models
 {
     public class OAuthInfo
     {
+        public long OAuthInfoId { get; set; }
+        public Account Account { get; set; }
         public string ClientId {get;set;}
         public string ClientSecret { get; set; }
         public string AuthorizationCode { get; set; }

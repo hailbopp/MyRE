@@ -2,14 +2,19 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using FreeCoRE.Web.Models;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace FreeCoRE.Web.Data
 {
-    public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
+    public class FreeCoreContext : IdentityDbContext<ApplicationUser>
     {
-        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
+        public DbSet<Account> Accounts { get; set; }
+        public DbSet<AppInstance> AppInstances { get; set; }
+        public DbSet<OAuthInfo> OAuthInfo { get; set; }
+
+        public FreeCoreContext(DbContextOptions<FreeCoreContext> options)
             : base(options)
         {
         }

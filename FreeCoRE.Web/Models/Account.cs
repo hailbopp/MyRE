@@ -8,11 +8,13 @@ namespace FreeCoRE.Web.Models
     public class Account
     {
         public string AccountId { get; set; }
+
+        public ApplicationUser User { get; set; }
     }
 
     public class AppInstance
     {        
-        public string InstanceId { get; set; }
+        public string AppInstanceId { get; set; }
         public string LocationId { get; set; }
         public string Region { get; set; }
 
