@@ -1,14 +1,14 @@
 public static String version() { return "v0.0.1" }
 
-def APP_NAME = "FreeCoRE"
+public static String handle() { return "FreeCoRE" }
 
 definition(
-    name: APP_NAME,
+    name: handle(),
     namespace: "zabracks",
     author: "Drew Worthey",
     description: "Automate all the things!",
     category: "Convenience",
-    singleInstance: false,
+    singleInstance: true,
     iconUrl: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience.png",
     iconX2Url: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience@2x.png",
     iconX3Url: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience@2x.png"
@@ -21,12 +21,12 @@ preferences {
     page(name: "pageFinishInstall")
 }
 
-def pageToplevel() {
+def pageTopLevel() {
 	def endpoint = getHubEndpoint()
 	if (!state.installed) {
-        return dynamicPage(name: "pageToplevel", title: "", install: false, uninstall: false, nextPage: "pageWebConsole") {
+        return dynamicPage(name: "pageTopLevel", title: "", install: false, uninstall: false, nextPage: "pageWebConsole") {
             section() {
-                paragraph "Welcome to ${APP_NAME}"
+                paragraph "Welcome to ${handle()}"
                 paragraph "You will be guided through a few installation steps that should only take a minute."
             }
             if (endpoint) {
@@ -49,29 +49,29 @@ def pageToplevel() {
                 }
             }
         }
-	} else {
-        return dynamicPage(name: "pageToplevel", title: "", install: true, uninstall: false) {
-            section("Management Console") {
-                if (!state.endpoint) {
-                    href "pageWebConsole", title: "Management Console", description: "Tap to initialize", image: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience.png", required: false
-                } else {
-                    //trace "*** DO NOT SHARE THIS LINK WITH ANYONE *** Dashboard URL: ${getDashboardInitUrl()}"
-                    href "", title: "Management Console", style: "external", url: getDashboardInitUrl(), description: "Tap to open", image: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience.png", required: false
-                    href "", title: "Authenticate a client", style: "embedded", url: getDashboardInitUrl(true), description: "Tap to open", image: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience.png", required: false
-                }
+	}
+    dynamicPage(name: "pageTopLevel", title: "", install: true, uninstall: false) {
+        section("Management Console") {
+            if (!state.endpoint) {
+                href "pageWebConsole", title: "Management Console", description: "Tap to initialize", image: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience.png", required: false
+            } else {
+                //trace "*** DO NOT SHARE THIS LINK WITH ANYONE *** Dashboard URL: ${getDashboardInitUrl()}"
+                href "", title: "Management Console", style: "external", url: getDashboardInitUrl(), description: "Tap to open", image: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience.png", required: false
+                href "", title: "Authenticate a client", style: "embedded", url: getDashboardInitUrl(true), description: "Tap to open", image: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience.png", required: false
             }
-
-            section(title:"Settings") {
-                href "pageSettings", title: "Settings", image: "https://cdn.rawgit.com/ady624/${handle()}/master/resources/icons/settings.png", required: false
-            }
-
         }
+
+        section(title:"Settings") {
+            href "pageSettings", title: "Settings", image: "https://cdn.rawgit.com/ady624/${handle()}/master/resources/icons/settings.png", required: false
+        }
+
     }
+    
 }
 
 private sectionDomainEntry() {
     section() {
-        input "apiDomain", "text", title: "Enter the domain of the ${APP_NAME} server that you wish to use.", required: true
+        input "apiDomain", "text", title: "Enter the domain of the ${handle()} server that you wish to use.", defaultValue: "http://freecoreweb.azurewebsites.net", required: true
     }
 }
 
@@ -85,16 +85,17 @@ private sectionPasswordEntry() {
 private pageWebConsole() {
     def endpoint = getHubEndpoint()
     def hasTimeZone = !!location.getTimeZone()
-    return dynamicPage(name: 'pageWebConsole', title: "", nextPage: endpoint && hasTimeZone ? 'pageDeviceSelect' : null) {
+    return dynamicPage(name: 'pageWebConsole', title: "", nextPage:'pageDeviceSelect') {
         if (!state.installed) {
             if (endpoint) {
                 if (hasTimeZone) {
                     section() {
-                        paragraph "Name this ${APP_NAME} instance."
+                        paragraph "Name this ${handle()} instance."
                         label name: "name", title: "Name", state: (name ? "complete" : null), defaultValue: app.name, required: false
                     }
+
                     section() {
-                        paragraph "${state.installed ? "Tap Done to continue." : "Continue to enter the password that you will use to authenticate yourself."}", required: false
+                        paragraph "${state.installed ? "Tap Done to continue." : "Enter the password that you will use to authenticate yourself."}", required: false
                     }
                 }
             } else {
@@ -104,15 +105,16 @@ private pageWebConsole() {
                 return
             }
         }
+        sectionDomainEntry()
         sectionPasswordEntry()
     }
 }
 
 private pageDeviceSelect() {
 	state.deviceVersion = now().toString()
-	dynamicPage(name: "pageDeviceSelect", title: "", nextPage: state.installed ? null : "pageFinishInstall") {
+	dynamicPage(name: "pageDeviceSelect", title: "", nextPage: "pageFinishInstall") {
 		section() {
-			paragraph "${state.installed ? "Select the devices you want ${APP_NAME} to have access to." : "Great, now let's select some devices."}"
+			paragraph "${state.installed ? "Select the devices you want ${handle()} to have access to." : "Great, now let's select some devices."}"
         }
 
 		section ('Select devices by type') {
@@ -142,7 +144,7 @@ private pageFinishInstall() {
             paragraph "You can also access the console on any another device by entering REPLACE_WITH_DOMAIN in the address bar of your browser.", required: true
         }
         section() {
-            paragraph "Now tap Done and enjoy ${APP_NAME}!"
+            paragraph "Now tap Done and enjoy ${handle()}!"
 		}
 	}
 }
@@ -153,15 +155,15 @@ private void initTokens() {
 
 /// Handlers
 def primaryHandler(event) {
-    if (!event || (!event.name.endsWith(APP_NAME))) return;
+    if (!event || (!event.name.endsWith(handle()))) return;
     def data = event.jsonData ?: null
 
 }
 
 /// Subscription management
 private subscribeToEvents() {
-    subscribe(location, "${APP_NAME}.poll", primaryHandler)
-	subscribe(location, "${'@@' + APP_NAME}", primaryHandler)
+    subscribe(location, "${handle()}.poll", primaryHandler)
+	subscribe(location, "${'@@' + handle()}", primaryHandler)
     //subscribe(location, "HubUpdated", hubUpdatedHandler, [filterEvents: false])
     //subscribe(location, "summary", summaryHandler, [filterEvents: false])
     //setPowerSource(getHub()?.isBatteryInUse() ? 'battery' : 'mains')
@@ -208,3 +210,10 @@ private getHubEndpoint() {
     }
     return state.endpoint
 }
+
+/// Utilities
+private info(message, shift = null, err = null) { debug message, shift, err, 'info' }
+private trace(message, shift = null, err = null) { debug message, shift, err, 'trace' }
+private warn(message, shift = null, err = null) { debug message, shift, err, 'warn' }
+private error(message, shift = null, err = null) { debug message, shift, err, 'error' }
+private timer(message, shift = null, err = null) { debug message, shift, err, 'timer' }
