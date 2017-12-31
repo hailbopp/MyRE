@@ -2,6 +2,7 @@
 import { Store } from 'FreeCoRE/Models/Store';
 import { Dispatch, connect } from 'react-redux';
 import { RouteComponentProps } from 'react-router';
+import { InputGroup, InputGroupAddon, Input } from 'reactstrap';
 
 interface IOwnProps { }
 interface IConnectedState { }
@@ -17,7 +18,6 @@ type DashboardProps = IOwnProps & IConnectedDispatch & IConnectedState & RouteCo
 
 class DashboardComponent extends React.Component<DashboardProps> {
     public render() {
-
         return (
             <div>
                 Dashboard

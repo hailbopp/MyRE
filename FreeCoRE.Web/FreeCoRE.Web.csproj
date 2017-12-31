@@ -9,19 +9,29 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <PreBuildEvent>npm run build</PreBuildEvent>
+    <!--<PreBuildEvent>npm run build</PreBuildEvent>-->
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="ClientSrc\FreeCoRE\Actions\Auth.ts" />
     <None Remove="ClientSrc\FreeCoRE\Actions\index.ts" />
     <None Remove="ClientSrc\FreeCoRE\Actions\Nav.ts" />
+    <None Remove="ClientSrc\FreeCoRE\Api\ApiClient.ts" />
+    <None Remove="ClientSrc\FreeCoRE\Api\Models\index.ts" />
     <None Remove="ClientSrc\FreeCoRE\Components\Application.tsx" />
     <None Remove="ClientSrc\FreeCoRE\Components\AppMainPanel.tsx" />
     <None Remove="ClientSrc\FreeCoRE\Components\Dashboard.tsx" />
+    <None Remove="ClientSrc\FreeCoRE\Components\InputField.tsx" />
+    <None Remove="ClientSrc\FreeCoRE\Components\LoginForm.tsx" />
+    <None Remove="ClientSrc\FreeCoRE\Components\LoginPage.tsx" />
     <None Remove="ClientSrc\FreeCoRE\Components\Navbar.tsx" />
+    <None Remove="ClientSrc\FreeCoRE\Components\RegistrationForm.tsx" />
     <None Remove="ClientSrc\FreeCoRE\index.tsx" />
+    <None Remove="ClientSrc\FreeCoRE\Middleware\Api\Client.ts" />
+    <None Remove="ClientSrc\FreeCoRE\Middleware\Api\index.ts" />
     <None Remove="ClientSrc\FreeCoRE\Middleware\Logging.ts" />
     <None Remove="ClientSrc\FreeCoRE\Models\Store.ts" />
+    <None Remove="ClientSrc\FreeCoRE\Reducers\Auth.ts" />
     <None Remove="ClientSrc\FreeCoRE\Reducers\index.ts" />
     <None Remove="ClientSrc\FreeCoRE\Reducers\Nav.ts" />
     <None Remove="ClientSrc\index.ts" />
@@ -44,15 +54,25 @@
   </ItemGroup>
 
   <ItemGroup>
+    <TypeScriptCompile Include="ClientSrc\FreeCoRE\Actions\Auth.ts" />
     <TypeScriptCompile Include="ClientSrc\FreeCoRE\Actions\index.ts" />
     <TypeScriptCompile Include="ClientSrc\FreeCoRE\Actions\Nav.ts" />
+    <TypeScriptCompile Include="ClientSrc\FreeCoRE\Api\ApiClient.ts" />
+    <TypeScriptCompile Include="ClientSrc\FreeCoRE\Api\Models\index.ts" />
     <TypeScriptCompile Include="ClientSrc\FreeCoRE\Components\Application.tsx" />
     <TypeScriptCompile Include="ClientSrc\FreeCoRE\Components\AppMainPanel.tsx" />
     <TypeScriptCompile Include="ClientSrc\FreeCoRE\Components\Dashboard.tsx" />
+    <TypeScriptCompile Include="ClientSrc\FreeCoRE\Components\InputField.tsx" />
+    <TypeScriptCompile Include="ClientSrc\FreeCoRE\Components\LoginForm.tsx" />
+    <TypeScriptCompile Include="ClientSrc\FreeCoRE\Components\LoginPage.tsx" />
     <TypeScriptCompile Include="ClientSrc\FreeCoRE\Components\Navbar.tsx" />
+    <TypeScriptCompile Include="ClientSrc\FreeCoRE\Components\RegistrationForm.tsx" />
     <TypeScriptCompile Include="ClientSrc\FreeCoRE\index.tsx" />
+    <TypeScriptCompile Include="ClientSrc\FreeCoRE\Middleware\Api\Client.ts" />
+    <TypeScriptCompile Include="ClientSrc\FreeCoRE\Middleware\Api\index.ts" />
     <TypeScriptCompile Include="ClientSrc\FreeCoRE\Middleware\Logging.ts" />
     <TypeScriptCompile Include="ClientSrc\FreeCoRE\Models\Store.ts" />
+    <TypeScriptCompile Include="ClientSrc\FreeCoRE\Reducers\Auth.ts" />
     <TypeScriptCompile Include="ClientSrc\FreeCoRE\Reducers\index.ts" />
     <TypeScriptCompile Include="ClientSrc\FreeCoRE\Reducers\Nav.ts" />
     <TypeScriptCompile Include="ClientSrc\index.ts" />

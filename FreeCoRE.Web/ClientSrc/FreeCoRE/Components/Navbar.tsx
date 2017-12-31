@@ -6,23 +6,29 @@ import { APP_NAME } from 'FreeCoRE';
 import { Store } from 'FreeCoRE/Models/Store';
 import { Navbar as BSNavbar, NavbarBrand, NavbarToggler, Nav, NavItem, Collapse, NavLink } from 'reactstrap';
 import { openNavPane, closeNavPane } from 'FreeCoRE/Actions/Nav';
+import { initiateLogout } from 'FreeCoRE/Actions/Auth';
+import { Option } from 'ts-option';
 
 interface IOwnProps { }
 interface IConnectedState {
     isNavOpen: boolean;
+    isLoggedIn: Option<boolean>;
 }
 interface IConnectedDispatch {
     openNav: () => void,
     collapseNav: () => void,
+    logOut: () => void,
 }
 
 const mapStateToProps = (state: Store.All, ownProps: IOwnProps): IConnectedState => ({
     isNavOpen: state.nav.navPaneOpen,
+    isLoggedIn: state.auth.isLoggedIn,
 });
 
 const mapDispatchToProps = (dispatch: Dispatch<Store.All>): IConnectedDispatch => ({
     openNav: () => dispatch(openNavPane()),
     collapseNav: () => dispatch(closeNavPane()),
+    logOut: () => dispatch(initiateLogout()),
 });
 
 class NavbarComponent extends React.Component<IOwnProps & IConnectedState & IConnectedDispatch> {
@@ -34,17 +40,25 @@ class NavbarComponent extends React.Component<IOwnProps & IConnectedState & ICon
         }
     }
 
+    private logOut = this.props.logOut;
+
     public render() {
         return (
             <BSNavbar color="faded" light expand="md">
                 <Link className="navbar-brand" to="/">{APP_NAME}</Link>
                 <NavbarToggler onClick={this.toggleCollapse} />
                 <Collapse isOpen={this.props.isNavOpen} navbar>
-                    <Nav navbar className="ml-auto">
-                        <NavItem>
-                            <Link className="nav-link" to="/">Scripts</Link>
-                        </NavItem>
-                    </Nav>
+                    {
+                        this.props.isLoggedIn.isDefined && this.props.isLoggedIn.get &&
+                            <Nav navbar className="ml-auto">
+                                <NavItem>
+                                    <Link className="nav-link" to="/">Scripts</Link>
+                                </NavItem>
+                                <NavItem>
+                                    <NavLink href="#" onClick={this.logOut}>Log Out</NavLink>
+                                </NavItem>
+                            </Nav>
+                    } 
                 </Collapse>
             </BSNavbar>
         );
