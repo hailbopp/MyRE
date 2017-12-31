@@ -165,10 +165,10 @@ private String getConsoleInitUrl(register = false) {
     if (!url) return null
     return url + "api/Auth/Initialize/" + 
         (
-            '{"url":"' + (apiServerUrl("")).bytes.encodeBase64() + '",' + 
-            '"hubUID":"' + (hubUID).bytes.encodeBase64() + '",' +
-            '"appId":"' + app.id.bytes.encodeBase64() + '",'
-            '"accessToken":"' + state.accessToken.bytes.encodeBase64() + '"}'
+            '{"Url":"' + (apiServerUrl("")).bytes.encodeBase64() + '",' + 
+            '"HubUID":"' + (hubUID).bytes.encodeBase64() + '",' +
+            '"AppId":"' + app.id.bytes.encodeBase64() + '",'
+            '"AccessToken":"' + state.accessToken.bytes.encodeBase64() + '"}'
         ).bytes.encodeBase64()
 }
 

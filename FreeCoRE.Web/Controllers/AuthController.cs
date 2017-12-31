@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 
 namespace FreeCoRE.Web.Controllers
 {
@@ -34,8 +35,8 @@ namespace FreeCoRE.Web.Controllers
         public async Task<IActionResult> InitializeSmartThings(string encodedData)
         {
             byte[] data = Convert.FromBase64String(encodedData);
-            string decodedString = Encoding.UTF8.GetString(data);
-
+            var blob = JsonConvert.DeserializeObject<SmartThingsAuthBlob>(Encoding.UTF8.GetString(data));
+            
             return Ok();
         }
 
