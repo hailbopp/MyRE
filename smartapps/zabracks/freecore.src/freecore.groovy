@@ -163,7 +163,13 @@ private subscribeToEvents() {
 private String getConsoleInitUrl(register = false) {
 	def url = getConsoleBaseUrl()
     if (!url) return null
-    return url + "api/Auth/Initialize/" + (apiServerUrl("").replace("https://", '').replace(".api.smartthings.com", "").replace(":443", "").replace("/", "") + ((hubUID ?: state.accessToken) + app.id).replace("-", "") + (hubUID ? '&access_token=' + state.accessToken : '')).bytes.encodeBase64()
+    return url + "api/Auth/Initialize/" + 
+        (
+            '{"url":"' + (apiServerUrl("")).bytes.encodeBase64() + '",' + 
+            '"hubUID":"' + (hubUID).bytes.encodeBase64() + '",' +
+            '"appId":"' + app.id.bytes.encodeBase64() + '",'
+            '"accessToken":"' + state.accessToken.bytes.encodeBase64() + '"}'
+        ).bytes.encodeBase64()
 }
 
 public String getConsoleBaseUrl() {
