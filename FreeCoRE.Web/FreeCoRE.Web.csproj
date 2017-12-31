@@ -18,6 +18,7 @@
     <None Remove="ClientSrc\FreeCoRE\Actions\Nav.ts" />
     <None Remove="ClientSrc\FreeCoRE\Api\ApiClient.ts" />
     <None Remove="ClientSrc\FreeCoRE\Api\Models\index.ts" />
+    <None Remove="ClientSrc\FreeCoRE\Components\AlertRow.tsx" />
     <None Remove="ClientSrc\FreeCoRE\Components\Application.tsx" />
     <None Remove="ClientSrc\FreeCoRE\Components\AppMainPanel.tsx" />
     <None Remove="ClientSrc\FreeCoRE\Components\Dashboard.tsx" />
@@ -59,6 +60,7 @@
     <TypeScriptCompile Include="ClientSrc\FreeCoRE\Actions\Nav.ts" />
     <TypeScriptCompile Include="ClientSrc\FreeCoRE\Api\ApiClient.ts" />
     <TypeScriptCompile Include="ClientSrc\FreeCoRE\Api\Models\index.ts" />
+    <TypeScriptCompile Include="ClientSrc\FreeCoRE\Components\AlertRow.tsx" />
     <TypeScriptCompile Include="ClientSrc\FreeCoRE\Components\Application.tsx" />
     <TypeScriptCompile Include="ClientSrc\FreeCoRE\Components\AppMainPanel.tsx" />
     <TypeScriptCompile Include="ClientSrc\FreeCoRE\Components\Dashboard.tsx" />

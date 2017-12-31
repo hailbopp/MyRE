@@ -57,7 +57,7 @@ def pageTopLevel() {
             } else {
                 //trace "*** DO NOT SHARE THIS LINK WITH ANYONE *** Dashboard URL: ${getDashboardInitUrl()}"
                 href "", title: "Management Console", style: "external", url: getConsoleInitUrl(), description: "Tap to open", image: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience.png", required: false
-                href "", title: "Authenticate a client", style: "embedded", url: getConsoleInitUrl(true), description: "Tap to open", image: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience.png", required: false
+                //href "", title: "Authenticate a client", style: "embedded", url: getConsoleInitUrl(true), description: "Tap to open", image: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience.png", required: false
             }
         }
 
@@ -75,13 +75,6 @@ private sectionDomainEntry() {
     }
 }
 
-private sectionPasswordEntry() {
-    section() {
-        input "password", "password", title: "Enter a password for your management console.", required: true
-        input "expiry", "enum", options: ["Every hour", "Every day", "Every week", "Every month (recommended)", "Every three months", "Never (not recommended)"], defaultValue: "Every month (recommended)", title: "Choose how often to require reauthentication", required: true
-    }
-}
-
 private pageWebConsole() {
     def endpoint = getHubEndpoint()
     def hasTimeZone = !!location.getTimeZone()
@@ -93,10 +86,6 @@ private pageWebConsole() {
                         paragraph "Name this ${handle()} instance."
                         label name: "name", title: "Name", state: (name ? "complete" : null), defaultValue: app.name, required: false
                     }
-
-                    section() {
-                        paragraph "${state.installed ? "Tap Done to continue." : "Enter the password that you will use to authenticate yourself."}", required: false
-                    }
                 }
             } else {
                 section() {
@@ -106,7 +95,6 @@ private pageWebConsole() {
             }
         }
         sectionDomainEntry()
-        sectionPasswordEntry()
     }
 }
 
@@ -142,7 +130,8 @@ private pageFinishInstall() {
         }
         section("Note") {
             paragraph "After you tap Done, go to the Automation tab, select the SmartApps section, and open the SmartApp to access the management console.", required: true
-            paragraph "You can also access the console on any another device by entering REPLACE_WITH_DOMAIN in the address bar of your browser.", required: true
+            paragraph "You'll be asked to log in or create an account on the ${handle()} server.", required: true
+            paragraph "You can also access the console on any another device by entering ${settings.domain} in the address bar of your browser.", required: true
         }
         section() {
             paragraph "Now tap Done and enjoy ${handle()}!"
@@ -174,7 +163,7 @@ private subscribeToEvents() {
 private String getConsoleInitUrl(register = false) {
 	def url = getConsoleBaseUrl()
     if (!url) return null
-    return url + (register ? "registration/" : "init/") + (apiServerUrl("").replace("https://", '').replace(".api.smartthings.com", "").replace(":443", "").replace("/", "") + ((hubUID ?: state.accessToken) + app.id).replace("-", "") + (hubUID ? '/?access_token=' + state.accessToken : '')).bytes.encodeBase64()
+    return url + "api/Auth/Initialize/" + (apiServerUrl("").replace("https://", '').replace(".api.smartthings.com", "").replace(":443", "").replace("/", "") + ((hubUID ?: state.accessToken) + app.id).replace("-", "") + (hubUID ? '&access_token=' + state.accessToken : '')).bytes.encodeBase64()
 }
 
 public String getConsoleBaseUrl() {

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using FreeCoRE.Web.Data;
 using FreeCoRE.Web.Data.Models;
@@ -27,6 +28,15 @@ namespace FreeCoRE.Web.Controllers
             _userManager = userManager;
             _signInManager = signInManager;
             _logger = logger;
+        }
+
+        [HttpGet("Initialize/{encodedData}")]
+        public async Task<IActionResult> InitializeSmartThings(string encodedData)
+        {
+            byte[] data = Convert.FromBase64String(encodedData);
+            string decodedString = Encoding.UTF8.GetString(data);
+
+            return Ok();
         }
 
         [HttpPost("Login")]

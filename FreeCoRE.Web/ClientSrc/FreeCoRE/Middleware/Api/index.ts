@@ -4,7 +4,7 @@ import { ApiClient } from "FreeCoRE/Middleware/Api/Client";
 import { ApiError } from "FreeCoRE/Api/ApiClient";
 import { Store } from "FreeCoRE/Models/Store";
 import { Middleware, MiddlewareAPI, Dispatch } from "redux";
-import { retrieveCurrentUser } from "FreeCoRE/Actions/Auth";
+import { retrieveCurrentUser, clearAuthMessages } from "FreeCoRE/Actions/Auth";
 
 function isAction(a: AppAction): a is AppAction {
     return (a as AppAction).type !== undefined;
@@ -21,15 +21,15 @@ export const ApiServiceMiddleware: ExtendedMiddleware<Store.All> = <S extends St
 
         const dispatch = (aa: AppAction) =>
             Promise.resolve()
-                .then(_ => next(aa));
-        
+                .then(_ => api.dispatch(aa));        
 
         // Pass all actions through by default.
-        dispatch(action);
+        next(action);
 
         switch (action.type) {
             // If we receive an action to send an API request, do it.
             case "API_ATTEMPT_LOGIN":
+                dispatch(clearAuthMessages());
                 ApiClient.logIn(action.credentials.email, action.credentials.password)
                     .then((result) => {
                         if (result.result === 'error') {
@@ -37,10 +37,10 @@ export const ApiServiceMiddleware: ExtendedMiddleware<Store.All> = <S extends St
                                 type: 'API_FAILED_LOGIN'
                             });
                         } else {
-                            api.dispatch({
+                            dispatch({
                                 type: 'API_SUCCESSFUL_LOGIN'
                             });
-                            api.dispatch(retrieveCurrentUser());
+                            dispatch(retrieveCurrentUser());
                         }
                     });
                 break;
@@ -55,6 +55,7 @@ export const ApiServiceMiddleware: ExtendedMiddleware<Store.All> = <S extends St
                     });
                 break;
             case "API_ATTEMPT_REGISTER":
+                dispatch(clearAuthMessages());
                 ApiClient.register(action.credentials.email, action.credentials.password)
                     .then((r) => {
                         if (r.result === "error") {
