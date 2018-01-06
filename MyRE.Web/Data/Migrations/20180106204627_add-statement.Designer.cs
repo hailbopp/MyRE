@@ -13,9 +13,10 @@ using System;
 namespace MyRE.Web.Data.Migrations
 {
     [DbContext(typeof(MyREContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20180106204627_add-statement")]
+    partial class addstatement
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -228,8 +229,6 @@ namespace MyRE.Web.Data.Migrations
 
                     b.Property<long?>("StatementId");
 
-                    b.Property<long?>("WhileStatementStatementId");
-
                     b.HasKey("BlockStatementId");
 
                     b.HasIndex("EventHandlerStatementStatementId");
@@ -237,8 +236,6 @@ namespace MyRE.Web.Data.Migrations
                     b.HasIndex("IfStatementStatementId");
 
                     b.HasIndex("StatementId");
-
-                    b.HasIndex("WhileStatementStatementId");
 
                     b.ToTable("BlockStatement");
                 });
@@ -352,19 +349,6 @@ namespace MyRE.Web.Data.Migrations
                     b.HasDiscriminator().HasValue("VariableNameExpression");
                 });
 
-            modelBuilder.Entity("MyRE.Web.Data.Models.ActionStatement", b =>
-                {
-                    b.HasBaseType("MyRE.Web.Data.Models.Statement");
-
-                    b.Property<long?>("ExpressionToEvaluateExpressionId");
-
-                    b.HasIndex("ExpressionToEvaluateExpressionId");
-
-                    b.ToTable("ActionStatement");
-
-                    b.HasDiscriminator().HasValue("ActionStatement");
-                });
-
             modelBuilder.Entity("MyRE.Web.Data.Models.EventHandlerStatement", b =>
                 {
                     b.HasBaseType("MyRE.Web.Data.Models.Statement");
@@ -387,49 +371,6 @@ namespace MyRE.Web.Data.Migrations
                     b.ToTable("IfStatement");
 
                     b.HasDiscriminator().HasValue("IfStatement");
-                });
-
-            modelBuilder.Entity("MyRE.Web.Data.Models.VariableAssignmentStatement", b =>
-                {
-                    b.HasBaseType("MyRE.Web.Data.Models.Statement");
-
-                    b.Property<long?>("ValueExpressionId");
-
-                    b.Property<string>("VariableName");
-
-                    b.HasIndex("ValueExpressionId");
-
-                    b.ToTable("VariableAssignmentStatement");
-
-                    b.HasDiscriminator().HasValue("VariableAssignmentStatement");
-                });
-
-            modelBuilder.Entity("MyRE.Web.Data.Models.VariableDefinitionStatement", b =>
-                {
-                    b.HasBaseType("MyRE.Web.Data.Models.Statement");
-
-                    b.Property<string>("VariableName")
-                        .HasColumnName("VariableDefinitionStatement_VariableName");
-
-                    b.Property<string>("VariableType");
-
-                    b.ToTable("VariableDefinitionStatement");
-
-                    b.HasDiscriminator().HasValue("VariableDefinitionStatement");
-                });
-
-            modelBuilder.Entity("MyRE.Web.Data.Models.WhileStatement", b =>
-                {
-                    b.HasBaseType("MyRE.Web.Data.Models.Statement");
-
-                    b.Property<long?>("ConditionExpressionId")
-                        .HasColumnName("WhileStatement_ConditionExpressionId");
-
-                    b.HasIndex("ConditionExpressionId");
-
-                    b.ToTable("WhileStatement");
-
-                    b.HasDiscriminator().HasValue("WhileStatement");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -504,10 +445,6 @@ namespace MyRE.Web.Data.Migrations
                     b.HasOne("MyRE.Web.Data.Models.Statement", "Statement")
                         .WithMany()
                         .HasForeignKey("StatementId");
-
-                    b.HasOne("MyRE.Web.Data.Models.WhileStatement")
-                        .WithMany("Block")
-                        .HasForeignKey("WhileStatementStatementId");
                 });
 
             modelBuilder.Entity("MyRE.Web.Data.Models.FunctionParameter", b =>
@@ -528,28 +465,7 @@ namespace MyRE.Web.Data.Migrations
                         .HasForeignKey("AccountId");
                 });
 
-            modelBuilder.Entity("MyRE.Web.Data.Models.ActionStatement", b =>
-                {
-                    b.HasOne("MyRE.Web.Data.Models.Expression", "ExpressionToEvaluate")
-                        .WithMany()
-                        .HasForeignKey("ExpressionToEvaluateExpressionId");
-                });
-
             modelBuilder.Entity("MyRE.Web.Data.Models.IfStatement", b =>
-                {
-                    b.HasOne("MyRE.Web.Data.Models.Expression", "Condition")
-                        .WithMany()
-                        .HasForeignKey("ConditionExpressionId");
-                });
-
-            modelBuilder.Entity("MyRE.Web.Data.Models.VariableAssignmentStatement", b =>
-                {
-                    b.HasOne("MyRE.Web.Data.Models.Expression", "Value")
-                        .WithMany()
-                        .HasForeignKey("ValueExpressionId");
-                });
-
-            modelBuilder.Entity("MyRE.Web.Data.Models.WhileStatement", b =>
                 {
                     b.HasOne("MyRE.Web.Data.Models.Expression", "Condition")
                         .WithMany()

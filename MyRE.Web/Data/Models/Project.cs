@@ -13,10 +13,4 @@ namespace MyRE.Web.Data.Models
 
         public AppInstance ParentInstance { get; set; }
     }
-
-    public class Trigger
-    {
-        public long TriggerId { get; set; }
-
-    }
 }

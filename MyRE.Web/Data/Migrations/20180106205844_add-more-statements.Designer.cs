@@ -13,9 +13,10 @@ using System;
 namespace MyRE.Web.Data.Migrations
 {
     [DbContext(typeof(MyREContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20180106205844_add-more-statements")]
+    partial class addmorestatements
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
