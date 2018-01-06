@@ -1,0 +1,45 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <DockerComposeProjectPath>..\docker-compose.dcproj</DockerComposeProjectPath>
+    <TypeScriptCompileBlocked>true</TypeScriptCompileBlocked>
+    <TypeScriptToolsVersion>2.5</TypeScriptToolsVersion>
+    <DisableFastUpToDateCheck>true</DisableFastUpToDateCheck>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <!--<PreBuildEvent>npm run build</PreBuildEvent>-->
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="ClientSrc\FreeCoRE\**" />
+    <Content Remove="ClientSrc\FreeCoRE\**" />
+    <EmbeddedResource Remove="ClientSrc\FreeCoRE\**" />
+    <None Remove="ClientSrc\FreeCoRE\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="ClientSrc\index.ts" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="ClientSrc\typings\" />
+    <Folder Include="wwwroot\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.3" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="2.0.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="2.0.1" />
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <DotNetCliToolReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Tools" Version="2.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <TypeScriptCompile Include="ClientSrc\index.ts" />
+  </ItemGroup>
+</Project>

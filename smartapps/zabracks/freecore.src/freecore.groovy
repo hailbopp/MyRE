@@ -1,9 +1,8 @@
-public static String version() { return "v0.0.1" }
-
-public static String handle() { return "FreeCoRE" }
+def getAPP_NAME() { return "MyRE" }
+def getVERSION() { return "0.0.1" }
 
 definition(
-    name: handle(),
+    name: APP_NAME,
     namespace: "zabracks",
     author: "Drew Worthey",
     description: "Automate all the things!",
@@ -15,161 +14,159 @@ definition(
 )
 
 preferences {
-    page(name: "pageTopLevel")
-    page(name: "pageWebConsole")
-    page(name: "pageDeviceSelect")
-    page(name: "pageFinishInstall")
+    page(name: "pageInit")
+    page(name: "pageFinishInstall")    
+    page(name: "pageSettings")
 }
 
-def pageTopLevel() {
-	def endpoint = getHubEndpoint()
-	if (!state.installed) {
-        return dynamicPage(name: "pageTopLevel", title: "", install: false, uninstall: false, nextPage: "pageWebConsole") {
+
+// Info
+private generateNewExecutionToken() {
+    state.executionToken = UUID.randomUUID().toString();
+}
+
+private revokeExecutionToken() {
+    state.executionToken = null;
+}
+
+private populateConnectionInfo() {
+    def accessToken = createAccessToken()
+    if (state.accessToken) {
+        generateNewExecutionToken()
+        state.accountId = app.getAccountId();
+        state.accessToken = accessToken
+        state.apiServerBaseUrl = apiServerUrl("")
+        state.appId = app.id
+    } 
+}
+
+private isOAuthEnabled() {
+    return createAccessToken();
+}
+
+private isInstalled() {
+    return state.installed
+}
+
+// Preference pages
+private sectionDomainEntry() {
+    section() {
+        input "apiDomain", "text", title: "Enter the domain of the ${APP_NAME} server that you wish to use.", defaultValue: "http://freecoreweb.azurewebsites.net", required: true
+    }
+}
+
+private sectionSelectDevices() {
+    section() {
+        paragraph "Most devices should fall into one of these two categories"
+        input "dev:actuator", "capability.actuator", multiple: true, title: "Which actuators?", required: false
+        input "dev:sensor", "capability.sensor", multiple: true, title: "Which sensors?", required: false
+    }
+    section() {
+        paragraph "If you cannot find a device by type, you may try looking for it by category below"
+        def d
+        for (capability in capabilities().findAll{ (!(it.value.d in [null, 'actuators', 'sensors'])) }.sort{ it.value.d }) {
+            if (capability.value.d != d) input "dev:${capability.key}", "capability.${capability.key}", multiple: true, title: "Which ${capability.value.d}?", required: false
+            d = capability.value.d
+        }
+    }
+}
+
+def pageInit() {
+	populateConnectionInfo()
+	if (!isInstalled()) {
+        return dynamicPage(name: "pageInit", title: "", install: false, uninstall: false, nextPage: "pageFinishInstall") {
             section() {
-                paragraph "Welcome to ${handle()}"
-                paragraph "You will be guided through a few installation steps that should only take a minute."
+                paragraph "Welcome to ${APP_NAME}! We have a little bit of preparation and configuration to do before you can log in to the web console and start automating all the things."
             }
-            if (endpoint) {
-               	if (!location.getTimeZone()) {
- 	               section() {
-	                	paragraph "Please set up your location."
-                   }
-                } else {
-                    section() {
-                        paragraph "Let's continue to the next step."
-                    }
-                }
-            } else {
+
+            if(!isOAuthEnabled()) {
                 section() {
-                    paragraph "OAuth needs to be configured for this SmartApp in the SmartThings IDE."
+                    paragraph "OAuth is not enabled. You must enable it in the SmartThings developer console."
                 }
-	            state.oAuthRequired = true
-                section () {
-                    paragraph "Once you have finished the steps above, tap Next", required: true
+            }
+
+            if(!location.getTimeZone()) {
+                section() {
+                    paragraph "Your location must be configured."
                 }
+            }
+
+            def isOkay = isOAuthEnabled() && location.getTimeZone()
+
+            if (isOkay) {
+                sectionDomainEntry()
+                sectionSelectDevices()
             }
         }
 	}
-    dynamicPage(name: "pageTopLevel", title: "", install: true, uninstall: false) {
-        section("Management Console") {
-            if (!state.endpoint) {
-                href "pageWebConsole", title: "Management Console", description: "Tap to initialize", image: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience.png", required: false
-            } else {
-                //trace "*** DO NOT SHARE THIS LINK WITH ANYONE *** Dashboard URL: ${getDashboardInitUrl()}"
-                href "", title: "Management Console", style: "external", url: getConsoleInitUrl(), description: "Tap to open", image: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience.png", required: false
-                //href "", title: "Authenticate a client", style: "embedded", url: getConsoleInitUrl(true), description: "Tap to open", image: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience.png", required: false
-            }
+    dynamicPage(name: "pageInit", title: "", install: true, uninstall: true) {
+        section("Web Console") {
+                href "", title: "Web Console", style: "external", url: getConsoleInitUrl(), description: "Tap to reauthenticate.", image: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience.png", required: false
+                //href "", title: "Access Web Console", style: "external", url: getConsoleBaseUrl(), description: "Tap to open", image: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience.png", required: false            
         }
 
         section(title:"Settings") {
-            href "pageSettings", title: "Settings", image: "https://cdn.rawgit.com/ady624/${handle()}/master/resources/icons/settings.png", required: false
+            href "pageSettings", title: "Settings", image: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience.png", required: false
         }
 
-    }
-    
+    }    
 }
 
-private sectionDomainEntry() {
-    section() {
-        input "apiDomain", "text", title: "Enter the domain of the ${handle()} server that you wish to use.", defaultValue: "http://freecoreweb.azurewebsites.net", required: true
-    }
-}
-
-private pageWebConsole() {
-    def endpoint = getHubEndpoint()
-    def hasTimeZone = !!location.getTimeZone()
-    return dynamicPage(name: 'pageWebConsole', title: "", nextPage:'pageDeviceSelect') {
-        if (!state.installed) {
-            if (endpoint) {
-                if (hasTimeZone) {
-                    section() {
-                        paragraph "Name this ${handle()} instance."
-                        label name: "name", title: "Name", state: (name ? "complete" : null), defaultValue: app.name, required: false
-                    }
-                }
-            } else {
-                section() {
-                    paragraph "OAuth is not enabled. After it has been enabled, retry.", required: true
-                }
-                return
-            }
-        }
+private pageSettings() {
+    dynamicPage(name: 'pageSettings', title: "", install: false, uninstall: false) {
         sectionDomainEntry()
+        sectionSelectDevices()
     }
-}
-
-private pageDeviceSelect() {
-	state.deviceVersion = now().toString()
-	dynamicPage(name: "pageDeviceSelect", title: "", nextPage: "pageFinishInstall") {
-		section() {
-			paragraph "${state.installed ? "Select the devices you want ${handle()} to have access to." : "Great, now let's select some devices."}"
-        }
-
-		section ('Select devices by type') {
-        	paragraph "Most devices should fall into one of these two categories"
-			input "dev:actuator", "capability.actuator", multiple: true, title: "Which actuators?", required: false
-			input "dev:sensor", "capability.sensor", multiple: true, title: "Which sensors?", required: false
-		}
-
-		section ('Select devices by capability') {
-        	paragraph "If you cannot find a device by type, you may try looking for it by category below"
-            def d
-			for (capability in capabilities().findAll{ (!(it.value.d in [null, 'actuators', 'sensors'])) }.sort{ it.value.d }) {
-				if (capability.value.d != d) input "dev:${capability.key}", "capability.${capability.key}", multiple: true, title: "Which ${capability.value.d}?", required: false
-				d = capability.value.d
-			}
-		}
-	}
 }
 
 private pageFinishInstall() {
-	initTokens()
-	dynamicPage(name: "pageFinishInstall", title: "", install: true) {
+    state.installed = true;
+	dynamicPage(name: "pageFinishInstall", title: "", install: true, uninstall: false) {
 		section() {
 			paragraph "Installation is complete."
         }
         section("Note") {
             paragraph "After you tap Done, go to the Automation tab, select the SmartApps section, and open the SmartApp to access the management console.", required: true
-            paragraph "You'll be asked to log in or create an account on the ${handle()} server.", required: true
+            paragraph "You'll be asked to log in or create an account on the ${APP_NAME} server.", required: true
             paragraph "You can also access the console on any another device by entering ${settings.domain} in the address bar of your browser.", required: true
         }
         section() {
-            paragraph "Now tap Done and enjoy ${handle()}!"
+            paragraph "Now tap Done and enjoy ${APP_NAME}!"
 		}
 	}
 }
 
-private void initTokens() {
-	state.securityTokens = [:]
-}
-
 /// Handlers
 def primaryHandler(event) {
-    if (!event || (!event.name.endsWith(handle()))) return;
+    if (!event || (!event.name.endsWith(APP_NAME))) return;
     def data = event.jsonData ?: null
 
 }
 
 /// Subscription management
 private subscribeToEvents() {
-    subscribe(location, "${handle()}.poll", primaryHandler)
-	subscribe(location, "${'@@' + handle()}", primaryHandler)
+    subscribe(location, "${APP_NAME}.poll", primaryHandler)
+	subscribe(location, "${'@@' + APP_NAME}", primaryHandler)
     //subscribe(location, "HubUpdated", hubUpdatedHandler, [filterEvents: false])
     //subscribe(location, "summary", summaryHandler, [filterEvents: false])
     //setPowerSource(getHub()?.isBatteryInUse() ? 'battery' : 'mains')
 }
 
-/// Registration with server
+/// Authentication with app server
 private String getConsoleInitUrl(register = false) {
 	def url = getConsoleBaseUrl()
     if (!url) return null
-    return url + "api/Auth/Initialize/" + 
-        (
-            '{"Url":"' + (apiServerUrl("")).bytes.encodeBase64() + '",' + 
-            '"HubUID":"' + (hubUID).bytes.encodeBase64() + '",' +
-            '"AppId":"' + app.id.bytes.encodeBase64() + '",'
-            '"AccessToken":"' + state.accessToken.bytes.encodeBase64() + '"}'
-        ).bytes.encodeBase64()
+
+    def body = [
+        AccessToken: state.accessToken,
+        ApiServerBaseUrl: state.apiServerBaseUrl,
+        AppId: state.appId,
+        ExecutionToken: state.executionToken,
+        AccountId: state.accountId,
+    ]
+
+    def json = new groovy.json.JsonBuilder(body)
+    return url + "api/Auth/Initialize/" + (json.toString()).bytes.encodeBase64()
 }
 
 public String getConsoleBaseUrl() {
@@ -197,26 +194,21 @@ def updated() {
 
 private initialize() {
     subscribeToEvents()    
-    state.vars = state.vars ?: [:]
-    state.version = version()
+    state.version = VERSION
     if (state.installed) {
-    	registerInstance()
+    	//registerInstance()
     }
 }
 
-private getHubEndpoint() {
-    if (!state.endpoint) {
-        try {
-            def accessToken = createAccessToken()
-            if (accessToken) {
-                state.endpoint = hubUID ? apiServerUrl("$hubUID/apps/${app.id}/?access_token=${state.accessToken}") : apiServerUrl("/api/token/${accessToken}/smartapps/installations/${app.id}/")
-            }
-        } catch(e) {
-            state.endpoint = null
-        }
+// Endpoints
+mappings {
+    path("/auth") {
+        action: [
+            POST: 'checkAuth'
+        ]
     }
-    return state.endpoint
 }
+
 
 /// Utilities
 private info(message, shift = null, err = null) { debug message, shift, err, 'info' }

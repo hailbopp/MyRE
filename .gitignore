@@ -2,6 +2,6 @@ bin/
 obj/
 .vs/
 .vscode/
-FreeCoRE.Web/wwwroot/*
-FreeCoRE.Web/node_modules/
+MyRE.Web/wwwroot/*
+MyRE.Web/node_modules/
 PublishProfiles/
