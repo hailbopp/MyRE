@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace MyRE.Core.Models
+namespace MyRE.Core.Models.Data
 {
     public class Block
     {

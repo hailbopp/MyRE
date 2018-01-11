@@ -1,5 +1,6 @@
 ﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using MyRE.Core.Models;
 using MyRE.Core.Services;
 
 namespace MyRE.Web.Controllers
@@ -16,6 +17,8 @@ namespace MyRE.Web.Controllers
         }
 
         [HttpGet("Me")]
+        [ProducesResponseType(typeof(void), 404)]
+        [ProducesResponseType(typeof(User), 200)]
         public async Task<IActionResult> GetLoggedInUser()
         {
             var user = await _user.GetAuthenticatedUserFromContextAsync(HttpContext);

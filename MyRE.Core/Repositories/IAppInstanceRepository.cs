@@ -1,5 +1,6 @@
 ﻿using System.Threading.Tasks;
 using MyRE.Core.Models;
+using MyRE.Core.Models.Data;
 
 namespace MyRE.Core.Repositories
 {

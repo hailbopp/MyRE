@@ -6,6 +6,7 @@ using MyRE.Core.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using MyRE.Core.Models.Data;
 using MyRE.Core.Models.Web;
 using MyRE.Core.Services;
 using Newtonsoft.Json;
@@ -34,6 +35,8 @@ namespace MyRE.Web.Controllers
         }
 
         [HttpGet("Initialize/{encodedData}")]
+        [ProducesResponseType(typeof(void), 200)]
+        [ProducesResponseType(typeof(ErrorResponse), 400)]
         public async Task<IActionResult> InitializeSmartThings(string encodedData)
         {
             if (!HttpContext.User.Identity.IsAuthenticated)
@@ -67,6 +70,8 @@ namespace MyRE.Web.Controllers
         }
 
         [HttpPost("Login")]
+        [ProducesResponseType(typeof(void), 404)]
+        [ProducesResponseType(typeof(void), 200)]
         public async Task<IActionResult> LoginAsync([FromBody] LoginRequest request)
         {
             var emailLower = request.Email.ToLowerInvariant();
@@ -93,6 +98,7 @@ namespace MyRE.Web.Controllers
         }
 
         [HttpPost("Logout")]
+        [ProducesResponseType(typeof(void), 200)]
         public async Task<IActionResult> LogoutAsync()
         {
             await _signInManager.SignOutAsync();
@@ -101,6 +107,8 @@ namespace MyRE.Web.Controllers
         }
 
         [HttpPost("Register")]
+        [ProducesResponseType(typeof(void), 201)]
+        [ProducesResponseType(typeof(ErrorResponse), 404)]
         public async Task<IActionResult> RegisterAsync([FromBody] RegisterRequest request)
         {
             var newUser = new ApplicationUser()

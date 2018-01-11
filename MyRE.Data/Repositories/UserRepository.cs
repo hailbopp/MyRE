@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using MyRE.Core.Models;
+using MyRE.Core.Models.Data;
 using MyRE.Core.Repositories;
 
 namespace MyRE.Data.Repositories

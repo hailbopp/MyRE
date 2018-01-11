@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace MyRE.Core.Models
+namespace MyRE.Core.Models.Data
 {
     public abstract class Statement
     {

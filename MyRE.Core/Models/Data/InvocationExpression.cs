@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
-namespace MyRE.Core.Models
+namespace MyRE.Core.Models.Data
 {
     public class InvocationExpression : Expression
     {
