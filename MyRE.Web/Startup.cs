@@ -75,14 +75,4 @@ namespace MyRE.Web
             app.UseMvc();
         }
     }
-
-    public static class Extensions
-    {
-        public static IApplicationBuilder UseCustomRewriter(this IApplicationBuilder app)
-        {
-            var options = new RewriteOptions().AddRewrite("^(?!api).*$", "index.html", false);
-
-            return app.UseRewriter(options);
-        }
-    }
 }
