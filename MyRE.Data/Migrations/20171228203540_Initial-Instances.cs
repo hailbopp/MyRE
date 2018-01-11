@@ -1,6 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore.Migrations;
-using System;
-using System.Collections.Generic;
 
 namespace MyRE.Data.Migrations
 {
@@ -12,7 +10,7 @@ namespace MyRE.Data.Migrations
                 name: "AppInstances",
                 columns: table => new
                 {
-                    AppInstanceId = table.Column<string>(nullable: false),
+                    AppInstanceId = table.Column<string>(),
                     AccountId = table.Column<string>(nullable: true),
                     LocationId = table.Column<string>(nullable: true),
                     Region = table.Column<string>(nullable: true)

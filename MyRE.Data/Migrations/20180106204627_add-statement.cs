@@ -1,7 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
-using System;
-using System.Collections.Generic;
 
 namespace MyRE.Data.Migrations
 {
@@ -15,9 +13,9 @@ namespace MyRE.Data.Migrations
                 {
                     Event = table.Column<string>(nullable: true),
                     ConditionExpressionId = table.Column<long>(nullable: true),
-                    StatementId = table.Column<long>(nullable: false)
+                    StatementId = table.Column<long>()
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
-                    Discriminator = table.Column<string>(nullable: false)
+                    Discriminator = table.Column<string>()
                 },
                 constraints: table =>
                 {
@@ -34,11 +32,11 @@ namespace MyRE.Data.Migrations
                 name: "BlockStatement",
                 columns: table => new
                 {
-                    BlockStatementId = table.Column<long>(nullable: false)
+                    BlockStatementId = table.Column<long>()
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
                     EventHandlerStatementStatementId = table.Column<long>(nullable: true),
                     IfStatementStatementId = table.Column<long>(nullable: true),
-                    Position = table.Column<int>(nullable: false),
+                    Position = table.Column<int>(),
                     StatementId = table.Column<long>(nullable: true)
                 },
                 constraints: table =>

@@ -1,6 +1,4 @@
-﻿using MyRE.Core.Models;
-
-namespace MyRE.Core.Models
+﻿namespace MyRE.Core.Models
 {
     public class Routine
     {

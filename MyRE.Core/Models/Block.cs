@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using MyRE.Core.Models;
 
 namespace MyRE.Core.Models
 {

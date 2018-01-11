@@ -8,12 +8,10 @@ namespace MyRE.Data.Repositories
 {
     public class UserRepository : IUserRepository
     {
-        private readonly MyREContext _MyREContext;
         private readonly UserManager<ApplicationUser> _userManager;
 
-        public UserRepository(MyREContext MyREContext, UserManager<ApplicationUser> userManager)
+        public UserRepository(UserManager<ApplicationUser> userManager)
         {
-            _MyREContext = MyREContext;
             _userManager = userManager;
         }
 

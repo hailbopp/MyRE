@@ -1,7 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using System;
-using System.Collections.Generic;
 
 namespace MyRE.Data.Migrations
 {
@@ -25,7 +24,7 @@ namespace MyRE.Data.Migrations
                 name: "Accounts",
                 columns: table => new
                 {
-                    AccountId = table.Column<string>(nullable: false),
+                    AccountId = table.Column<string>(),
                     UserId = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
@@ -43,14 +42,14 @@ namespace MyRE.Data.Migrations
                 name: "OAuthInfo",
                 columns: table => new
                 {
-                    OAuthInfoId = table.Column<long>(nullable: false)
+                    OAuthInfoId = table.Column<long>()
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
                     AccessToken = table.Column<string>(nullable: true),
                     AccountId = table.Column<string>(nullable: true),
                     AuthorizationCode = table.Column<string>(nullable: true),
                     ClientId = table.Column<string>(nullable: true),
                     ClientSecret = table.Column<string>(nullable: true),
-                    TokenExpiration = table.Column<DateTimeOffset>(nullable: false)
+                    TokenExpiration = table.Column<DateTimeOffset>()
                 },
                 constraints: table =>
                 {

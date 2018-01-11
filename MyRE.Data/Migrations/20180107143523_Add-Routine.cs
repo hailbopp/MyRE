@@ -1,7 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
-using System;
-using System.Collections.Generic;
 
 namespace MyRE.Data.Migrations
 {
@@ -13,11 +11,11 @@ namespace MyRE.Data.Migrations
                 name: "Routines",
                 columns: table => new
                 {
-                    RoutineId = table.Column<long>(nullable: false)
+                    RoutineId = table.Column<long>()
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
                     BlockId = table.Column<long>(nullable: true),
                     Description = table.Column<string>(nullable: true),
-                    ExecutionMethod = table.Column<int>(nullable: false),
+                    ExecutionMethod = table.Column<int>(),
                     Name = table.Column<string>(nullable: true),
                     ProjectId = table.Column<long>(nullable: true)
                 },

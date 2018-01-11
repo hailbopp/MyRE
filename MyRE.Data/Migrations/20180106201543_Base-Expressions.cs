@@ -1,7 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
-using System;
-using System.Collections.Generic;
 
 namespace MyRE.Data.Migrations
 {
@@ -13,9 +11,9 @@ namespace MyRE.Data.Migrations
                 name: "Expressions",
                 columns: table => new
                 {
-                    ExpressionId = table.Column<long>(nullable: false)
+                    ExpressionId = table.Column<long>()
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
-                    Discriminator = table.Column<string>(nullable: false),
+                    Discriminator = table.Column<string>(),
                     Value = table.Column<string>(nullable: true),
                     ValueType = table.Column<int>(nullable: true)
                 },

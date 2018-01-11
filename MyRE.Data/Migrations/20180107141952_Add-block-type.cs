@@ -1,7 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
-using System;
-using System.Collections.Generic;
 
 namespace MyRE.Data.Migrations
 {
@@ -66,7 +64,7 @@ namespace MyRE.Data.Migrations
                 name: "Block",
                 columns: table => new
                 {
-                    BlockId = table.Column<long>(nullable: false)
+                    BlockId = table.Column<long>()
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn)
                 },
                 constraints: table =>

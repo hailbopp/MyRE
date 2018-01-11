@@ -18,7 +18,7 @@ namespace MyRE.Web.Controllers
         [HttpGet("Me")]
         public async Task<IActionResult> GetLoggedInUser()
         {
-            var user = await _user.GetAuthenticatedUserFromContextAsync(this.HttpContext);
+            var user = await _user.GetAuthenticatedUserFromContextAsync(HttpContext);
 
             if (user == null)
             {
