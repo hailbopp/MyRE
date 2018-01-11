@@ -1,4 +1,6 @@
-﻿namespace MyRE.Core.Models
+﻿using System.Collections.Generic;
+
+namespace MyRE.Core.Models
 {
     public class AppInstance
     {
@@ -12,5 +14,7 @@
 
         public long AccountId { get; set; }
         public Account Account { get; set; }
+
+        public List<Project> Projects { get; set; }
     }
 }

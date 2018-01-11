@@ -2,7 +2,7 @@
 {
     public class VariableDefinitionStatement : Statement
     {
-        public string VariableType { get; set; }
-        public string VariableName { get; set; }
+        public DataType VariableType { get; set; }
+        public VariableNameExpression VariableNameExpression { get; set; }
     }
 }

@@ -13,9 +13,10 @@ using System;
 namespace MyRE.Data.Migrations
 {
     [DbContext(typeof(MyREContext))]
-    partial class MyREContextModelSnapshot : ModelSnapshot
+    [Migration("20180111190433_add-data-model-annotations")]
+    partial class adddatamodelannotations
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

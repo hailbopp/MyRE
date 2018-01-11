@@ -2,7 +2,7 @@
 {
     public class VariableAssignmentStatement : Statement
     {
-        public string VariableName { get; set; }
+        public VariableNameExpression VariableNameExpression { get; set; }
         public Expression Value { get; set; }
     }
 }

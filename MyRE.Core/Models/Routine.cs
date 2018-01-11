@@ -1,9 +1,15 @@
-﻿namespace MyRE.Core.Models
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace MyRE.Core.Models
 {
     public class Routine
     {
         public long RoutineId { get; set; }
+
+        [MaxLength(1024)]
         public string Name { get; set; }
+
+        [MaxLength(4096)]
         public string Description { get; set; }
         public Project Project { get; set; }
         public RoutineExecutionMethod ExecutionMethod { get; set; }
