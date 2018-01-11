@@ -6,15 +6,15 @@ using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.EntityFrameworkCore.Storage.Internal;
 using Microsoft.EntityFrameworkCore.ValueGeneration;
-using MyRE.Data;
 using MyRE.Core.Models;
+using MyRE.Data;
 using System;
 
 namespace MyRE.Data.Migrations
 {
     [DbContext(typeof(MyREContext))]
-    [Migration("20180107141952_Add-block-type")]
-    partial class Addblocktype
+    [Migration("20180111173343_Base-Models")]
+    partial class BaseModels
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -133,12 +133,18 @@ namespace MyRE.Data.Migrations
 
             modelBuilder.Entity("MyRE.Core.Models.Account", b =>
                 {
-                    b.Property<string>("AccountId")
+                    b.Property<long>("AccountId")
                         .ValueGeneratedOnAdd();
+
+                    b.Property<string>("RemoteAccountId")
+                        .IsRequired();
 
                     b.Property<string>("UserId");
 
                     b.HasKey("AccountId");
+
+                    b.HasAlternateKey("RemoteAccountId")
+                        .HasName("UNQ_RemoteAccountId");
 
                     b.HasIndex("UserId");
 
@@ -147,18 +153,22 @@ namespace MyRE.Data.Migrations
 
             modelBuilder.Entity("MyRE.Core.Models.AppInstance", b =>
                 {
-                    b.Property<string>("AppInstanceId")
+                    b.Property<long>("AppInstanceId")
                         .ValueGeneratedOnAdd();
 
                     b.Property<string>("AccessToken");
 
-                    b.Property<string>("AccountId");
-
-                    b.Property<string>("ExecutionToken");
+                    b.Property<long>("AccountId");
 
                     b.Property<string>("InstanceServerBaseUri");
 
+                    b.Property<string>("RemoteAppId")
+                        .IsRequired();
+
                     b.HasKey("AppInstanceId");
+
+                    b.HasAlternateKey("RemoteAppId")
+                        .HasName("UNQ_RemoteAppId");
 
                     b.HasIndex("AccountId");
 
@@ -281,30 +291,6 @@ namespace MyRE.Data.Migrations
                     b.ToTable("FunctionParameter");
                 });
 
-            modelBuilder.Entity("MyRE.Core.Models.OAuthInfo", b =>
-                {
-                    b.Property<long>("OAuthInfoId")
-                        .ValueGeneratedOnAdd();
-
-                    b.Property<string>("AccessToken");
-
-                    b.Property<string>("AccountId");
-
-                    b.Property<string>("AuthorizationCode");
-
-                    b.Property<string>("ClientId");
-
-                    b.Property<string>("ClientSecret");
-
-                    b.Property<DateTimeOffset>("TokenExpiration");
-
-                    b.HasKey("OAuthInfoId");
-
-                    b.HasIndex("AccountId");
-
-                    b.ToTable("OAuthInfo");
-                });
-
             modelBuilder.Entity("MyRE.Core.Models.Project", b =>
                 {
                     b.Property<long>("ProjectId")
@@ -314,13 +300,37 @@ namespace MyRE.Data.Migrations
 
                     b.Property<string>("Name");
 
-                    b.Property<string>("ParentInstanceAppInstanceId");
+                    b.Property<long?>("ParentInstanceAppInstanceId");
 
                     b.HasKey("ProjectId");
 
                     b.HasIndex("ParentInstanceAppInstanceId");
 
                     b.ToTable("Projects");
+                });
+
+            modelBuilder.Entity("MyRE.Core.Models.Routine", b =>
+                {
+                    b.Property<long>("RoutineId")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<long?>("BlockId");
+
+                    b.Property<string>("Description");
+
+                    b.Property<int>("ExecutionMethod");
+
+                    b.Property<string>("Name");
+
+                    b.Property<long?>("ProjectId");
+
+                    b.HasKey("RoutineId");
+
+                    b.HasIndex("BlockId");
+
+                    b.HasIndex("ProjectId");
+
+                    b.ToTable("Routines");
                 });
 
             modelBuilder.Entity("MyRE.Core.Models.Statement", b =>
@@ -523,7 +533,8 @@ namespace MyRE.Data.Migrations
                 {
                     b.HasOne("MyRE.Core.Models.Account", "Account")
                         .WithMany()
-                        .HasForeignKey("AccountId");
+                        .HasForeignKey("AccountId")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("MyRE.Core.Models.BlockStatement", b =>
@@ -548,18 +559,22 @@ namespace MyRE.Data.Migrations
                         .HasForeignKey("ValueExpressionId");
                 });
 
-            modelBuilder.Entity("MyRE.Core.Models.OAuthInfo", b =>
-                {
-                    b.HasOne("MyRE.Core.Models.Account", "Account")
-                        .WithMany()
-                        .HasForeignKey("AccountId");
-                });
-
             modelBuilder.Entity("MyRE.Core.Models.Project", b =>
                 {
                     b.HasOne("MyRE.Core.Models.AppInstance", "ParentInstance")
                         .WithMany()
                         .HasForeignKey("ParentInstanceAppInstanceId");
+                });
+
+            modelBuilder.Entity("MyRE.Core.Models.Routine", b =>
+                {
+                    b.HasOne("MyRE.Core.Models.Block", "Block")
+                        .WithMany()
+                        .HasForeignKey("BlockId");
+
+                    b.HasOne("MyRE.Core.Models.Project", "Project")
+                        .WithMany()
+                        .HasForeignKey("ProjectId");
                 });
 
             modelBuilder.Entity("MyRE.Core.Models.ActionStatement", b =>

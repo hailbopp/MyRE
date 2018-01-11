@@ -6,17 +6,16 @@ using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.EntityFrameworkCore.Storage.Internal;
 using Microsoft.EntityFrameworkCore.ValueGeneration;
-using MyRE.Data;
 using MyRE.Core.Models;
+using MyRE.Data;
 using System;
 
 namespace MyRE.Data.Migrations
 {
     [DbContext(typeof(MyREContext))]
-    [Migration("20180106204627_add-statement")]
-    partial class addstatement
+    partial class MyREContextModelSnapshot : ModelSnapshot
     {
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -133,12 +132,18 @@ namespace MyRE.Data.Migrations
 
             modelBuilder.Entity("MyRE.Core.Models.Account", b =>
                 {
-                    b.Property<string>("AccountId")
+                    b.Property<long>("AccountId")
                         .ValueGeneratedOnAdd();
+
+                    b.Property<string>("RemoteAccountId")
+                        .IsRequired();
 
                     b.Property<string>("UserId");
 
                     b.HasKey("AccountId");
+
+                    b.HasAlternateKey("RemoteAccountId")
+                        .HasName("UNQ_RemoteAccountId");
 
                     b.HasIndex("UserId");
 
@@ -147,18 +152,22 @@ namespace MyRE.Data.Migrations
 
             modelBuilder.Entity("MyRE.Core.Models.AppInstance", b =>
                 {
-                    b.Property<string>("AppInstanceId")
+                    b.Property<long>("AppInstanceId")
                         .ValueGeneratedOnAdd();
 
                     b.Property<string>("AccessToken");
 
-                    b.Property<string>("AccountId");
-
-                    b.Property<string>("ExecutionToken");
+                    b.Property<long>("AccountId");
 
                     b.Property<string>("InstanceServerBaseUri");
 
+                    b.Property<string>("RemoteAppId")
+                        .IsRequired();
+
                     b.HasKey("AppInstanceId");
+
+                    b.HasAlternateKey("RemoteAppId")
+                        .HasName("UNQ_RemoteAppId");
 
                     b.HasIndex("AccountId");
 
@@ -216,14 +225,22 @@ namespace MyRE.Data.Migrations
                     b.ToTable("AspNetUsers");
                 });
 
+            modelBuilder.Entity("MyRE.Core.Models.Block", b =>
+                {
+                    b.Property<long>("BlockId")
+                        .ValueGeneratedOnAdd();
+
+                    b.HasKey("BlockId");
+
+                    b.ToTable("Block");
+                });
+
             modelBuilder.Entity("MyRE.Core.Models.BlockStatement", b =>
                 {
                     b.Property<long>("BlockStatementId")
                         .ValueGeneratedOnAdd();
 
-                    b.Property<long?>("EventHandlerStatementStatementId");
-
-                    b.Property<long?>("IfStatementStatementId");
+                    b.Property<long?>("BlockId");
 
                     b.Property<int>("Position");
 
@@ -231,9 +248,7 @@ namespace MyRE.Data.Migrations
 
                     b.HasKey("BlockStatementId");
 
-                    b.HasIndex("EventHandlerStatementStatementId");
-
-                    b.HasIndex("IfStatementStatementId");
+                    b.HasIndex("BlockId");
 
                     b.HasIndex("StatementId");
 
@@ -275,28 +290,46 @@ namespace MyRE.Data.Migrations
                     b.ToTable("FunctionParameter");
                 });
 
-            modelBuilder.Entity("MyRE.Core.Models.OAuthInfo", b =>
+            modelBuilder.Entity("MyRE.Core.Models.Project", b =>
                 {
-                    b.Property<long>("OAuthInfoId")
+                    b.Property<long>("ProjectId")
                         .ValueGeneratedOnAdd();
 
-                    b.Property<string>("AccessToken");
+                    b.Property<string>("Description");
 
-                    b.Property<string>("AccountId");
+                    b.Property<string>("Name");
 
-                    b.Property<string>("AuthorizationCode");
+                    b.Property<long?>("ParentInstanceAppInstanceId");
 
-                    b.Property<string>("ClientId");
+                    b.HasKey("ProjectId");
 
-                    b.Property<string>("ClientSecret");
+                    b.HasIndex("ParentInstanceAppInstanceId");
 
-                    b.Property<DateTimeOffset>("TokenExpiration");
+                    b.ToTable("Projects");
+                });
 
-                    b.HasKey("OAuthInfoId");
+            modelBuilder.Entity("MyRE.Core.Models.Routine", b =>
+                {
+                    b.Property<long>("RoutineId")
+                        .ValueGeneratedOnAdd();
 
-                    b.HasIndex("AccountId");
+                    b.Property<long?>("BlockId");
 
-                    b.ToTable("OAuthInfo");
+                    b.Property<string>("Description");
+
+                    b.Property<int>("ExecutionMethod");
+
+                    b.Property<string>("Name");
+
+                    b.Property<long?>("ProjectId");
+
+                    b.HasKey("RoutineId");
+
+                    b.HasIndex("BlockId");
+
+                    b.HasIndex("ProjectId");
+
+                    b.ToTable("Routines");
                 });
 
             modelBuilder.Entity("MyRE.Core.Models.Statement", b =>
@@ -349,11 +382,28 @@ namespace MyRE.Data.Migrations
                     b.HasDiscriminator().HasValue("VariableNameExpression");
                 });
 
+            modelBuilder.Entity("MyRE.Core.Models.ActionStatement", b =>
+                {
+                    b.HasBaseType("MyRE.Core.Models.Statement");
+
+                    b.Property<long?>("ExpressionToEvaluateExpressionId");
+
+                    b.HasIndex("ExpressionToEvaluateExpressionId");
+
+                    b.ToTable("ActionStatement");
+
+                    b.HasDiscriminator().HasValue("ActionStatement");
+                });
+
             modelBuilder.Entity("MyRE.Core.Models.EventHandlerStatement", b =>
                 {
                     b.HasBaseType("MyRE.Core.Models.Statement");
 
+                    b.Property<long?>("BlockId");
+
                     b.Property<string>("Event");
+
+                    b.HasIndex("BlockId");
 
                     b.ToTable("EventHandlerStatement");
 
@@ -364,13 +414,66 @@ namespace MyRE.Data.Migrations
                 {
                     b.HasBaseType("MyRE.Core.Models.Statement");
 
+                    b.Property<long?>("BlockId")
+                        .HasColumnName("IfStatement_BlockId");
+
                     b.Property<long?>("ConditionExpressionId");
+
+                    b.HasIndex("BlockId");
 
                     b.HasIndex("ConditionExpressionId");
 
                     b.ToTable("IfStatement");
 
                     b.HasDiscriminator().HasValue("IfStatement");
+                });
+
+            modelBuilder.Entity("MyRE.Core.Models.VariableAssignmentStatement", b =>
+                {
+                    b.HasBaseType("MyRE.Core.Models.Statement");
+
+                    b.Property<long?>("ValueExpressionId");
+
+                    b.Property<string>("VariableName");
+
+                    b.HasIndex("ValueExpressionId");
+
+                    b.ToTable("VariableAssignmentStatement");
+
+                    b.HasDiscriminator().HasValue("VariableAssignmentStatement");
+                });
+
+            modelBuilder.Entity("MyRE.Core.Models.VariableDefinitionStatement", b =>
+                {
+                    b.HasBaseType("MyRE.Core.Models.Statement");
+
+                    b.Property<string>("VariableName")
+                        .HasColumnName("VariableDefinitionStatement_VariableName");
+
+                    b.Property<string>("VariableType");
+
+                    b.ToTable("VariableDefinitionStatement");
+
+                    b.HasDiscriminator().HasValue("VariableDefinitionStatement");
+                });
+
+            modelBuilder.Entity("MyRE.Core.Models.WhileStatement", b =>
+                {
+                    b.HasBaseType("MyRE.Core.Models.Statement");
+
+                    b.Property<long?>("BlockId")
+                        .HasColumnName("WhileStatement_BlockId");
+
+                    b.Property<long?>("ConditionExpressionId")
+                        .HasColumnName("WhileStatement_ConditionExpressionId");
+
+                    b.HasIndex("BlockId");
+
+                    b.HasIndex("ConditionExpressionId");
+
+                    b.ToTable("WhileStatement");
+
+                    b.HasDiscriminator().HasValue("WhileStatement");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -429,18 +532,15 @@ namespace MyRE.Data.Migrations
                 {
                     b.HasOne("MyRE.Core.Models.Account", "Account")
                         .WithMany()
-                        .HasForeignKey("AccountId");
+                        .HasForeignKey("AccountId")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("MyRE.Core.Models.BlockStatement", b =>
                 {
-                    b.HasOne("MyRE.Core.Models.EventHandlerStatement")
-                        .WithMany("Block")
-                        .HasForeignKey("EventHandlerStatementStatementId");
-
-                    b.HasOne("MyRE.Core.Models.IfStatement")
-                        .WithMany("Block")
-                        .HasForeignKey("IfStatementStatementId");
+                    b.HasOne("MyRE.Core.Models.Block")
+                        .WithMany("Statements")
+                        .HasForeignKey("BlockId");
 
                     b.HasOne("MyRE.Core.Models.Statement", "Statement")
                         .WithMany()
@@ -458,15 +558,62 @@ namespace MyRE.Data.Migrations
                         .HasForeignKey("ValueExpressionId");
                 });
 
-            modelBuilder.Entity("MyRE.Core.Models.OAuthInfo", b =>
+            modelBuilder.Entity("MyRE.Core.Models.Project", b =>
                 {
-                    b.HasOne("MyRE.Core.Models.Account", "Account")
+                    b.HasOne("MyRE.Core.Models.AppInstance", "ParentInstance")
                         .WithMany()
-                        .HasForeignKey("AccountId");
+                        .HasForeignKey("ParentInstanceAppInstanceId");
+                });
+
+            modelBuilder.Entity("MyRE.Core.Models.Routine", b =>
+                {
+                    b.HasOne("MyRE.Core.Models.Block", "Block")
+                        .WithMany()
+                        .HasForeignKey("BlockId");
+
+                    b.HasOne("MyRE.Core.Models.Project", "Project")
+                        .WithMany()
+                        .HasForeignKey("ProjectId");
+                });
+
+            modelBuilder.Entity("MyRE.Core.Models.ActionStatement", b =>
+                {
+                    b.HasOne("MyRE.Core.Models.Expression", "ExpressionToEvaluate")
+                        .WithMany()
+                        .HasForeignKey("ExpressionToEvaluateExpressionId");
+                });
+
+            modelBuilder.Entity("MyRE.Core.Models.EventHandlerStatement", b =>
+                {
+                    b.HasOne("MyRE.Core.Models.Block", "Block")
+                        .WithMany()
+                        .HasForeignKey("BlockId");
                 });
 
             modelBuilder.Entity("MyRE.Core.Models.IfStatement", b =>
                 {
+                    b.HasOne("MyRE.Core.Models.Block", "Block")
+                        .WithMany()
+                        .HasForeignKey("BlockId");
+
+                    b.HasOne("MyRE.Core.Models.Expression", "Condition")
+                        .WithMany()
+                        .HasForeignKey("ConditionExpressionId");
+                });
+
+            modelBuilder.Entity("MyRE.Core.Models.VariableAssignmentStatement", b =>
+                {
+                    b.HasOne("MyRE.Core.Models.Expression", "Value")
+                        .WithMany()
+                        .HasForeignKey("ValueExpressionId");
+                });
+
+            modelBuilder.Entity("MyRE.Core.Models.WhileStatement", b =>
+                {
+                    b.HasOne("MyRE.Core.Models.Block", "Block")
+                        .WithMany()
+                        .HasForeignKey("BlockId");
+
                     b.HasOne("MyRE.Core.Models.Expression", "Condition")
                         .WithMany()
                         .HasForeignKey("ConditionExpressionId");
