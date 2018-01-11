@@ -40,6 +40,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\MyRE.Core\MyRE.Core.csproj" />
+    <ProjectReference Include="..\MyRE.Data\MyRE.Data.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <TypeScriptCompile Include="ClientSrc\index.ts" />
   </ItemGroup>
 </Project>

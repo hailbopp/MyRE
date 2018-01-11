@@ -4,13 +4,14 @@ using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
-using MyRE.Web.Data;
-using MyRE.Web.Data.Models;
-using MyRE.Web.Models.Web;
+using MyRE.Data;
+using MyRE.Core.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using MyRE.Core.Models.Web;
+using MyRE.Core.Services;
 using Newtonsoft.Json;
 
 namespace MyRE.Web.Controllers
@@ -19,37 +20,54 @@ namespace MyRE.Web.Controllers
     [Route("api/Auth")]
     public class AuthController : BaseController
     {
-        private readonly MyREContext _dbContext;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly IAuthService _authService;
+        private readonly IUserService _userService;
         private readonly ILogger _logger;
 
-        public AuthController(MyREContext MyREContext, UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, ILogger<AuthController> logger)
+        public AuthController(
+            IAuthService authService, IUserService userService,
+            ILogger<AuthController> logger, UserManager<ApplicationUser> userManager1, SignInManager<ApplicationUser> signInManager1)
         {
-            _dbContext = MyREContext;
-            _userManager = userManager;
-            _signInManager = signInManager;
+            _authService = authService;
+            _userService = userService;
             _logger = logger;
+            _userManager = userManager1;
+            _signInManager = signInManager1;
         }
-        
+
         [HttpGet("Initialize/{encodedData}")]
         public async Task<IActionResult> InitializeSmartThings(string encodedData)
         {
-            if(!HttpContext.User.Identity.IsAuthenticated)
-            {   
+            if (!HttpContext.User.Identity.IsAuthenticated)
+            {
                 return Redirect("/login?loginError='You must log in or register before you can use the web console. Log in, then authenticate again via the SmartApp.'");
             }
 
             byte[] data = Convert.FromBase64String(encodedData);
             var blob = JsonConvert.DeserializeObject<SmartThingsAuthBlob>(Encoding.UTF8.GetString(data));
-            
-            
+
+            try
+            {
+                var result = await _authService.CreateInstanceAsync(blob.AccountId,
+                    _userService.GetAuthenticatedUserFromContextAsync(HttpContext).Result.UserId,
+                    blob.AppId, blob.ApiServerBaseUrl, blob.AccessToken);
+
+                return Ok();
+            }
+            catch (ArgumentException e)
+            {
+                return BadRequest(new ErrorResponse(e.Message));
+            }
+
+
             //var response = await client.GetAsync($"{baseUrl}api/smartapps/installations/{installationId}/test");
-            
+
             //var response = await client.GetAsync(blob.Url + "api/smartapps/endpoints");
             //var content = await response.Content.ReadAsStringAsync();
 
-            return Ok(blob);
+            //return Ok(blob);
         }
 
         [HttpPost("Login")]
@@ -59,18 +77,19 @@ namespace MyRE.Web.Controllers
 
             var user = await _userManager.FindByEmailAsync(request.Email);
 
-            if(user == null)
+            if (user == null)
             {
                 _logger.LogInformation($"Log in failed for email ${request.Email}");
                 return NotFound();
             }
 
             var signedInResult = await _signInManager.PasswordSignInAsync(user, request.Password, true, false);
-            if(signedInResult.Succeeded)
+            if (signedInResult.Succeeded)
             {
                 _logger.LogInformation($"Log in succeeded for email ${request.Email}");
                 return Ok();
-            } else
+            }
+            else
             {
                 _logger.LogInformation($"Log in failed for email ${request.Email}");
                 return NotFound();
@@ -96,14 +115,11 @@ namespace MyRE.Web.Controllers
 
             var createResult = await _userManager.CreateAsync(newUser, request.Password);
 
-            if(!createResult.Succeeded)
+            if (!createResult.Succeeded)
             {
                 var message = createResult.Errors.First().Description;
 
-                return BadRequest(new ErrorResponse()
-                {
-                    Message = message
-                });
+                return BadRequest(new ErrorResponse(message));
             }
             return Created();
         }

@@ -1,13 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
-using MyRE.Web.Data;
-using MyRE.Web.Data.Models;
-using MyRE.Web.Interfaces;
-using MyRE.Web.Repositories;
-using MyRE.Web.Services;
+﻿using System.IO;
+using MyRE.Data;
+using MyRE.Core.Models;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
@@ -15,8 +8,9 @@ using Microsoft.AspNetCore.Rewrite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
+using MyRE.Core.Repositories;
+using MyRE.Core.Services;
+using MyRE.Data.Repositories;
 using Newtonsoft.Json.Serialization;
 
 namespace MyRE.Web
@@ -43,6 +37,7 @@ namespace MyRE.Web
                 .AddEntityFrameworkStores<MyREContext>()
                 .AddDefaultTokenProviders();
 
+            services.AddTransient<IAuthService, AuthService>();
             services.AddTransient<IUserRepository, UserRepository>();
             services.AddTransient<IUserService, UserService>();
         }
