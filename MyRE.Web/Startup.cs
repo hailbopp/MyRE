@@ -19,8 +19,6 @@ namespace MyRE.Web
 {
     public class Startup
     {
-        private const string SWAGGER_JSON_URL = "api/docs/{documentName}/swagger.json";
-
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;

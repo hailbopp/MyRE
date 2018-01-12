@@ -1,8 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using MyRE.Core.Models;
+using MyRE.Core.Services;
 
 namespace MyRE.Web.Controllers
 {
-    public class BaseController: Controller
+    public abstract class BaseController: Controller
     {
         protected StatusCodeResult StatusResult(int statusCode)
         {
