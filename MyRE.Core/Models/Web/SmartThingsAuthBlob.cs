@@ -7,5 +7,6 @@
         public string AppId { get; set; }
         public string ExecutionToken { get; set; }
         public string AccountId { get; set; }
+        public string InstanceName { get; set; }
     }
 }

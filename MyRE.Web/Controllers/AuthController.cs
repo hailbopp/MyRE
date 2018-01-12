@@ -49,7 +49,7 @@ namespace MyRE.Web.Controllers
 
             try
             {
-                var result = await _authService.CreateInstanceAsync(blob.AccountId,
+                var result = await _authService.CreateInstanceAsync(blob.AccountId, blob.InstanceName,
                     _userService.GetAuthenticatedUserFromContextAsync(HttpContext).Result.UserId,
                     blob.AppId, blob.ApiServerBaseUrl, blob.AccessToken);
 

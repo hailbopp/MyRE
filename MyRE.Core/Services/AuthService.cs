@@ -17,7 +17,7 @@ namespace MyRE.Core.Services
             _appInstanceRepository = appInstanceRepository;
         }
         
-        public async Task<AppInstance> CreateInstanceAsync(string accountId, string userId, string appId, string serverBaseUri, string accessToken)
+        public async Task<AppInstance> CreateInstanceAsync(string accountId, string instanceName, string userId, string appId, string serverBaseUri, string accessToken)
         {
             var existingAccount = await _accountRepository.GetByRemoteIdAsync(accountId);
             if (existingAccount != null && existingAccount.User.Id != userId)
@@ -35,6 +35,7 @@ namespace MyRE.Core.Services
             var instance = new AppInstance()
             {
                 AccessToken = accessToken,
+                Name = instanceName,
                 RemoteAppId = appId,
                 Account = existingAccount,
                 InstanceServerBaseUri = serverBaseUri,

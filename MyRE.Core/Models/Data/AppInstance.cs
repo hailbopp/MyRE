@@ -6,6 +6,8 @@ namespace MyRE.Core.Models.Data
     {
         public long AppInstanceId { get; set; }
 
+        public string Name { get; set; }
+
         public string RemoteAppId { get; set; }
 
         public string InstanceServerBaseUri { get; set; }

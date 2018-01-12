@@ -1,4 +1,4 @@
-﻿namespace MyRE.Core.Models
+﻿namespace MyRE.Core.Models.Domain
 {
     public class User
     {

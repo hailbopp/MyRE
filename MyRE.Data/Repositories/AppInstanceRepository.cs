@@ -1,4 +1,6 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using MyRE.Core.Models;
 using MyRE.Core.Models.Data;
@@ -23,12 +25,9 @@ namespace MyRE.Data.Repositories
             return result.Entity;
         }
 
-        public async Task<AppInstance> GetAppInstanceByRemoteIdAsync(string remoteAppId)
-        {
-            var result = await _myreContext.AppInstances.FirstOrDefaultAsync(i => i.RemoteAppId == remoteAppId);
+        public async Task<AppInstance> GetAppInstanceByRemoteIdAsync(string remoteAppId) => await _myreContext.AppInstances.FirstOrDefaultAsync(i => i.RemoteAppId == remoteAppId);
 
-            return result;
-        }
+        public async Task<IEnumerable<AppInstance>> GetByUserIdAsync(string userId) => await _myreContext.AppInstances.Where(i => i.Account.UserId == userId).ToListAsync();
     }
     
 }

@@ -1,6 +1,9 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using MyRE.Core.Models;
+using MyRE.Core.Models.Domain;
+using MyRE.Core.Models.Web;
 using MyRE.Core.Services;
 
 namespace MyRE.Web.Controllers
@@ -29,6 +32,36 @@ namespace MyRE.Web.Controllers
             }
 
             return Ok(user);
+        }
+
+        [HttpGet("{userId}")]
+        [ProducesResponseType(typeof(User), 200)]
+        [ProducesResponseType(typeof(void), 401)]
+        public async Task<IActionResult> RetrieveUser(string userId)
+        {
+            var currentUser = await _user.GetAuthenticatedUserFromContextAsync(HttpContext);
+
+            if (await _user.UserCanAccessUserDataAsync(currentUser, userId))
+            {
+                return Ok(await _user.GetUserAsync(userId));
+            }
+            else {
+                return Unauthorized();
+            }
+        }
+
+        [HttpGet("{userId}/Instances")]
+        public async Task<IActionResult> ListUserInstances(string userId)
+        {
+            var currentUser = await _user.GetAuthenticatedUserFromContextAsync(HttpContext);
+            if (await _user.UserCanAccessUserDataAsync(currentUser, userId))
+            {
+                return Ok(_user.GetUserInstancesAsync(userId));
+            }
+            else
+            {
+                return Unauthorized();
+            }
         }
     }
 }

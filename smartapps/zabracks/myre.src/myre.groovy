@@ -51,6 +51,9 @@ private isInstalled() {
 // Preference pages
 private sectionDomainEntry() {
     section() {
+        input "instanceName", "text", title: "Enter a name for this instance so that you can identify it later.", defaultValue: "MyRE", required: true
+    }
+    section() {
         input "apiDomain", "text", title: "Enter the domain of the ${APP_NAME} server that you wish to use.", defaultValue: "http://freecoreweb.azurewebsites.net", required: true
     }
 }
@@ -163,6 +166,7 @@ private String getConsoleInitUrl(register = false) {
         AppId: state.appId,
         ExecutionToken: state.executionToken,
         AccountId: state.accountId,
+        InstanceName: settings.instanceName
     ]
 
     def json = new groovy.json.JsonBuilder(body)
