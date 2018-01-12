@@ -1,6 +1,6 @@
 ﻿import { Option } from 'ts-option';
 import { List } from 'immutable';
-import { User } from "MyRE/Api/Models";
+import { User, Instance } from "MyRE/Api/Models";
 import { AppAction } from 'MyRE/Actions';
 
 
@@ -26,13 +26,14 @@ export namespace Store {
         registrationMessage: Option<AlertMessage>;
     }
     
-    export interface Script {
-        name: string;
+    export interface InstanceState {
+        // If instances is none, then we haven't yet attempted to grab instances from the API.
+        instances: Option<List<Instance>>;
     }
 
     export interface All {
         auth: Auth;
-
         nav: Nav;
+        instanceState: InstanceState;
     }
 }

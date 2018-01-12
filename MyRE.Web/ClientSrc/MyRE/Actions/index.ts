@@ -1,5 +1,6 @@
 ﻿import * as Auth from 'MyRE/Actions/Auth';
 import * as Nav from 'MyRE/Actions/Nav';
+import * as Instances from 'MyRE/Actions/Instances';
 
 type UndefinedAction = { type: '' };
 
@@ -22,5 +23,8 @@ export type AppAction =
 
     | Nav.OpenNavPaneAction
     | Nav.CloseNavPaneAction
+
+    | Instances.RequestUserInstanceListApiAction
+    | Instances.ReceivedUserInstanceListApiAction
 
     | UndefinedAction

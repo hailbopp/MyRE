@@ -56,7 +56,7 @@ namespace MyRE.Web.Controllers
             var currentUser = await _user.GetAuthenticatedUserFromContextAsync(HttpContext);
             if (await _user.UserCanAccessUserDataAsync(currentUser, userId))
             {
-                return Ok(_user.GetUserInstancesAsync(userId));
+                return Ok(await _user.GetUserInstancesAsync(userId));
             }
             else
             {

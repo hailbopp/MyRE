@@ -5,6 +5,9 @@ import { ApiError } from "MyRE/Api/Models/Results";
 import { Store } from "MyRE/Models/Store";
 import { Middleware, MiddlewareAPI, Dispatch } from "redux";
 import { retrieveCurrentUser, clearAuthMessages } from "MyRE/Actions/Auth";
+import { some } from "ts-option";
+import { List } from "immutable";
+import { Instance } from "MyRE/Api/Models";
 
 function isAction(a: AppAction): a is AppAction {
     return (a as AppAction).type !== undefined;
@@ -34,7 +37,8 @@ export const ApiServiceMiddleware: ExtendedMiddleware<Store.All> = <S extends St
                     .then((result) => {
                         if (result.result === 'error') {
                             dispatch({
-                                type: 'API_FAILED_LOGIN'
+                                type: 'API_FAILED_LOGIN',
+                                message: "Login failed",
                             });
                         } else {
                             dispatch({
@@ -80,6 +84,15 @@ export const ApiServiceMiddleware: ExtendedMiddleware<Store.All> = <S extends St
                         }
                     })
                 break;
+            case "API_REQUEST_USER_INSTANCE_LIST":
+                ApiClient.listUserInstances(action.userId)
+                    .then((result) => {
+                        if (result.result === 'error') {
+                            dispatch({ type: 'API_RECEIVED_USER_INSTANCE_LIST', instances: List<Instance>([]) });
+                        } else {
+                            dispatch({ type: 'API_RECEIVED_USER_INSTANCE_LIST', instances: List<Instance>(result.data) });
+                        }
+                    });
             default:
                 return a;
         }

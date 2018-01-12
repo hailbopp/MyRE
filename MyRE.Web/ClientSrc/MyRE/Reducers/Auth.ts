@@ -43,7 +43,7 @@ export const reduceAuth = (state: Store.Auth, action: AppAction): Store.Auth => 
         case 'API_FAILED_LOGIN':
             newState.loginMessage = some({
                 level: "danger",
-                message: "Login failed"
+                message: action.message,
             });
             return newState;
 

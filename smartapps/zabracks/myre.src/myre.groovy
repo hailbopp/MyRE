@@ -174,7 +174,6 @@ private String getConsoleInitUrl(register = false) {
 }
 
 public String getConsoleBaseUrl() {
-	if (!state.endpoint) return null
 	return "${settings.apiDomain}/"
 }
 

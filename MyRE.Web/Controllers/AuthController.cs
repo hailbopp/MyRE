@@ -53,7 +53,7 @@ namespace MyRE.Web.Controllers
                     _userService.GetAuthenticatedUserFromContextAsync(HttpContext).Result.UserId,
                     blob.AppId, blob.ApiServerBaseUrl, blob.AccessToken);
 
-                return Ok();
+                return Redirect("/");
             }
             catch (ArgumentException e)
             {

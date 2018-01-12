@@ -8,6 +8,12 @@ export interface User {
     Email: string;
 }
 
+export interface Instance {
+    Id: number;
+    Name: string;
+    AccountId: number;
+}
+
 export interface ProjectListing {
     ProjectId: number;
     Name: string;

@@ -9,6 +9,10 @@
   </PropertyGroup>
 
   <PropertyGroup>
+    <IsTransformWebConfigDisabled>true</IsTransformWebConfigDisabled>
+  </PropertyGroup>
+
+  <PropertyGroup>
     <!--<PreBuildEvent>npm run build</PreBuildEvent>-->
   </PropertyGroup>
 
@@ -17,11 +21,6 @@
     <Content Remove="ClientSrc\FreeCoRE\**" />
     <EmbeddedResource Remove="ClientSrc\FreeCoRE\**" />
     <None Remove="ClientSrc\FreeCoRE\**" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Remove="ClientSrc\index.ts" />
-    <None Remove="ClientSrc\MyRE\Api\Models\Results.ts" />
   </ItemGroup>
 
   <ItemGroup>
@@ -44,10 +43,5 @@
   <ItemGroup>
     <ProjectReference Include="..\MyRE.Core\MyRE.Core.csproj" />
     <ProjectReference Include="..\MyRE.Data\MyRE.Data.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <TypeScriptCompile Include="ClientSrc\index.ts" />
-    <TypeScriptCompile Include="ClientSrc\MyRE\Api\Models\Results.ts" />
   </ItemGroup>
 </Project>

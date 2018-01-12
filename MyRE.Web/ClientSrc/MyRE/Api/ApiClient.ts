@@ -1,4 +1,4 @@
-﻿import { User, ErrorResponse, ProjectListing } from "MyRE/Api/Models";
+﻿import { User, ErrorResponse, ProjectListing, Instance } from "MyRE/Api/Models";
 import { JsonConvert } from "json2typescript";
 import { Option, some, none } from "ts-option";
 import { ApiResult, ApiSuccess, ApiError } from "MyRE/Api/Models/Results";
@@ -16,12 +16,19 @@ export class MyREApiClient {
         register: '/api/Auth/Register',
 
         getCurrentUser: '/api/Users/Me',
+        listUserInstances: (userId: string) => `/api/Users/${userId}/Instances`,
 
         listProjects: '/api/Projects',
     }
 
-    private getEndpointUrl<S extends keyof typeof MyREApiClient.paths>(pathName: S) {
-        return this.baseUri + MyREApiClient.paths[pathName];
+    private getEndpointUrl<S extends keyof typeof MyREApiClient.paths>(pathName: S, ...args: string[]) {
+        let path = MyREApiClient.paths[pathName];
+        if (typeof path === 'string' || path instanceof String) {
+            return this.baseUri + path;
+        } else {
+            let result = (<(...a: string[]) => string>path)(...args);
+            return result;
+        }        
     }
 
     private async parseError(r: Response): Promise<ErrorResponse> {
@@ -34,15 +41,18 @@ export class MyREApiClient {
         }
     }
 
-    private async performRequest<T>(input: RequestInfo, init: RequestInit): Promise<ApiResult<T>> {
+    private async performRequest<T>(input: RequestInfo, init: RequestInit, noResponseType: boolean = false): Promise<ApiResult<T>> {
         let response = await fetch(input, init);
         if (response.ok) {
-            let entity: T = <T>(await response.json());
-            return new ApiSuccess(entity);
-        } else {
-            let message = (await this.parseError(response)).Message;
-            return new ApiError(response.status, some(message));
+            try {
+                let entity: T = <T>(await response.json());
+                return new ApiSuccess(entity);
+            } catch (e) {
+                return new ApiSuccess({} as T);
+            }
         }
+        let message = (await this.parseError(response)).Message;
+        return new ApiError(response.status, some(message));        
     }
 
     private async get<T>(input: RequestInfo): Promise<ApiResult<T>> {
@@ -66,13 +76,10 @@ export class MyREApiClient {
 
 
         
-    public logIn = async (email: string, password: string): Promise<ApiResult<undefined>> => this.post<undefined>(this.getEndpointUrl('logIn'), { Email: email, Password: password });    
-
-    public logOut = async (): Promise<ApiResult<undefined>> => this.post<undefined>(this.getEndpointUrl("logOut"));
-
-    public register = async (email: string, password: string): Promise<ApiResult<undefined>> => this.post<undefined>(this.getEndpointUrl('register'), { Email: email, Password: password });
-
+    public logIn = async (email: string, password: string): Promise<ApiResult<any>> => this.post<any>(this.getEndpointUrl('logIn'), { Email: email, Password: password });
+    public logOut = async (): Promise<ApiResult<any>> => this.post<any>(this.getEndpointUrl("logOut"));
+    public register = async (email: string, password: string): Promise<ApiResult<any>> => this.post<any>(this.getEndpointUrl('register'), { Email: email, Password: password });
     public getCurrentUser = async (): Promise<ApiResult<User>> => this.get<User>(this.getEndpointUrl('getCurrentUser'));
-
+    public listUserInstances = async (userId: string): Promise<ApiResult<Instance[]>> => this.get<Instance[]>(this.getEndpointUrl('listUserInstances', userId))
     public listProjects = async (): Promise<ApiResult<ProjectListing[]>> => this.get<ProjectListing[]>(this.getEndpointUrl('listProjects'));
 }

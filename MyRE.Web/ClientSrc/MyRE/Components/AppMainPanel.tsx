@@ -7,9 +7,12 @@ import { Dashboard } from 'MyRE/Components/Dashboard';
 import { Option } from 'ts-option';
 import { retrieveCurrentUser } from 'MyRE/Actions/Auth';
 import { LoginPage } from 'MyRE/Components/LoginPage';
+import { Instance } from 'MyRE/Api/Models';
+import { List } from 'immutable';
 
 interface IOwnProps { }
 interface IConnectedState {
+    hasInstances: boolean;
     isLoggedIn: Option<boolean>;
 }
 interface IConnectedDispatch {
@@ -17,13 +20,14 @@ interface IConnectedDispatch {
 }
 
 const mapStateToProps = (state: Store.All, ownProps: IOwnProps): IConnectedState => ({
+    hasInstances: state.instanceState.instances.isDefined && state.instanceState.instances.get.count() > 0,
     isLoggedIn: state.auth.isLoggedIn,
 });
 
 const mapDispatchToProps = (dispatch: Dispatch<Store.All>): IConnectedDispatch => ({
     initiateCheckForLoggedInUser: () => {
         dispatch(retrieveCurrentUser());
-    }
+    },
 });
 
 enum AuthenticationStatus {
@@ -53,9 +57,10 @@ class AppMainPanelComponent extends React.Component<IOwnProps & IConnectedState 
         return (
             <Switch>
                 <Route path="/login" component={LoginPage} />
-                {authStatus === AuthenticationStatus.NotAuthenticated && <Redirect to="/login" />}
+                {authStatus === AuthenticationStatus.NotAuthenticated && <Redirect to="/login" />}                
 
                 <Route exact path="/" component={Dashboard} />
+                {!this.props.hasInstances && <Redirect to="/" />}
             </Switch>
         );
     }

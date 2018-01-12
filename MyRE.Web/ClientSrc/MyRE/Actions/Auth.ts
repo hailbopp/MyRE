@@ -1,5 +1,5 @@
 ﻿import { User } from "MyRE/Api/Models";
-import { Option } from "ts-option";
+import { Option, some } from "ts-option";
 
 export interface Credentials {
     email: string;
@@ -45,11 +45,17 @@ export type SuccessfulLoginApiAction = {
 
 export type FailedLoginApiAction = {
     type: 'API_FAILED_LOGIN';
+    message: string;
 }
 
 export const attemptLogin = (credentials: Credentials): AttemptLoginApiAction => ({
     type: 'API_ATTEMPT_LOGIN',
     credentials: credentials,
+});
+
+export const sendLoginError = (message: string): FailedLoginApiAction => ({
+    type: 'API_FAILED_LOGIN',
+    message: message
 });
 
 // Log out
