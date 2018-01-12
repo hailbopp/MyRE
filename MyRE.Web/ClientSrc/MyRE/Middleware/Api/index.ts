@@ -1,7 +1,7 @@
 ﻿import * as Redux from "redux";
 import { AppAction } from "MyRE/Actions";
 import { ApiClient } from "MyRE/Middleware/Api/Client";
-import { ApiError } from "MyRE/Api/ApiClient";
+import { ApiError } from "MyRE/Api/Models/Results";
 import { Store } from "MyRE/Models/Store";
 import { Middleware, MiddlewareAPI, Dispatch } from "redux";
 import { retrieveCurrentUser, clearAuthMessages } from "MyRE/Actions/Auth";

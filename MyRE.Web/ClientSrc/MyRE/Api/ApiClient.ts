@@ -1,34 +1,7 @@
-﻿import { User, ErrorResponse } from "MyRE/Api/Models";
+﻿import { User, ErrorResponse, ProjectListing } from "MyRE/Api/Models";
 import { JsonConvert } from "json2typescript";
 import { Option, some, none } from "ts-option";
-
-
-
-export class ApiSuccess<T> {
-    result: 'success';
-    data: T;
-
-    constructor(data: T) {
-        this.result = 'success';
-        this.data = data;
-    }
-}
-
-export class ApiError {
-    result: 'error';
-    message: Option<string>;
-    status: number;
-
-    constructor(status: number, message: Option<string>) {
-        this.result = 'error';
-        this.message = message;
-        this.status = status;
-    }
-}
-
-export type ApiResult<T> =
-    | ApiSuccess<T>
-    | ApiError
+import { ApiResult, ApiSuccess, ApiError } from "MyRE/Api/Models/Results";
 
 export class MyREApiClient {
     private baseUri: string;
@@ -43,21 +16,44 @@ export class MyREApiClient {
         register: '/api/Auth/Register',
 
         getCurrentUser: '/api/Users/Me',
+
+        listProjects: '/api/Projects',
     }
 
     private getEndpointUrl<S extends keyof typeof MyREApiClient.paths>(pathName: S) {
         return this.baseUri + MyREApiClient.paths[pathName];
     }
 
-    private get(input: RequestInfo): Promise<Response> {
+    private async parseError(r: Response): Promise<ErrorResponse> {
+        try {
+            return <ErrorResponse>(await r.json());
+        } catch (e) {
+            return Promise.resolve({
+                Message: r.statusText
+            });
+        }
+    }
+
+    private async performRequest<T>(input: RequestInfo, init: RequestInit): Promise<ApiResult<T>> {
+        let response = await fetch(input, init);
+        if (response.ok) {
+            let entity: T = <T>(await response.json());
+            return new ApiSuccess(entity);
+        } else {
+            let message = (await this.parseError(response)).Message;
+            return new ApiError(response.status, some(message));
+        }
+    }
+
+    private async get<T>(input: RequestInfo): Promise<ApiResult<T>> {
         let init: RequestInit = {
             credentials: 'include',
         };
 
-        return fetch(input, init);
+        return this.performRequest<T>(input, init);
     }
     
-    private post(input: RequestInfo, body?: any): Promise<Response> {
+    private async post<T>(input: RequestInfo, body?: any): Promise<ApiResult<T>> {
         let init: RequestInit = {};
         init.body = JSON.stringify(body);
         init.method = 'POST';
@@ -65,63 +61,18 @@ export class MyREApiClient {
         init.headers['Content-Type'] = 'application/json';
         init.credentials = 'include';
 
-        return fetch(input, init);
+        return this.performRequest<T>(input, init);
     }
 
-    private async parseError(r: Response): Promise<ErrorResponse> {
-        try {
-            return <ErrorResponse>(await r.json());
-        } catch(e) {
-            return Promise.resolve({
-                Message: r.statusText
-            });
-        }        
-    }
+
         
-    public logIn = (email: string, password: string): Promise<ApiResult<undefined>> => {
-        return this.post(
-            this.getEndpointUrl('logIn'), {
-                Email: email,
-                Password: password
-            })
-            .then(response => {
-                if (response.status === 200) {
-                    return new ApiSuccess(undefined);
-                } else {
-                    return new ApiError(response.status, some(response.statusText));
-                }
-            });
-    }
+    public logIn = async (email: string, password: string): Promise<ApiResult<undefined>> => this.post<undefined>(this.getEndpointUrl('logIn'), { Email: email, Password: password });    
 
-    public logOut = (): Promise<ApiResult<undefined>> => 
-        this.post(this.getEndpointUrl("logOut"))
-            .catch(response => {
-                return new ApiError(response.status, none);
-            })
-            .then(response => {
-                return new ApiSuccess(undefined);
-            })
+    public logOut = async (): Promise<ApiResult<undefined>> => this.post<undefined>(this.getEndpointUrl("logOut"));
 
-    public register = (email: string, password: string): Promise<ApiResult<undefined>> =>
-        this.post(this.getEndpointUrl('register'), { Email: email, Password: password })
-            .then(async response => {
-                if (response.ok) {
-                    return new ApiSuccess(undefined);
-                }
-                let message = (await this.parseError(response)).Message;
-                return new ApiError(response.status, some(message));
-                
-            });
+    public register = async (email: string, password: string): Promise<ApiResult<undefined>> => this.post<undefined>(this.getEndpointUrl('register'), { Email: email, Password: password });
 
-    public getCurrentUser = (): Promise<ApiResult<User>> =>
-        this.get(this.getEndpointUrl('getCurrentUser'))
-            .then(async response => {
-                if (response.ok) {
-                    let user: User = <User>(await response.json());
-                    return new ApiSuccess(user);
-                } else {
-                    let message = (await this.parseError(response)).Message;
-                    return new ApiError(response.status, some(message));
-                }
-            });
+    public getCurrentUser = async (): Promise<ApiResult<User>> => this.get<User>(this.getEndpointUrl('getCurrentUser'));
+
+    public listProjects = async (): Promise<ApiResult<ProjectListing[]>> => this.get<ProjectListing[]>(this.getEndpointUrl('listProjects'));
 }

@@ -42,6 +42,8 @@ namespace MyRE.Web
                 .AddDefaultTokenProviders();
 
             // IoC Binding
+            services.AddTransient<IAccountRepository, AccountRepository>();
+            services.AddTransient<IAppInstanceRepository, AppInstanceRepository>();
             services.AddTransient<IAuthService, AuthService>();
             services.AddTransient<IUserRepository, UserRepository>();
             services.AddTransient<IUserService, UserService>();
@@ -52,7 +54,7 @@ namespace MyRE.Web
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, MyREContext db)
         {
-            if (env.IsDevelopment())
+            if (env.IsDevelopment() || true)
             {
                 app.UseDeveloperExceptionPage();
             }

@@ -21,6 +21,7 @@
 
   <ItemGroup>
     <None Remove="ClientSrc\index.ts" />
+    <None Remove="ClientSrc\MyRE\Api\Models\Results.ts" />
   </ItemGroup>
 
   <ItemGroup>
@@ -47,5 +48,6 @@
 
   <ItemGroup>
     <TypeScriptCompile Include="ClientSrc\index.ts" />
+    <TypeScriptCompile Include="ClientSrc\MyRE\Api\Models\Results.ts" />
   </ItemGroup>
 </Project>
