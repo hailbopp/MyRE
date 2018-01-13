@@ -217,6 +217,14 @@ def mapCommandInfo(cmd) {
     ]
 }
 
+def mapCapabilityInfo(cap) {
+    return [
+        name: cap.getName(),
+        attributes: cap.getAttributes().collect{mapAttributeInfo(it)},
+        commands: cap.getCommands().collect{mapCommandInfo(it)}
+    ]
+}
+
 def getDeviceInfo(device) {
     return [
     	deviceId: device.getId(),
@@ -225,7 +233,8 @@ def getDeviceInfo(device) {
         modelName: device.getModelName(),
         manufacturer: device.getManufacturerName(),
         attributes: device.getSupportedAttributes().collect{mapAttributeInfo(it)},
-        commands: device.getSupportedCommands().collect{mapCommandInfo(it)}
+        commands: device.getSupportedCommands().collect{mapCommandInfo(it)},
+        capabilities: device.getCapabilities().collect{mapCapabilityInfo(it)}
     ]
     
 }
