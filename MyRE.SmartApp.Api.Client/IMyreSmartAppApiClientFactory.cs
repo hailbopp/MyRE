@@ -1,7 +1,7 @@
 ﻿namespace MyRE.SmartApp.Api.Client
 {
-    public interface IMyreSmartAppApiClientFactory<T> where T: IMyreSmartAppApiClient
+    public interface IMyreSmartAppApiClientFactory
     {
-        T Create(string baseUri, string instanceId, string accessToken);
+        IMyreSmartAppApiClient Create(string baseUri, string instanceId, string accessToken);
     }
 }

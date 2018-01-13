@@ -12,6 +12,7 @@ using MyRE.Core.Models.Data;
 using MyRE.Core.Repositories;
 using MyRE.Core.Services;
 using MyRE.Data.Repositories;
+using MyRE.SmartApp.Api.Client;
 using Newtonsoft.Json.Serialization;
 using Swashbuckle.AspNetCore.Swagger;
 
@@ -42,6 +43,7 @@ namespace MyRE.Web
                 .AddDefaultTokenProviders();
 
             // IoC Binding
+            services.AddTransient<IMyreSmartAppApiClientFactory, MyreSmartAppApiClientFactory>();
             services.AddTransient<IAccountRepository, AccountRepository>();
             services.AddTransient<IAppInstanceRepository, AppInstanceRepository>();
             services.AddTransient<IAuthService, AuthService>();

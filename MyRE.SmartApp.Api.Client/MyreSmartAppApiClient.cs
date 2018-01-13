@@ -12,7 +12,7 @@ namespace MyRE.SmartApp.Api.Client
 {
     public class MyreSmartAppApiClient : IMyreSmartAppApiClient
     {
-        public static class Routes
+        private static class Routes
         {
             public static string InstanceStatus = "status";
             public static string Devices = "devices";
@@ -20,7 +20,7 @@ namespace MyRE.SmartApp.Api.Client
 
         private const string BASE_ENDPOINT_PATH = "api/smartapps/installations/";
 
-        public readonly HttpClient Client;
+        private readonly HttpClient Client;
 
         public MyreSmartAppApiClient(string baseUrl, string instanceId, string accessToken)
         {
