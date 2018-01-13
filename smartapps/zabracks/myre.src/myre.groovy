@@ -51,7 +51,7 @@ private isInstalled() {
 // Preference pages
 private sectionDomainEntry() {
     section() {
-        input "instanceName", "text", title: "Enter a name for this instance so that you can identify it later.", defaultValue: "MyRE", required: true
+        input "instanceName", "text", title: "Enter a name for this instance so that you can identify it later.", defaultValue: app.name, required: true
     }
     section() {
         input "apiDomain", "text", title: "Enter the domain of the ${APP_NAME} server that you wish to use.", defaultValue: "http://freecoreweb.azurewebsites.net", required: true
@@ -116,7 +116,7 @@ def pageInit() {
 }
 
 private pageSettings() {
-    dynamicPage(name: 'pageSettings', title: "", install: false, uninstall: false) {
+    dynamicPage(name: 'pageSettings', title: "", install: false, uninstall: false, nextPage: (isInstalled() ? 'pageInit' : 'pageFinishInstall')) {
         sectionDomainEntry()
         sectionSelectDevices()
     }
@@ -143,7 +143,6 @@ private pageFinishInstall() {
 def primaryHandler(event) {
     if (!event || (!event.name.endsWith(APP_NAME))) return;
     def data = event.jsonData ?: null
-
 }
 
 /// Subscription management
@@ -203,18 +202,75 @@ private initialize() {
     }
 }
 
+def mapAttributeInfo(attribute) {
+	return [
+    	name: attribute.getName(),
+        type: attribute.getDataType(),
+        values: attribute.getValues()
+    ]
+}
+
+def mapCommandInfo(cmd) {
+    return [
+        name: cmd.getName(),
+        arguments: cmd.getArguments()
+    ]
+}
+
+def getDeviceInfo(device) {
+    return [
+    	deviceId: device.getId(),
+    	label: device.getLabel(),
+        displayName: device.getDisplayName(),
+        modelName: device.getModelName(),
+        manufacturer: device.getManufacturerName(),
+        attributes: device.getSupportedAttributes().collect{mapAttributeInfo(it)},
+        commands: device.getSupportedCommands().collect{mapCommandInfo(it)}
+    ]
+    
+}
+
 // Endpoints
 mappings {
-    path("/auth") {
+    path("/status") {
         action: [
-            POST: 'checkAuth'
+            GET: 'getInstanceStatus'
         ]
+    }
+    path("/devices") {
+        action: [
+            GET: 'getDevices'
+        ]
+    }
+}
+
+def renderJson(data) {
+    render contentType: "application/json", data: groovy.json.JsonOutput.toJson(data)
+}
+
+def getInstanceStatus() {
+    def response = [
+        instanceId: app.id,
+        accountId: app.getAccountId(),
+        instanceName: settings.instanceName,
+    ]
+
+    response.timestamp = now()
+    renderJson response
+}
+
+def getDevices() {
+	try {
+    	return settings.findAll{ it.key.startsWith("dev:") }.collect{ it.value }.flatten().collect{getDeviceInfo it}
+    } catch(e) {
+    	return render(status: 500, data: e)
     }
 }
 
 
 /// Utilities
-private info(message, shift = null, err = null) { debug message, shift, err, 'info' }
+
+private info(message, shift = null, err = null) { log.info message, err, 'info' }
 private trace(message, shift = null, err = null) { debug message, shift, err, 'trace' }
 private warn(message, shift = null, err = null) { debug message, shift, err, 'warn' }
 private error(message, shift = null, err = null) { debug message, shift, err, 'error' }
