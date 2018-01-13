@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Domain = MyRE.Core.Models.Domain;
+﻿using Domain = MyRE.Core.Models.Domain;
 using Data = MyRE.Core.Models.Data;
 
 namespace MyRE.Core.Extensions

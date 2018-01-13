@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using MyRE.Core.Extensions;
-using MyRE.Core.Models;
 using MyRE.Core.Models.Domain;
 using MyRE.Core.Repositories;
 

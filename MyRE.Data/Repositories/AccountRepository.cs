@@ -1,6 +1,5 @@
 ﻿using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using MyRE.Core.Models;
 using MyRE.Core.Models.Data;
 using MyRE.Core.Repositories;
 

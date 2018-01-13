@@ -1,7 +1,4 @@
-﻿using System;
-using System.Text;
-
-namespace MyRE.SmartApp.Api.Client.Models
+﻿namespace MyRE.SmartApp.Api.Client.Models
 {
     public class InstanceStatus
     {

@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using MyRE.Core.Models;
 using MyRE.Core.Models.Data;
 
 namespace MyRE.Data

@@ -1,6 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using MyRE.Core.Models;
-using MyRE.Core.Services;
 
 namespace MyRE.Web.Controllers
 {

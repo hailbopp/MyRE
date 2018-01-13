@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace MyRE.Core.Models.Domain
+﻿namespace MyRE.Core.Models.Domain
 {
     public class Instance
     {

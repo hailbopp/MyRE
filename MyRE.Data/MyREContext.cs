@@ -1,4 +1,3 @@
-using MyRE.Core.Models;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using MyRE.Core.Models.Data;

@@ -1,9 +1,6 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using MyRE.Core.Models;
 using MyRE.Core.Models.Domain;
-using MyRE.Core.Models.Web;
 using MyRE.Core.Services;
 
 namespace MyRE.Web.Controllers
