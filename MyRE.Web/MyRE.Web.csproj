@@ -43,5 +43,6 @@
   <ItemGroup>
     <ProjectReference Include="..\MyRE.Core\MyRE.Core.csproj" />
     <ProjectReference Include="..\MyRE.Data\MyRE.Data.csproj" />
+    <ProjectReference Include="..\MyRE.SmartApp.Api.Client\MyRE.SmartApp.Api.Client.csproj" />
   </ItemGroup>
 </Project>

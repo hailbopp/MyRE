@@ -14,8 +14,9 @@ namespace MyRE.SmartApp.Api.Client
     {
         private static class Routes
         {
-            public static string InstanceStatus = "status";
-            public static string Devices = "devices";
+            public const string InstanceStatus = "status";
+            public const string Devices = "devices";
+            public static readonly Func<string, string> DeviceId = (deviceId) => $"devices/{deviceId}";
         }
 
         private const string BASE_ENDPOINT_PATH = "api/smartapps/installations/";
@@ -33,42 +34,21 @@ namespace MyRE.SmartApp.Api.Client
         {
             Client.Dispose();
         }
-        
-        public async Task<ApiResponse<InstanceStatus>> GetInstanceStatusAsync()
-        {
-            var response = await Client.GetAsync(Routes.InstanceStatus);
 
+        private async Task<ApiResponse<T>> GetAsync<T>(string path)
+        {
+            var response = await Client.GetAsync(path);
             if (response.IsSuccessStatusCode)
             {
-                return new ApiResponse<InstanceStatus>()
+                return new ApiResponse<T>()
                 {
-                    Data = JsonConvert.DeserializeObject<InstanceStatus>(await response.Content.ReadAsStringAsync()),
+                    //Raw = await response.Content.ReadAsStringAsync(),
+                    Data = JsonConvert.DeserializeObject<T>(await response.Content.ReadAsStringAsync())
                 };
             }
-
-            return new ApiResponse<InstanceStatus>()
+            return new ApiResponse<T>()
             {
-                Error = Option.Some(new ApiError()
-                {
-                    Message = await response.Content.ReadAsStringAsync(),
-                    StatusCode = response.StatusCode,
-                }),
-            };
-        }
-
-        public async Task<ApiResponse<IEnumerable<DeviceInfo>>> ListDevicesAsync()
-        {
-            var response = await Client.GetAsync(Routes.Devices);
-
-            if (response.IsSuccessStatusCode)
-            {
-                return new ApiResponse<IEnumerable<DeviceInfo>>()
-                {
-                    Data = JsonConvert.DeserializeObject<IEnumerable<DeviceInfo>>(await response.Content.ReadAsStringAsync())
-                };
-            }
-            return new ApiResponse<IEnumerable<DeviceInfo>>()
-            {
+                Raw = await response.Content.ReadAsStringAsync(),
                 Error = Option.Some(new ApiError()
                 {
                     Message = await response.Content.ReadAsStringAsync(),
@@ -76,5 +56,10 @@ namespace MyRE.SmartApp.Api.Client
                 })
             };
         }
+
+        public async Task<ApiResponse<InstanceStatus>> GetInstanceStatusAsync() => await GetAsync<InstanceStatus>(Routes.InstanceStatus);
+
+        public async Task<ApiResponse<IEnumerable<DeviceInfo>>> ListDevicesAsync() => await GetAsync<IEnumerable<DeviceInfo>>(Routes.Devices);
+        public async Task<ApiResponse<DeviceState>> GetDeviceStatusAsync(string deviceId) => await GetAsync<DeviceState>(Routes.DeviceId(deviceId));
     }
 }

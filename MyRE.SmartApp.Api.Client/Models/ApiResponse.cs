@@ -11,6 +11,7 @@ namespace MyRE.SmartApp.Api.Client.Models
 
     public class ApiResponse<T>
     {
+        public string Raw { get; set; }
         public T Data { get; set; }
 
         public Option<ApiError> Error { get; set; } = Option.None<ApiError>();

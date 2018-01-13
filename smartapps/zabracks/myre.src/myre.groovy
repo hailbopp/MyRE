@@ -202,11 +202,20 @@ private initialize() {
     }
 }
 
+/// API Logic
 def mapAttributeInfo(attribute) {
 	return [
     	name: attribute.getName(),
         type: attribute.getDataType(),
         values: attribute.getValues()
+    ]
+}
+
+def mapState(state) {
+	return [
+    	name: state.getName(),
+        timestamp: state.getDate(),
+        value: state.getValue()
     ]
 }
 
@@ -235,8 +244,28 @@ def getDeviceInfo(device) {
         attributes: device.getSupportedAttributes().collect{mapAttributeInfo(it)},
         commands: device.getSupportedCommands().collect{mapCommandInfo(it)},
         capabilities: device.getCapabilities().collect{mapCapabilityInfo(it)}
+    ]    
+}
+
+def getDeviceState(device) {
+	return [
+    	deviceId: device.getId(),
+        label: device.getLabel(),
+        displayName: device.getDisplayName(),
+        attributeStates: device.getSupportedAttributes().collect{ device.currentState(it.name) }.findAll{ it != null }.collect{ mapState(it) }
     ]
-    
+}
+
+def getManagedDevices() {
+	return settings.findAll{ it.key.startsWith("dev:") }.collect{ it.value }.flatten()
+}
+
+def getDeviceStatusById(deviceId) {
+    def device = getManagedDevices().find{ it.id == deviceId }
+    if(device) {
+        return getDeviceState(device)
+    }
+    return null    
 }
 
 // Endpoints
@@ -248,15 +277,21 @@ mappings {
     }
     path("/devices") {
         action: [
-            GET: 'getDevices'
+            GET: 'listDevices'
+        ]
+    }
+    path("/devices/:deviceId") {
+        action: [
+            GET: 'getDeviceById'
         ]
     }
 }
 
 def renderJson(data) {
-    render contentType: "application/json", data: groovy.json.JsonOutput.toJson(data)
+    return render(contentType: "application/json", data: groovy.json.JsonOutput.toJson(data))
 }
 
+// GET /status
 def getInstanceStatus() {
     def response = [
         instanceId: app.id,
@@ -268,11 +303,23 @@ def getInstanceStatus() {
     renderJson response
 }
 
-def getDevices() {
+// GET /devices
+def listDevices() {
 	try {
-    	return settings.findAll{ it.key.startsWith("dev:") }.collect{ it.value }.flatten().collect{getDeviceInfo it}
+    	return getManagedDevices().collect{getDeviceInfo it}        
     } catch(e) {
     	return render(status: 500, data: e)
+    }
+}
+
+// GET /devices/:deviceId
+def getDeviceById() {
+    def deviceId = params?.deviceId
+    def result = getDeviceStatusById(deviceId)
+    if(result) {
+    	return result
+    } else {
+    	return render(status: 404, data: "Device with that ID does not exist.")
     }
 }
 
