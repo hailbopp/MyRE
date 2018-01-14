@@ -8,16 +8,18 @@ namespace MyRE.Core.Extensions
         // Project
         public static Domain.Project ToDomainModel(this Data.Project self) => new Domain.Project()
         {
-            ProjectId = self.ProjectId,
+            Id = self.ProjectId,
             Name = self.Name,
             Description = self.Description,
+            InstanceId = self.ParentInstanceId,
         };
 
         public static Data.Project ToDataModel(this Domain.Project self) => new Data.Project()
         {
-            ProjectId = self.ProjectId,
+            ProjectId = self.Id,
             Name = self.Name,
             Description = self.Description,
+            ParentInstanceId = self.InstanceId,
         };
 
         // Instance

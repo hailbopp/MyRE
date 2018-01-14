@@ -13,9 +13,10 @@ using System;
 namespace MyRE.Data.Migrations
 {
     [DbContext(typeof(MyREContext))]
-    partial class MyREContextModelSnapshot : ModelSnapshot
+    [Migration("20180114002621_add-project-instance-id")]
+    partial class addprojectinstanceid
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

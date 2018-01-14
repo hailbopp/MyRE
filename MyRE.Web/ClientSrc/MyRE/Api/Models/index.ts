@@ -15,7 +15,8 @@ export interface Instance {
 }
 
 export interface ProjectListing {
-    ProjectId: number;
+    Id: number;
     Name: string;
     Description: string;
+    InstanceId: number;
 }

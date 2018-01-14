@@ -7,5 +7,7 @@ namespace MyRE.Core.Services
     public interface IProjectService
     {
         Task<IEnumerable<Project>> GetUserProjectsAsync(string userId);
+
+        Task<Project> CreateAsync(string name, string description, long instanceId);
     }
 }

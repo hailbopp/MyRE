@@ -23,5 +23,19 @@ namespace MyRE.Data.Repositories
 
             return results.Select(r => r.ToDomainModel()).ToList();
         }
+
+        public async Task<Project> CreateAsync(string name, string description, long instanceId)
+        {
+            var newEntity = new Core.Models.Data.Project()
+            {
+                Name = name,
+                Description = description,
+                ParentInstanceId = instanceId
+            };
+            var createResult = await _dbContext.Projects.AddAsync(newEntity);
+            var saveResult = await _dbContext.SaveChangesAsync();
+
+            return createResult.Entity.ToDomainModel();
+        }
     }
 }

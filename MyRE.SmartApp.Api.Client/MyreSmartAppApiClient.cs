@@ -23,8 +23,7 @@ namespace MyRE.SmartApp.Api.Client
 
         public MyreSmartAppApiClient(string baseUrl, string instanceId, string accessToken)
         {
-            Client = new HttpClient();
-            Client.BaseAddress = new Uri(new Uri(baseUrl), $"{BASE_ENDPOINT_PATH}{instanceId}/");
+            Client = new HttpClient {BaseAddress = new Uri(new Uri(baseUrl), $"{BASE_ENDPOINT_PATH}{instanceId}/")};
             Client.DefaultRequestHeaders.Add("Authorization", "Bearer " + accessToken);
         }
 
@@ -56,7 +55,6 @@ namespace MyRE.SmartApp.Api.Client
         }
 
         public async Task<ApiResponse<InstanceStatus>> GetInstanceStatusAsync() => await GetAsync<InstanceStatus>(Routes.InstanceStatus);
-
         public async Task<ApiResponse<IEnumerable<DeviceInfo>>> ListDevicesAsync() => await GetAsync<IEnumerable<DeviceInfo>>(Routes.Devices);
         public async Task<ApiResponse<DeviceState>> GetDeviceStatusAsync(string deviceId) => await GetAsync<DeviceState>(Routes.DeviceId(deviceId));
     }

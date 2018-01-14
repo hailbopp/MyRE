@@ -15,5 +15,8 @@ namespace MyRE.Core.Services
         }
 
         public Task<IEnumerable<Project>> GetUserProjectsAsync(string userId) => _projectRepository.GetUserProjectsAsync(userId);
+
+        public Task<Project> CreateAsync(string name, string description, long instanceId) =>
+            _projectRepository.CreateAsync(name, description, instanceId);
     }
 }

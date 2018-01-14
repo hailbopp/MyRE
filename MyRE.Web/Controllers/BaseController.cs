@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System;
+using Microsoft.ApplicationInsights.AspNetCore.Extensions;
+using Microsoft.AspNetCore.Mvc;
 
 namespace MyRE.Web.Controllers
 {
@@ -16,6 +18,13 @@ namespace MyRE.Web.Controllers
 
         protected StatusCodeResult ServerError(object value) {
             return StatusResult(500);
+        }
+
+        protected Uri GetUriOfResource(string path)
+        {
+            var requestUri = Request.GetUri();
+
+            return new Uri(requestUri, path);
         }
     }
 }
