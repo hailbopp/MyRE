@@ -1,4 +1,4 @@
-﻿import { User, ErrorResponse, ProjectListing, Instance } from "MyRE/Api/Models";
+﻿import { User, ErrorResponse, ProjectListing, Instance, CreateProjectRequest } from "MyRE/Api/Models";
 import { JsonConvert } from "json2typescript";
 import { Option, some, none } from "ts-option";
 import { ApiResult, ApiSuccess, ApiError } from "MyRE/Api/Models/Results";
@@ -19,6 +19,7 @@ export class MyREApiClient {
         listUserInstances: (userId: string) => `/api/Users/${userId}/Instances`,
 
         listProjects: '/api/Projects',
+        createProject: '/api/Projects',
     }
 
     private getEndpointUrl<S extends keyof typeof MyREApiClient.paths>(pathName: S, ...args: string[]) {
@@ -73,13 +74,12 @@ export class MyREApiClient {
 
         return this.performRequest<T>(input, init);
     }
-
-
         
     public logIn = async (email: string, password: string): Promise<ApiResult<any>> => this.post<any>(this.getEndpointUrl('logIn'), { Email: email, Password: password });
     public logOut = async (): Promise<ApiResult<any>> => this.post<any>(this.getEndpointUrl("logOut"));
     public register = async (email: string, password: string): Promise<ApiResult<any>> => this.post<any>(this.getEndpointUrl('register'), { Email: email, Password: password });
     public getCurrentUser = async (): Promise<ApiResult<User>> => this.get<User>(this.getEndpointUrl('getCurrentUser'));
-    public listUserInstances = async (userId: string): Promise<ApiResult<Instance[]>> => this.get<Instance[]>(this.getEndpointUrl('listUserInstances', userId))
+    public listUserInstances = async (userId: string): Promise<ApiResult<Instance[]>> => this.get<Instance[]>(this.getEndpointUrl('listUserInstances', userId));
     public listProjects = async (): Promise<ApiResult<ProjectListing[]>> => this.get<ProjectListing[]>(this.getEndpointUrl('listProjects'));
+    public createProject = async (newEntity: CreateProjectRequest): Promise<ApiResult<ProjectListing>> => this.post<ProjectListing>(this.getEndpointUrl('createProject'), newEntity);
 }

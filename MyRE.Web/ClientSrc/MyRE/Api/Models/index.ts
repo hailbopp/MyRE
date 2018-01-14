@@ -20,3 +20,9 @@ export interface ProjectListing {
     Description: string;
     InstanceId: number;
 }
+
+export interface CreateProjectRequest {
+    Name: string;
+    Description: string;
+    InstanceId: number;
+}
