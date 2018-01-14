@@ -9,25 +9,35 @@ import { retrieveCurrentUser } from 'MyRE/Actions/Auth';
 import { LoginPage } from 'MyRE/Components/LoginPage';
 import { Instance } from 'MyRE/Api/Models';
 import { List } from 'immutable';
+import { ProjectsPage } from 'MyRE/Components/ProjectsPage';
+import { listUserInstances } from 'MyRE/Actions/Instances';
 
 interface IOwnProps { }
 interface IConnectedState {
-    hasInstances: boolean;
+    instances: Option<List<Instance>>;
+    instancesLoading: boolean;
     isLoggedIn: Option<boolean>;
+    userId: Option<string>;
 }
 interface IConnectedDispatch {
     initiateCheckForLoggedInUser: () => void;
+    retrieveInstanceList: (userId: string) => void;
 }
 
 const mapStateToProps = (state: Store.All, ownProps: IOwnProps): IConnectedState => ({
-    hasInstances: state.instanceState.instances.isDefined && state.instanceState.instances.get.count() > 0,
+    instances: state.instanceState.instances,
+    instancesLoading: state.instanceState.retrievingInstances,
     isLoggedIn: state.auth.isLoggedIn,
+    userId: state.auth.currentUser.map(u => u.UserId),
 });
 
 const mapDispatchToProps = (dispatch: Dispatch<Store.All>): IConnectedDispatch => ({
     initiateCheckForLoggedInUser: () => {
         dispatch(retrieveCurrentUser());
     },
+    retrieveInstanceList: (userId) => {
+        dispatch(listUserInstances(userId));
+    }
 });
 
 enum AuthenticationStatus {
@@ -47,20 +57,32 @@ class AppMainPanelComponent extends React.Component<IOwnProps & IConnectedState 
         }
     }
 
-    public render() {
+    public componentWillMount() {
         const authStatus = this.getAuthStatus(this.props.isLoggedIn);
-
         if (authStatus === AuthenticationStatus.ShouldCheckForAuth) {
             this.props.initiateCheckForLoggedInUser();
         }
+    }
 
+    public componentDidUpdate() {
+        if (this.props.instances.isEmpty && this.props.userId.isDefined && !this.props.instancesLoading) {
+            this.props.retrieveInstanceList(this.props.userId.get);
+        }
+    }
+
+    public render() {
+        const authStatus = this.getAuthStatus(this.props.isLoggedIn);
         return (
             <Switch>
                 <Route path="/login" component={LoginPage} />
-                {authStatus === AuthenticationStatus.NotAuthenticated && <Redirect to="/login" />}                
+                {authStatus === AuthenticationStatus.NotAuthenticated &&
+                    <Redirect to="/login" />}                
 
                 <Route exact path="/" component={Dashboard} />
-                {!this.props.hasInstances && <Redirect to="/" />}
+                {this.props.instances.isDefined && this.props.instances.get.isEmpty() &&
+                    <Redirect to="/" />}
+
+                <Route path="/projects" component={ProjectsPage} />
             </Switch>
         );
     }

@@ -1,6 +1,6 @@
 ﻿import { Option } from 'ts-option';
 import { List } from 'immutable';
-import { User, Instance } from "MyRE/Api/Models";
+import { User, Instance, ProjectListing } from "MyRE/Api/Models";
 import { AppAction } from 'MyRE/Actions';
 
 
@@ -29,11 +29,18 @@ export namespace Store {
     export interface InstanceState {
         // If instances is none, then we haven't yet attempted to grab instances from the API.
         instances: Option<List<Instance>>;
+        retrievingInstances: boolean;
+    }
+
+    export interface Projects {
+        projects: Option<List<ProjectListing>>;
+        retrievingProjects: boolean;
     }
 
     export interface All {
         auth: Auth;
         nav: Nav;
         instanceState: InstanceState;
+        projects: Projects;
     }
 }

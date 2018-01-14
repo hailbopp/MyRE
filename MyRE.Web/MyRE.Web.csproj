@@ -24,6 +24,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="ClientSrc\MyRE\Components\ProjectsPage.tsx" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Folder Include="ClientSrc\typings\" />
     <Folder Include="wwwroot\" />
   </ItemGroup>
@@ -44,5 +48,9 @@
     <ProjectReference Include="..\MyRE.Core\MyRE.Core.csproj" />
     <ProjectReference Include="..\MyRE.Data\MyRE.Data.csproj" />
     <ProjectReference Include="..\MyRE.SmartApp.Api.Client\MyRE.SmartApp.Api.Client.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <TypeScriptCompile Include="ClientSrc\MyRE\Components\ProjectsPage.tsx" />
   </ItemGroup>
 </Project>

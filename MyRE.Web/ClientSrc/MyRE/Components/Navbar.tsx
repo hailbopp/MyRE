@@ -52,7 +52,7 @@ class NavbarComponent extends React.Component<IOwnProps & IConnectedState & ICon
                         this.props.isLoggedIn.isDefined && this.props.isLoggedIn.get &&
                             <Nav navbar className="ml-auto">
                                 <NavItem>
-                                    <Link className="nav-link" to="/">Scripts</Link>
+                                    <Link className="nav-link" to="/projects">Projects</Link>
                                 </NavItem>
                                 <NavItem>
                                     <NavLink href="#" onClick={this.logOut}>Log Out</NavLink>

@@ -5,6 +5,7 @@ import { reduceAuth } from "MyRE/Reducers/Auth";
 import { List } from "immutable";
 import { AppAction } from "MyRE/Actions";
 import { reduceInstanceState } from "MyRE/Reducers/InstanceState";
+import { reduceProjects } from "MyRE/Reducers/Projects";
 
 export const initialState: Store.All = {
     auth: {
@@ -21,6 +22,12 @@ export const initialState: Store.All = {
 
     instanceState: {
         instances: none,
+        retrievingInstances: false,
+    },
+
+    projects: {
+        projects: none,
+        retrievingProjects: false,
     }
 }
 
@@ -28,4 +35,5 @@ export const reduce = (state: Store.All, action: any): Store.All => ({
     auth: reduceAuth(state.auth, action),
     nav: reduceNav(state.nav, action),
     instanceState: reduceInstanceState(state.instanceState, action),
+    projects: reduceProjects(state.projects, action),
 })

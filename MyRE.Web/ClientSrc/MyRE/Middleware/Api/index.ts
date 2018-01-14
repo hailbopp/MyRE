@@ -7,12 +7,11 @@ import { Middleware, MiddlewareAPI, Dispatch } from "redux";
 import { retrieveCurrentUser, clearAuthMessages } from "MyRE/Actions/Auth";
 import { some } from "ts-option";
 import { List } from "immutable";
-import { Instance } from "MyRE/Api/Models";
+import { Instance, ProjectListing } from "MyRE/Api/Models";
 
 function isAction(a: AppAction): a is AppAction {
     return (a as AppAction).type !== undefined;
 }
-
 
 export interface ExtendedMiddleware<StateType> extends Middleware {
     <S extends StateType>(api: MiddlewareAPI<S>): (next: Dispatch<S>) => Dispatch<S>;
@@ -24,7 +23,7 @@ export const ApiServiceMiddleware: ExtendedMiddleware<Store.All> = <S extends St
 
         const dispatch = (aa: AppAction) =>
             Promise.resolve()
-                .then(_ => api.dispatch(aa));        
+                .then(_ => api.dispatch(aa));
 
         // Pass all actions through by default.
         next(action);
@@ -82,7 +81,7 @@ export const ApiServiceMiddleware: ExtendedMiddleware<Store.All> = <S extends St
                         } else {
                             dispatch({ type: 'API_RECEIVED_CURRENT_USER', user: result.data })
                         }
-                    })
+                    });
                 break;
             case "API_REQUEST_USER_INSTANCE_LIST":
                 ApiClient.listUserInstances(action.userId)
@@ -93,9 +92,22 @@ export const ApiServiceMiddleware: ExtendedMiddleware<Store.All> = <S extends St
                             dispatch({ type: 'API_RECEIVED_USER_INSTANCE_LIST', instances: List<Instance>(result.data) });
                         }
                     });
+                break;
+            case 'API_REQUEST_PROJECT_LIST':
+                ApiClient.listProjects()
+                    .then((result) => {
+                        if (result.result === 'error') {
+                            dispatch({ type: 'API_RECEIVED_PROJECTS', projects: List<ProjectListing>([]) });
+                        } else {
+                            dispatch({ type: 'API_RECEIVED_PROJECTS', projects: List<ProjectListing>(result.data) });
+                        }
+                    })
+                break;
             default:
                 return a;
         }
+
+
     }
     return a;
 };

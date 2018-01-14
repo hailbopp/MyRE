@@ -1,6 +1,7 @@
 ﻿import * as Auth from 'MyRE/Actions/Auth';
 import * as Nav from 'MyRE/Actions/Nav';
 import * as Instances from 'MyRE/Actions/Instances';
+import * as Projects from 'MyRE/Actions/Projects';
 
 type UndefinedAction = { type: '' };
 
@@ -26,5 +27,8 @@ export type AppAction =
 
     | Instances.RequestUserInstanceListApiAction
     | Instances.ReceivedUserInstanceListApiAction
+
+    | Projects.RequestProjectListApiAction
+    | Projects.ReceivedProjectListApiAction
 
     | UndefinedAction

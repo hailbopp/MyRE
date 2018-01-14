@@ -75,11 +75,28 @@ export class MyREApiClient {
         return this.performRequest<T>(input, init);
     }
         
-    public logIn = async (email: string, password: string): Promise<ApiResult<any>> => this.post<any>(this.getEndpointUrl('logIn'), { Email: email, Password: password });
-    public logOut = async (): Promise<ApiResult<any>> => this.post<any>(this.getEndpointUrl("logOut"));
-    public register = async (email: string, password: string): Promise<ApiResult<any>> => this.post<any>(this.getEndpointUrl('register'), { Email: email, Password: password });
-    public getCurrentUser = async (): Promise<ApiResult<User>> => this.get<User>(this.getEndpointUrl('getCurrentUser'));
-    public listUserInstances = async (userId: string): Promise<ApiResult<Instance[]>> => this.get<Instance[]>(this.getEndpointUrl('listUserInstances', userId));
-    public listProjects = async (): Promise<ApiResult<ProjectListing[]>> => this.get<ProjectListing[]>(this.getEndpointUrl('listProjects'));
-    public createProject = async (newEntity: CreateProjectRequest): Promise<ApiResult<ProjectListing>> => this.post<ProjectListing>(this.getEndpointUrl('createProject'), newEntity);
+    public logIn = async (email: string, password: string): Promise<ApiResult<any>> =>
+        this.post<any>(this.getEndpointUrl('logIn'), {
+            Email: email, Password: password
+        });
+
+    public logOut = async (): Promise<ApiResult<any>> =>
+        this.post<any>(this.getEndpointUrl("logOut"));
+
+    public register = async (email: string, password: string): Promise<ApiResult<any>> =>
+        this.post<any>(this.getEndpointUrl('register'), {
+            Email: email, Password: password
+        });
+
+    public getCurrentUser = async (): Promise<ApiResult<User>> =>
+        this.get<User>(this.getEndpointUrl('getCurrentUser'));
+
+    public listUserInstances = async (userId: string): Promise<ApiResult<Instance[]>> =>
+        this.get<Instance[]>(this.getEndpointUrl('listUserInstances', userId));
+
+    public listProjects = async (): Promise<ApiResult<ProjectListing[]>> =>
+        this.get<ProjectListing[]>(this.getEndpointUrl('listProjects'));
+
+    public createProject = async (newEntity: CreateProjectRequest): Promise<ApiResult<ProjectListing>> =>
+        this.post<ProjectListing>(this.getEndpointUrl('createProject'), newEntity);
 }
