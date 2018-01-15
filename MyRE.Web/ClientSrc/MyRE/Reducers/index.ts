@@ -14,6 +14,15 @@ export const initialState: Store.All = {
 
         loginMessage: none,
         registrationMessage: none,
+
+        loginForm: {
+            emailValue: '',
+            passwordValue: ''
+        },
+        registrationForm: {
+            emailValue: '',
+            passwordValue: ''
+        }
     },
 
     nav: {
@@ -28,6 +37,15 @@ export const initialState: Store.All = {
     projects: {
         projects: none,
         retrievingProjects: false,
+
+        createProjectModalOpen: false,
+        newProject: {
+            Name: '',
+            Description: '',
+            InstanceId: -1,
+        },
+        newProjectSubmitting: false,
+        createProjectMessage: none,
     }
 }
 

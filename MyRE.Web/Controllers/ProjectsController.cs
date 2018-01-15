@@ -2,6 +2,7 @@
 using System.Net;
 using System.Threading.Tasks;
 using Microsoft.ApplicationInsights.AspNetCore.Extensions;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MyRE.Core.Models.Domain;
 using MyRE.Core.Services;
@@ -10,6 +11,7 @@ namespace MyRE.Web.Controllers
 {
     [Produces("application/json")]
     [Route("api/Projects")]
+    [Authorize]
     public class ProjectsController : BaseController
     {
         private readonly IProjectService _project;

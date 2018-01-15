@@ -2,11 +2,12 @@
 import { Store } from 'MyRE/Models/Store';
 import { Dispatch, connect } from 'react-redux';
 import { RouteComponentProps } from 'react-router';
-import { Container, Table, Row, Col } from 'reactstrap';
+import { Container, Table, Row, Col, Button } from 'reactstrap';
 import { ProjectListing } from 'MyRE/Api/Models';
 import { List } from 'immutable';
 import { Option } from 'ts-option';
-import { requestProjectList } from 'MyRE/Actions/Projects';
+import { requestProjectList, toggleCreateProjectDialog } from 'MyRE/Actions/Projects';
+import { CreateProjectDialog } from 'MyRE/Components/CreateProjectDialog';
 
 interface IOwnProps { }
 interface IConnectedState {
@@ -15,6 +16,7 @@ interface IConnectedState {
 }
 interface IConnectedDispatch {
     getProjects: () => void;
+    toggleCreateModal: () => void;
 }
 
 const mapStateToProps = (state: Store.All, ownProps: IOwnProps): IConnectedState => ({
@@ -25,38 +27,56 @@ const mapStateToProps = (state: Store.All, ownProps: IOwnProps): IConnectedState
 const mapDispatchToProps = (dispatch: Dispatch<Store.All>): IConnectedDispatch => ({
     getProjects: () => {
         dispatch(requestProjectList());
+    },
+    toggleCreateModal: () => {
+        dispatch(toggleCreateProjectDialog());
     }
 });
 
 class ProjectsPageComponent extends React.Component<IOwnProps & IConnectedDispatch & IConnectedState & RouteComponentProps<IOwnProps & IConnectedDispatch & IConnectedState>> {
-    public render() {
+    public componentWillMount() {
         if (!this.props.retrievingProjects && this.props.projects.isEmpty) {
             this.props.getProjects();
         }
+    }
 
+    public render() {
         return (
-            <Container>
-                <Row>
-                    <Col>
-                        <h4>Projects</h4>
-                    </Col>
-                </Row>
-                
-                <Table>
-                    <thead>
-                        <tr>
-                            <th>Name</th>
-                            <th>Description</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {
-                            
-                        }
-                    </tbody>
-                </Table>
-            </Container>
-            );
+            <div>
+                <Container>
+                    <Row>
+                        <Col xs="12" sm="10">
+                            <h4>Projects</h4>
+                        </Col>
+                        <Col xs="12" sm="2">
+                            <Button color="primary" onClick={this.props.toggleCreateModal}>New Project</Button>
+                        </Col>
+                    </Row>
+                    <Row>
+                    </Row>
+
+                    <Table>
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {
+                                this.props.projects.isDefined &&
+                                this.props.projects.get.toArray().map((p, idx) =>
+                                    <tr key={idx}>
+                                        <td>{p.Name}</td>
+                                        <td>{p.Description}</td>
+                                    </tr>)
+                            }
+                        </tbody>
+                    </Table>
+                </Container>
+                <CreateProjectDialog />
+            </div>
+        );
     }
 }
 

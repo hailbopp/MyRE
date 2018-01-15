@@ -1,4 +1,6 @@
-﻿namespace MyRE.Core.Models.Data
+﻿using System;
+
+namespace MyRE.Core.Models.Data
 {
     public class Account
     {

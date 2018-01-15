@@ -1,4 +1,6 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
+using System.Threading.Tasks;
 using MyRE.Data;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -33,12 +35,24 @@ namespace MyRE.Web
 
             services.AddSwaggerGen(c => { c.SwaggerDoc("v1", new Info() {Title = "MyRE", Version = "v1"}); });
 
-            services.AddDbContext<MyREContext>(options =>
-                options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"), b => {}));
+            services
+                .AddEntityFrameworkSqlServer()
+                .AddOptions()
+                .AddDbContext<MyREContext>(options =>
+                    options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"), b => {}));
 
             services.AddIdentity<ApplicationUser, IdentityRole>()
                 .AddEntityFrameworkStores<MyREContext>()
                 .AddDefaultTokenProviders();
+
+            services.ConfigureApplicationCookie(options =>
+            {
+                options.Events.OnRedirectToLogin = context =>
+                {
+                    context.Response.StatusCode = 401;
+                    return Task.CompletedTask;
+                };
+            });
 
             // IoC Binding
             services.AddTransient<IMyreSmartAppApiClientFactory, MyreSmartAppApiClientFactory>();
@@ -49,6 +63,8 @@ namespace MyRE.Web
             services.AddTransient<IUserService, UserService>();
             services.AddTransient<IProjectRepository, ProjectRepository>();
             services.AddTransient<IProjectService, ProjectService>();
+
+            services.AddTransient<IServiceProvider, ServiceProvider>(provider => services.BuildServiceProvider());
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -63,7 +79,6 @@ namespace MyRE.Web
             {
                 db.Database.Migrate();
             }
-
 
             app.UseSwagger();
 
@@ -88,5 +103,6 @@ namespace MyRE.Web
 
             app.UseMvc();
         }
+        
     }
 }

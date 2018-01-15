@@ -24,11 +24,13 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="ClientSrc\MyRE\Actions\Projects.ts" />
     <None Remove="ClientSrc\MyRE\Components\ProjectsPage.tsx" />
+    <None Remove="ClientSrc\MyRE\Reducers\Projects.ts" />
+    <None Remove="ClientSrc\typings\immutable.d.ts" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="ClientSrc\typings\" />
     <Folder Include="wwwroot\" />
   </ItemGroup>
 
@@ -51,6 +53,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <TypeScriptCompile Include="ClientSrc\MyRE\Actions\Projects.ts" />
     <TypeScriptCompile Include="ClientSrc\MyRE\Components\ProjectsPage.tsx" />
+    <TypeScriptCompile Include="ClientSrc\MyRE\Reducers\Projects.ts" />
+    <TypeScriptCompile Include="ClientSrc\typings\immutable.d.ts" />
   </ItemGroup>
 </Project>

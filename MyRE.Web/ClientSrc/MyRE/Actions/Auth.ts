@@ -1,5 +1,6 @@
 ﻿import { User } from "MyRE/Api/Models";
 import { Option, some } from "ts-option";
+import { Store } from "MyRE/Models/Store";
 
 export interface Credentials {
     email: string;
@@ -31,6 +32,27 @@ export type FailedGetCurrentUserApiAction = {
 
 export const retrieveCurrentUser = (): RequestCurrentUserApiAction => ({
     type: 'API_REQUEST_CURRENT_USER',
+});
+
+// Login/Registration Form Values
+export type UpdateLoginFormValues = {
+    type: 'LOGIN_FORM_UPDATE';
+    values: Store.EmailPasswordForm;
+}
+
+export type UpdateRegistrationFormValues = {
+    type: 'REGISTRATION_FORM_UPDATE';
+    values: Store.EmailPasswordForm;
+}
+
+export const updateLoginForm = (values: Store.EmailPasswordForm): UpdateLoginFormValues => ({
+    type: 'LOGIN_FORM_UPDATE',
+    values,
+});
+
+export const updateRegistrationForm = (values: Store.EmailPasswordForm): UpdateRegistrationFormValues => ({
+    type: 'REGISTRATION_FORM_UPDATE',
+    values,
 });
 
 // Log in
@@ -90,3 +112,23 @@ export const attemptRegistration = (credentials: Credentials): AttemptAccountReg
     type: 'API_ATTEMPT_REGISTER',
     credentials,
 });
+
+export type AuthAction =
+    | UpdateLoginFormValues
+    | UpdateRegistrationFormValues
+
+    | AttemptAccountRegistrationApiAction
+    | SuccessfulRegistrationApiAction
+    | FailedRegistrationApiAction
+
+    | AttemptLoginApiAction
+    | SuccessfulLoginApiAction
+    | FailedLoginApiAction
+    | LogOutApiAction
+    | SuccessfulLogoutApiAction
+
+    | RequestCurrentUserApiAction
+    | ReceivedCurrentUserApiAction
+    | FailedGetCurrentUserApiAction
+
+    | ClearAuthScreenStatusMessagesAction;

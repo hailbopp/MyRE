@@ -61,7 +61,7 @@ export class MyREApiClient {
             credentials: 'include',
         };
 
-        return this.performRequest<T>(input, init);
+        return await this.performRequest<T>(input, init);
     }
     
     private async post<T>(input: RequestInfo, body?: any): Promise<ApiResult<T>> {
@@ -72,7 +72,7 @@ export class MyREApiClient {
         init.headers['Content-Type'] = 'application/json';
         init.credentials = 'include';
 
-        return this.performRequest<T>(input, init);
+        return await this.performRequest<T>(input, init);
     }
         
     public logIn = async (email: string, password: string): Promise<ApiResult<any>> =>
@@ -95,7 +95,7 @@ export class MyREApiClient {
         this.get<Instance[]>(this.getEndpointUrl('listUserInstances', userId));
 
     public listProjects = async (): Promise<ApiResult<ProjectListing[]>> =>
-        this.get<ProjectListing[]>(this.getEndpointUrl('listProjects'));
+        await this.get<ProjectListing[]>(this.getEndpointUrl('listProjects'));
 
     public createProject = async (newEntity: CreateProjectRequest): Promise<ApiResult<ProjectListing>> =>
         this.post<ProjectListing>(this.getEndpointUrl('createProject'), newEntity);

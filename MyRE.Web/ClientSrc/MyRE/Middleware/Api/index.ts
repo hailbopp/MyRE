@@ -97,12 +97,24 @@ export const ApiServiceMiddleware: ExtendedMiddleware<Store.All> = <S extends St
                 ApiClient.listProjects()
                     .then((result) => {
                         if (result.result === 'error') {
-                            dispatch({ type: 'API_RECEIVED_PROJECTS', projects: List<ProjectListing>([]) });
+                            dispatch({ type: 'API_FAILED_PROJECT_LIST' });
                         } else {
                             dispatch({ type: 'API_RECEIVED_PROJECTS', projects: List<ProjectListing>(result.data) });
                         }
                     })
                 break;
+
+            case 'API_CREATE_NEW_PROJECT':
+                ApiClient.createProject(action.newProject)
+                    .then((result) => {
+                        if (result.result === 'error') {
+                            dispatch({ type: 'API_FAILED_CREATE_PROJECT', error: result });
+                        } else {
+                            dispatch({ type: 'API_SUCCESSFUL_CREATE_PROJECT', newProject: result.data });
+                        }
+                    });
+                break;
+
             default:
                 return a;
         }

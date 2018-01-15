@@ -1,6 +1,6 @@
 ﻿import { Option } from 'ts-option';
 import { List } from 'immutable';
-import { User, Instance, ProjectListing } from "MyRE/Api/Models";
+import { User, Instance, ProjectListing, CreateProjectRequest } from "MyRE/Api/Models";
 import { AppAction } from 'MyRE/Actions';
 
 
@@ -14,6 +14,11 @@ export namespace Store {
         navPaneOpen: boolean;
     }
 
+    export interface EmailPasswordForm {
+        emailValue: string;
+        passwordValue: string;
+    }
+
     export interface Auth {
         // isLoggedIn has some extra implications.
         // If isLoggedIn is none, then we haven't tried to check for a logged in user yet.
@@ -24,6 +29,9 @@ export namespace Store {
 
         loginMessage: Option<AlertMessage>;
         registrationMessage: Option<AlertMessage>;
+
+        loginForm: EmailPasswordForm;
+        registrationForm: EmailPasswordForm;
     }
     
     export interface InstanceState {
@@ -35,6 +43,11 @@ export namespace Store {
     export interface Projects {
         projects: Option<List<ProjectListing>>;
         retrievingProjects: boolean;
+
+        createProjectModalOpen: boolean;
+        newProject: CreateProjectRequest;
+        newProjectSubmitting: boolean;
+        createProjectMessage: Option<AlertMessage>;
     }
 
     export interface All {

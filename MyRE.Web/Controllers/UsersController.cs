@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MyRE.Core.Models.Domain;
 using MyRE.Core.Services;
@@ -7,6 +8,7 @@ namespace MyRE.Web.Controllers
 {
     [Produces("application/json")]
     [Route("api/Users")]
+    [Authorize]
     public class UsersController : BaseController
     {
         private readonly IUserService _user;

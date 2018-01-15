@@ -6,21 +6,7 @@ import * as Projects from 'MyRE/Actions/Projects';
 type UndefinedAction = { type: '' };
 
 export type AppAction =
-    | Auth.AttemptAccountRegistrationApiAction
-    | Auth.SuccessfulRegistrationApiAction
-    | Auth.FailedRegistrationApiAction
-
-    | Auth.AttemptLoginApiAction
-    | Auth.SuccessfulLoginApiAction
-    | Auth.FailedLoginApiAction
-    | Auth.LogOutApiAction
-    | Auth.SuccessfulLogoutApiAction
-
-    | Auth.RequestCurrentUserApiAction
-    | Auth.ReceivedCurrentUserApiAction
-    | Auth.FailedGetCurrentUserApiAction
-
-    | Auth.ClearAuthScreenStatusMessagesAction
+    | Auth.AuthAction
 
     | Nav.OpenNavPaneAction
     | Nav.CloseNavPaneAction
@@ -28,7 +14,6 @@ export type AppAction =
     | Instances.RequestUserInstanceListApiAction
     | Instances.ReceivedUserInstanceListApiAction
 
-    | Projects.RequestProjectListApiAction
-    | Projects.ReceivedProjectListApiAction
+    | Projects.ProjectAction
 
     | UndefinedAction

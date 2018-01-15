@@ -1,8 +1,0 @@
-version: '3'
-
-services:
-  freecore.web:
-    image: freecore.web
-    build:
-      context: .
-      dockerfile: FreeCoRE.Web/Dockerfile
