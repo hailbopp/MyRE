@@ -52,14 +52,12 @@ class ProjectsPageComponent extends React.Component<IOwnProps & IConnectedDispat
                             <Button color="primary" onClick={this.props.toggleCreateModal}>New Project</Button>
                         </Col>
                     </Row>
-                    <Row>
-                    </Row>
-
                     <Table>
                         <thead>
                             <tr>
                                 <th>Name</th>
                                 <th>Description</th>
+                                <th />
                             </tr>
                         </thead>
                         <tbody>
@@ -69,6 +67,13 @@ class ProjectsPageComponent extends React.Component<IOwnProps & IConnectedDispat
                                     <tr key={idx}>
                                         <td>{p.Name}</td>
                                         <td>{p.Description}</td>
+                                        <td>
+                                            <span className="float-right">
+                                                <Button outline size="sm" color="primary">Edit</Button>
+                                                {' '}
+                                                <Button outline size="sm" color="danger">Delete</Button>
+                                            </span>
+                                        </td>
                                     </tr>)
                             }
                         </tbody>

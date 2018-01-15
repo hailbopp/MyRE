@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using MyRE.Core.Extensions;
-using MyRE.Core.Models.Domain;
+using MyRE.Core.Models.Data;
 using MyRE.Core.Repositories;
 
 namespace MyRE.Data.Repositories
@@ -22,7 +22,7 @@ namespace MyRE.Data.Repositories
         {
             var results = await _dbContext.Projects.Where(p => p.ParentInstance.Account.UserId == userId).ToListAsync();
 
-            return results.Select(r => r.ToDomainModel()).ToList();
+            return results;
         }
 
         public async Task<Project> CreateAsync(string name, string description, Guid instanceId)
@@ -36,7 +36,18 @@ namespace MyRE.Data.Repositories
             var createResult = await _dbContext.Projects.AddAsync(newEntity);
             var saveResult = await _dbContext.SaveChangesAsync();
 
-            return createResult.Entity.ToDomainModel();
+            return createResult.Entity;
+        }
+
+        public async Task<Project> GetByIdAsync(Guid projectId)
+        {
+            return await _dbContext.Projects.FindAsync(projectId);
+        }
+
+        public async Task<ApplicationUser> GetOwnerAsync(Guid projectId)
+        {
+            var project = await GetByIdAsync(projectId);
+            return project.ParentInstance.Account.User;
         }
     }
 }

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using MyRE.Core.Models.Domain;
+using MyRE.Core.Models.Data;
 
 namespace MyRE.Core.Repositories
 {
@@ -9,5 +9,8 @@ namespace MyRE.Core.Repositories
     {
         Task<IEnumerable<Project>> GetUserProjectsAsync(string userId);
         Task<Project> CreateAsync(string name, string description, Guid instanceId);
+
+        Task<Project> GetByIdAsync(Guid projectId);
+        Task<ApplicationUser> GetOwnerAsync(Guid projectId);
     }
 }

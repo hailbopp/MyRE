@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using MyRE.Data;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -13,6 +14,7 @@ using MyRE.Core.Repositories;
 using MyRE.Core.Services;
 using MyRE.Data.Repositories;
 using MyRE.SmartApp.Api.Client;
+using MyRE.Web.Authorization;
 using Newtonsoft.Json.Serialization;
 using Swashbuckle.AspNetCore.Swagger;
 
@@ -55,6 +57,8 @@ namespace MyRE.Web
             });
 
             // IoC Binding
+            services.AddSingleton<IAuthorizationHandler, ProjectAuthorizationHandler>();
+
             services.AddTransient<IMyreSmartAppApiClientFactory, MyreSmartAppApiClientFactory>();
             services.AddTransient<IAccountRepository, AccountRepository>();
             services.AddTransient<IAppInstanceRepository, AppInstanceRepository>();
