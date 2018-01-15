@@ -59,10 +59,10 @@ class ProjectsPageComponent extends React.Component<IOwnProps & IConnectedDispat
                             <h4>Projects</h4>
                         </Col>
                         <Col xs="12" sm="2">
-                            <Button color="primary" onClick={this.props.toggleCreateModal}>New Project</Button>
+                            <Button color="primary" className="float-right" size="sm" onClick={this.props.toggleCreateModal}>New Project</Button>
                         </Col>
                     </Row>
-                    <Table>
+                    <Table responsive>
                         <thead>
                             <tr>
                                 <th>Name</th>
@@ -79,7 +79,7 @@ class ProjectsPageComponent extends React.Component<IOwnProps & IConnectedDispat
                                         <td>{p.Description}</td>
                                         <td>
                                             <span className="float-right">
-                                                <Button outline size="sm" color="primary">Edit</Button>
+                                                <Button outline size="sm" color="primary" onClick={() => this.props.history.push(`/projects/${p.Id}/edit`)}>Edit</Button>
                                                 {' '}
                                                 <Button outline size="sm" color="danger" onClick={() => this.props.deleteProject(p.Id)}>Delete</Button>
                                             </span>

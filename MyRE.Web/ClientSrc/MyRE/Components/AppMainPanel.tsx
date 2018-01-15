@@ -11,6 +11,7 @@ import { Instance } from 'MyRE/Api/Models';
 import { List } from 'immutable';
 import { ProjectsPage } from 'MyRE/Components/ProjectsPage';
 import { listUserInstances } from 'MyRE/Actions/Instances';
+import { ProjectEditPage } from 'MyRE/Components/ProjectEditPage';
 
 interface IOwnProps { }
 interface IConnectedState {
@@ -82,6 +83,7 @@ class AppMainPanelComponent extends React.Component<IOwnProps & IConnectedState 
                 {this.props.instances.isDefined && this.props.instances.get.isEmpty() &&
                     <Redirect to="/" />}
 
+                <Route path="/projects/:projectId/edit" component={ProjectEditPage} />
                 <Route path="/projects" component={ProjectsPage} />
             </Switch>
         );
