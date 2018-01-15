@@ -31,7 +31,7 @@ export const reduceProjects = (state: Store.Projects, action: AppAction): Store.
             if (state.createProjectModalOpen) {
                 // Close the modal and clear out state data.
                 newState.createProjectModalOpen = false;
-                newState.newProject = { Name: '', Description: '', InstanceId: -1 };
+                newState.newProject = { Name: '', Description: '', InstanceId: '' };
             } else {
                 newState.createProjectModalOpen = true;
             }
@@ -50,7 +50,7 @@ export const reduceProjects = (state: Store.Projects, action: AppAction): Store.
             newState.newProjectSubmitting = false;
             newState.createProjectModalOpen = false;
             newState.createProjectMessage = none;
-            newState.newProject = { Name: '', Description: '', InstanceId: -1 };
+            newState.newProject = { Name: '', Description: '', InstanceId: '' };
             return newState;
 
         case 'API_FAILED_CREATE_PROJECT':

@@ -42,7 +42,7 @@ export const initialState: Store.All = {
         newProject: {
             Name: '',
             Description: '',
-            InstanceId: -1,
+            InstanceId: '',
         },
         newProjectSubmitting: false,
         createProjectMessage: none,

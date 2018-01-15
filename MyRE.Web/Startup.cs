@@ -57,7 +57,6 @@ namespace MyRE.Web
             });
 
             // IoC Binding
-            services.AddSingleton<IAuthorizationHandler, ProjectAuthorizationHandler>();
 
             services.AddTransient<IMyreSmartAppApiClientFactory, MyreSmartAppApiClientFactory>();
             services.AddTransient<IAccountRepository, AccountRepository>();
@@ -68,7 +67,9 @@ namespace MyRE.Web
             services.AddTransient<IProjectRepository, ProjectRepository>();
             services.AddTransient<IProjectService, ProjectService>();
 
-            services.AddTransient<IServiceProvider, ServiceProvider>(provider => services.BuildServiceProvider());
+            services.AddTransient<IAuthorizationHandler, ProjectAuthorizationHandler>();
+
+            services.AddSingleton<IServiceProvider, ServiceProvider>(provider => services.BuildServiceProvider());
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

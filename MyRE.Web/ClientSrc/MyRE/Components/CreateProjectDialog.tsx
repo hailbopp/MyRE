@@ -18,7 +18,7 @@ interface IConnectedState {
 
 interface IConnectedDispatch {
     toggleModal: () => void;
-    changeNewProjectProperties: (name: string, description: string, instanceId: number) => void;
+    changeNewProjectProperties: (name: string, description: string, instanceId: string) => void;
     submitProjectCreate: (project: CreateProjectRequest) => void;
 }
 
@@ -55,7 +55,7 @@ class CreateProjectDialogComponent extends React.PureComponent<IConnectedState &
     }
 
     private changeInstanceId: React.ChangeEventHandler<HTMLInputElement> = (e) => {
-        this.props.changeNewProjectProperties(this.props.newProject.Name, this.props.newProject.Description, e.target.valueAsNumber);
+        this.props.changeNewProjectProperties(this.props.newProject.Name, this.props.newProject.Description, e.target.value);
     }
 
     private submit = () => {

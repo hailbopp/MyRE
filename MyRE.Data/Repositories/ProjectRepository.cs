@@ -46,8 +46,18 @@ namespace MyRE.Data.Repositories
 
         public async Task<ApplicationUser> GetOwnerAsync(Guid projectId)
         {
-            var project = await GetByIdAsync(projectId);
-            return project.ParentInstance.Account.User;
+            return await _dbContext
+                .Users.FirstOrDefaultAsync(u => u
+                    .Accounts.Any(acc => acc
+                        .AppInstances.Any(ai => ai
+                            .Projects.Any(p => p.ProjectId == projectId))));
+        }
+
+        public async Task DeleteAsync(Guid projectId)
+        {
+            var entity = await GetByIdAsync(projectId);
+            var deleteResult = _dbContext.Projects.Remove(entity);
+            var saveResult = await _dbContext.SaveChangesAsync();
         }
     }
 }

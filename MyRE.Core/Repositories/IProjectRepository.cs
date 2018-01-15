@@ -12,5 +12,6 @@ namespace MyRE.Core.Repositories
 
         Task<Project> GetByIdAsync(Guid projectId);
         Task<ApplicationUser> GetOwnerAsync(Guid projectId);
+        Task DeleteAsync(Guid projectId);
     }
 }

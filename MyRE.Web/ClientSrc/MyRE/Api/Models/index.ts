@@ -9,20 +9,20 @@ export interface User {
 }
 
 export interface Instance {
-    Id: number;
+    Id: string;
     Name: string;
-    AccountId: number;
+    AccountId: string;
 }
 
 export interface ProjectListing {
-    Id: number;
+    Id: string;
     Name: string;
     Description: string;
-    InstanceId: number;
+    InstanceId: string;
 }
 
 export interface CreateProjectRequest {
     Name: string;
     Description: string;
-    InstanceId: number;
+    InstanceId: string;
 }

@@ -6,7 +6,7 @@ import { Container, Table, Row, Col, Button } from 'reactstrap';
 import { ProjectListing } from 'MyRE/Api/Models';
 import { List } from 'immutable';
 import { Option } from 'ts-option';
-import { requestProjectList, toggleCreateProjectDialog } from 'MyRE/Actions/Projects';
+import { requestProjectList, toggleCreateProjectDialog, deleteProject } from 'MyRE/Actions/Projects';
 import { CreateProjectDialog } from 'MyRE/Components/CreateProjectDialog';
 
 interface IOwnProps { }
@@ -17,6 +17,7 @@ interface IConnectedState {
 interface IConnectedDispatch {
     getProjects: () => void;
     toggleCreateModal: () => void;
+    deleteProject: (projectId: string) => void;
 }
 
 const mapStateToProps = (state: Store.All, ownProps: IOwnProps): IConnectedState => ({
@@ -30,10 +31,19 @@ const mapDispatchToProps = (dispatch: Dispatch<Store.All>): IConnectedDispatch =
     },
     toggleCreateModal: () => {
         dispatch(toggleCreateProjectDialog());
+    },
+    deleteProject: (projectId) => {
+        dispatch(deleteProject(projectId));
     }
 });
 
 class ProjectsPageComponent extends React.Component<IOwnProps & IConnectedDispatch & IConnectedState & RouteComponentProps<IOwnProps & IConnectedDispatch & IConnectedState>> {
+    private deleteProject = (projectId: string) => {
+        return () => {
+            this.props.deleteProject(projectId);
+        }
+    } 
+
     public componentWillMount() {
         if (!this.props.retrievingProjects && this.props.projects.isEmpty) {
             this.props.getProjects();
@@ -71,7 +81,7 @@ class ProjectsPageComponent extends React.Component<IOwnProps & IConnectedDispat
                                             <span className="float-right">
                                                 <Button outline size="sm" color="primary">Edit</Button>
                                                 {' '}
-                                                <Button outline size="sm" color="danger">Delete</Button>
+                                                <Button outline size="sm" color="danger" onClick={() => this.props.deleteProject(p.Id)}>Delete</Button>
                                             </span>
                                         </td>
                                     </tr>)

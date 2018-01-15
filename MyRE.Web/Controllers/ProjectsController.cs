@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using Microsoft.ApplicationInsights.AspNetCore.Extensions;
@@ -30,31 +31,22 @@ namespace MyRE.Web.Controllers
 
         [HttpGet("")]
         [ProducesResponseType(typeof(IEnumerable<Project>), 200)]
-        public async Task<IActionResult> ListProjectsAsync()
+        public async Task<IEnumerable<Project>> ListProjectsAsync()
         {
             var currentUser = await _user.GetAuthenticatedUserFromContextAsync(HttpContext);
             var projects = await _project.GetUserProjectsAsync(currentUser.UserId);
 
-            return Ok(projects);
+            return projects.Select(p => p.ToDomainModel());
         }
 
         [HttpGet("{projectId:Guid}")]
+        [ProducesResponseType(typeof(Project), 200)]
         public async Task<IActionResult> GetProjectAsync(Guid projectId)
         {
-            var project = await _project.GetByIdAsync(projectId);
-
-            if (project == null)
-            {
-                return NotFound();
-            }
-
-            var authResult = await _authorizationService.AuthorizeAsync(User, project, Operations.Read);
-            if (authResult.Succeeded)
-            {
-                return Ok(project);
-            }
-
-            return Forbid();
+            return await RetrieveAuthenticatedResource(
+                _authorizationService, 
+                () => _project.GetByIdAsync(projectId),
+                project => Task.FromResult(Ok(project.ToDomainModel())));
         }
 
         [HttpPost("")]
@@ -64,6 +56,14 @@ namespace MyRE.Web.Controllers
             var createdProject = await _project.CreateAsync(newProject.Name, newProject.Description, newProject.InstanceId);
 
             return Created(GetUriOfResource($"/api/Projects/{createdProject.ProjectId}"), createdProject.ToDomainModel());
+        }
+
+        [HttpDelete("{projectId:Guid}")]
+        [ProducesResponseType(typeof(void), 204)]
+        public async Task<IActionResult> DeleteProject(Guid projectId)
+        {
+            return await DeleteAuthenticatedResource(_authorizationService, () => _project.GetByIdAsync(projectId),
+                project => _project.DeleteAsync(projectId));
         }
     }
 }

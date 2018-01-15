@@ -117,6 +117,17 @@ export const ApiServiceMiddleware: ExtendedMiddleware<Store.All> = <S extends St
                     });
                 break;
 
+            case 'API_DELETE_PROJECT':
+                ApiClient.deleteProject(action.projectId)
+                    .then((result) => {
+                        if (result.result === 'error') {
+                            dispatch({ type: 'API_FAILED_DELETE_PROJECT', error: result });
+                        } else {
+                            dispatch({ type: 'API_SUCCESSFUL_DELETE_PROJECT' })
+                                .then(_ => dispatch(requestProjectList()));
+                        }
+                    })
+
             default:
                 return a;
         }

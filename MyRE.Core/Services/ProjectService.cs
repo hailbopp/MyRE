@@ -23,5 +23,10 @@ namespace MyRE.Core.Services
 
         public Task<Project> CreateAsync(string name, string description, Guid instanceId) =>
             _projectRepository.CreateAsync(name, description, instanceId);
+
+        public async Task DeleteAsync(Guid projectId)
+        {
+            await _projectRepository.DeleteAsync(projectId);
+        }
     }
 }

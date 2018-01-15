@@ -20,6 +20,7 @@ export class MyREApiClient {
 
         listProjects: '/api/Projects',
         createProject: '/api/Projects',
+        deleteProject: (projectId: string) => `/api/Projects/${projectId}`,
     }
 
     private getEndpointUrl<S extends keyof typeof MyREApiClient.paths>(pathName: S, ...args: string[]) {
@@ -74,6 +75,15 @@ export class MyREApiClient {
 
         return await this.performRequest<T>(input, init);
     }
+
+    private async delete(input: RequestInfo): Promise<ApiResult<any>> {
+        let init: RequestInit = {
+            credentials: 'include',
+            method: 'DELETE',
+        };
+
+        return await this.performRequest<any>(input, init);
+    }
         
     public logIn = async (email: string, password: string): Promise<ApiResult<any>> =>
         this.post<any>(this.getEndpointUrl('logIn'), {
@@ -99,4 +109,7 @@ export class MyREApiClient {
 
     public createProject = async (newEntity: CreateProjectRequest): Promise<ApiResult<ProjectListing>> =>
         this.post<ProjectListing>(this.getEndpointUrl('createProject'), newEntity);
+
+    public deleteProject = async (projectId: string): Promise<ApiResult<any>> =>
+        this.delete(this.getEndpointUrl('deleteProject', projectId));
 }

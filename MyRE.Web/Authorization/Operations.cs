@@ -4,13 +4,18 @@ namespace MyRE.Web.Authorization
 {
     public static class Operations
     {
-        public static OperationAuthorizationRequirement Create =
+        public static readonly OperationAuthorizationRequirement Create =
             new OperationAuthorizationRequirement { Name = nameof(Create) };
-        public static OperationAuthorizationRequirement Read =
+        public static readonly OperationAuthorizationRequirement Read =
             new OperationAuthorizationRequirement { Name = nameof(Read) };
-        public static OperationAuthorizationRequirement Update =
+        public static readonly OperationAuthorizationRequirement Update =
             new OperationAuthorizationRequirement { Name = nameof(Update) };
-        public static OperationAuthorizationRequirement Delete =
+        public static readonly OperationAuthorizationRequirement Delete =
             new OperationAuthorizationRequirement { Name = nameof(Delete) };
+
+        public static readonly string[] AllNames = new[]
+        {
+            Create.Name, Read.Name, Update.Name, Delete.Name
+        };
     }
 }

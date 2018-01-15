@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace MyRE.Core.Models.Data
 {
@@ -11,5 +12,6 @@ namespace MyRE.Core.Models.Data
         public string UserId { get; set; }
         public ApplicationUser User { get; set; }
         
+        public IEnumerable<AppInstance> AppInstances { get; set; }
     }
 }

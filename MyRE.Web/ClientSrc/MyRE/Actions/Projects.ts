@@ -57,7 +57,24 @@ export const createNewProject = (newProject: CreateProjectRequest): CreateNewPro
     newProject,
 });
 
+export type DeleteProjectApiAction = {
+    type: 'API_DELETE_PROJECT';
+    projectId: string;
+}
 
+export type SuccessfullyDeletedProjectApiAction = {
+    type: 'API_SUCCESSFUL_DELETE_PROJECT';
+}
+
+export type FailedDeleteProjectApiAction = {
+    type: 'API_FAILED_DELETE_PROJECT';
+    error: ApiError;
+}
+
+export const deleteProject = (projectId: string): DeleteProjectApiAction => ({
+    type: 'API_DELETE_PROJECT',
+    projectId
+});
 
 export type ProjectAction =
     | RequestProjectListApiAction
@@ -65,6 +82,11 @@ export type ProjectAction =
     | FailedProjectListApiAction
     | ToggleCreateProjectDialogUIAction
     | ChangeNewProjectDataUIAction
+
     | CreateNewProjectApiAction
     | SuccessfullyCreatedProjectApiAction
     | FailedCreateProjectApiAction
+
+    | DeleteProjectApiAction
+    | SuccessfullyDeletedProjectApiAction
+    | FailedDeleteProjectApiAction
