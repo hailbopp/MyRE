@@ -4,10 +4,11 @@ import { ApiClient } from "MyRE/Middleware/Api/Client";
 import { ApiError } from "MyRE/Api/Models/Results";
 import { Store } from "MyRE/Models/Store";
 import { Middleware, MiddlewareAPI, Dispatch } from "redux";
-import { retrieveCurrentUser, clearAuthMessages } from "MyRE/Actions/Auth";
+import { retrieveCurrentUser, clearAuthMessages, attemptLogin, AttemptAccountRegistrationApiAction } from "MyRE/Actions/Auth";
 import { some } from "ts-option";
 import { List } from "immutable";
 import { Instance, ProjectListing } from "MyRE/Api/Models";
+import { requestProjectList } from "MyRE/Actions/Projects";
 
 function isAction(a: AppAction): a is AppAction {
     return (a as AppAction).type !== undefined;
@@ -69,7 +70,7 @@ export const ApiServiceMiddleware: ExtendedMiddleware<Store.All> = <S extends St
                         } else {
                             dispatch({
                                 type: 'API_SUCCESSFUL_REGISTRATION',
-                            });
+                            }).then(_ => dispatch(attemptLogin((<AttemptAccountRegistrationApiAction>action).credentials)));
                         }
                     })
                 break;
@@ -110,7 +111,8 @@ export const ApiServiceMiddleware: ExtendedMiddleware<Store.All> = <S extends St
                         if (result.result === 'error') {
                             dispatch({ type: 'API_FAILED_CREATE_PROJECT', error: result });
                         } else {
-                            dispatch({ type: 'API_SUCCESSFUL_CREATE_PROJECT', newProject: result.data });
+                            dispatch({ type: 'API_SUCCESSFUL_CREATE_PROJECT', newProject: result.data })
+                                .then(_ => dispatch(requestProjectList()));
                         }
                     });
                 break;
