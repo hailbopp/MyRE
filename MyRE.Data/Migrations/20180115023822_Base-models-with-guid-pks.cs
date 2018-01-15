@@ -1,10 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using System;
+using System.Collections.Generic;
 
 namespace MyRE.Data.Migrations
 {
-    public partial class BaseModels : Migration
+    public partial class Basemodelswithguidpks : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -51,8 +52,7 @@ namespace MyRE.Data.Migrations
                 name: "Block",
                 columns: table => new
                 {
-                    BlockId = table.Column<long>(nullable: false)
-                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn)
+                    BlockId = table.Column<Guid>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -63,13 +63,12 @@ namespace MyRE.Data.Migrations
                 name: "Expressions",
                 columns: table => new
                 {
-                    ExpressionId = table.Column<long>(nullable: false)
-                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
-                    Discriminator = table.Column<string>(nullable: false),
-                    FunctionName = table.Column<string>(nullable: true),
+                    ExpressionId = table.Column<Guid>(nullable: false),
+                    Discriminator = table.Column<string>(maxLength: 32, nullable: false),
+                    FunctionName = table.Column<string>(maxLength: 64, nullable: true),
                     Value = table.Column<string>(nullable: true),
                     ValueType = table.Column<int>(nullable: true),
-                    VariableName = table.Column<string>(nullable: true)
+                    VariableName = table.Column<string>(maxLength: 128, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -101,8 +100,7 @@ namespace MyRE.Data.Migrations
                 name: "Accounts",
                 columns: table => new
                 {
-                    AccountId = table.Column<long>(nullable: false)
-                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    AccountId = table.Column<Guid>(nullable: false),
                     RemoteAccountId = table.Column<string>(nullable: false),
                     UserId = table.Column<string>(nullable: true)
                 },
@@ -207,11 +205,10 @@ namespace MyRE.Data.Migrations
                 name: "FunctionParameter",
                 columns: table => new
                 {
-                    FunctionParameterId = table.Column<long>(nullable: false)
-                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
-                    InvocationExpressionExpressionId = table.Column<long>(nullable: true),
+                    FunctionParameterId = table.Column<Guid>(nullable: false),
+                    InvocationExpressionExpressionId = table.Column<Guid>(nullable: true),
                     Position = table.Column<int>(nullable: false),
-                    ValueExpressionId = table.Column<long>(nullable: true)
+                    ValueExpressionId = table.Column<Guid>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -234,20 +231,19 @@ namespace MyRE.Data.Migrations
                 name: "Statements",
                 columns: table => new
                 {
-                    ExpressionToEvaluateExpressionId = table.Column<long>(nullable: true),
-                    BlockId = table.Column<long>(nullable: true),
-                    Event = table.Column<string>(nullable: true),
-                    IfStatement_BlockId = table.Column<long>(nullable: true),
-                    ConditionExpressionId = table.Column<long>(nullable: true),
-                    StatementId = table.Column<long>(nullable: false)
-                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
-                    Discriminator = table.Column<string>(nullable: false),
-                    ValueExpressionId = table.Column<long>(nullable: true),
-                    VariableName = table.Column<string>(nullable: true),
-                    VariableDefinitionStatement_VariableName = table.Column<string>(nullable: true),
-                    VariableType = table.Column<string>(nullable: true),
-                    WhileStatement_BlockId = table.Column<long>(nullable: true),
-                    WhileStatement_ConditionExpressionId = table.Column<long>(nullable: true)
+                    ExpressionToEvaluateExpressionId = table.Column<Guid>(nullable: true),
+                    BlockId = table.Column<Guid>(nullable: true),
+                    Event = table.Column<string>(maxLength: 128, nullable: true),
+                    IfStatement_BlockId = table.Column<Guid>(nullable: true),
+                    ConditionExpressionId = table.Column<Guid>(nullable: true),
+                    StatementId = table.Column<Guid>(nullable: false),
+                    Discriminator = table.Column<string>(maxLength: 32, nullable: false),
+                    ValueExpressionId = table.Column<Guid>(nullable: true),
+                    VariableNameExpressionExpressionId = table.Column<Guid>(nullable: true),
+                    VariableDefinitionStatement_VariableNameExpressionExpressionId = table.Column<Guid>(nullable: true),
+                    VariableType = table.Column<int>(nullable: true),
+                    WhileStatement_BlockId = table.Column<Guid>(nullable: true),
+                    WhileStatement_ConditionExpressionId = table.Column<Guid>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -283,6 +279,18 @@ namespace MyRE.Data.Migrations
                         principalColumn: "ExpressionId",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
+                        name: "FK_Statements_Expressions_VariableNameExpressionExpressionId",
+                        column: x => x.VariableNameExpressionExpressionId,
+                        principalTable: "Expressions",
+                        principalColumn: "ExpressionId",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Statements_Expressions_VariableDefinitionStatement_VariableNameExpressionExpressionId",
+                        column: x => x.VariableDefinitionStatement_VariableNameExpressionExpressionId,
+                        principalTable: "Expressions",
+                        principalColumn: "ExpressionId",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
                         name: "FK_Statements_Block_WhileStatement_BlockId",
                         column: x => x.WhileStatement_BlockId,
                         principalTable: "Block",
@@ -300,11 +308,11 @@ namespace MyRE.Data.Migrations
                 name: "AppInstances",
                 columns: table => new
                 {
-                    AppInstanceId = table.Column<long>(nullable: false)
-                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    AppInstanceId = table.Column<Guid>(nullable: false),
                     AccessToken = table.Column<string>(nullable: true),
-                    AccountId = table.Column<long>(nullable: false),
+                    AccountId = table.Column<Guid>(nullable: false),
                     InstanceServerBaseUri = table.Column<string>(nullable: true),
+                    Name = table.Column<string>(nullable: true),
                     RemoteAppId = table.Column<string>(nullable: false)
                 },
                 constraints: table =>
@@ -323,11 +331,10 @@ namespace MyRE.Data.Migrations
                 name: "BlockStatement",
                 columns: table => new
                 {
-                    BlockStatementId = table.Column<long>(nullable: false)
-                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
-                    BlockId = table.Column<long>(nullable: true),
+                    BlockStatementId = table.Column<Guid>(nullable: false),
+                    BlockId = table.Column<Guid>(nullable: true),
                     Position = table.Column<int>(nullable: false),
-                    StatementId = table.Column<long>(nullable: true)
+                    StatementId = table.Column<Guid>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -350,34 +357,32 @@ namespace MyRE.Data.Migrations
                 name: "Projects",
                 columns: table => new
                 {
-                    ProjectId = table.Column<long>(nullable: false)
-                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    ProjectId = table.Column<Guid>(nullable: false),
                     Description = table.Column<string>(nullable: true),
                     Name = table.Column<string>(nullable: true),
-                    ParentInstanceAppInstanceId = table.Column<long>(nullable: true)
+                    ParentInstanceId = table.Column<Guid>(nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Projects", x => x.ProjectId);
                     table.ForeignKey(
-                        name: "FK_Projects_AppInstances_ParentInstanceAppInstanceId",
-                        column: x => x.ParentInstanceAppInstanceId,
+                        name: "FK_Projects_AppInstances_ParentInstanceId",
+                        column: x => x.ParentInstanceId,
                         principalTable: "AppInstances",
                         principalColumn: "AppInstanceId",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
                 name: "Routines",
                 columns: table => new
                 {
-                    RoutineId = table.Column<long>(nullable: false)
-                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
-                    BlockId = table.Column<long>(nullable: true),
-                    Description = table.Column<string>(nullable: true),
+                    RoutineId = table.Column<Guid>(nullable: false),
+                    BlockId = table.Column<Guid>(nullable: true),
+                    Description = table.Column<string>(maxLength: 4096, nullable: true),
                     ExecutionMethod = table.Column<int>(nullable: false),
-                    Name = table.Column<string>(nullable: true),
-                    ProjectId = table.Column<long>(nullable: true)
+                    Name = table.Column<string>(maxLength: 1024, nullable: true),
+                    ProjectId = table.Column<Guid>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -466,9 +471,9 @@ namespace MyRE.Data.Migrations
                 column: "ValueExpressionId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Projects_ParentInstanceAppInstanceId",
+                name: "IX_Projects_ParentInstanceId",
                 table: "Projects",
-                column: "ParentInstanceAppInstanceId");
+                column: "ParentInstanceId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Routines_BlockId",
@@ -504,6 +509,16 @@ namespace MyRE.Data.Migrations
                 name: "IX_Statements_ValueExpressionId",
                 table: "Statements",
                 column: "ValueExpressionId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Statements_VariableNameExpressionExpressionId",
+                table: "Statements",
+                column: "VariableNameExpressionExpressionId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Statements_VariableDefinitionStatement_VariableNameExpressionExpressionId",
+                table: "Statements",
+                column: "VariableDefinitionStatement_VariableNameExpressionExpressionId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Statements_WhileStatement_BlockId",

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
@@ -24,7 +25,7 @@ namespace MyRE.Data.Repositories
             return results.Select(r => r.ToDomainModel()).ToList();
         }
 
-        public async Task<Project> CreateAsync(string name, string description, long instanceId)
+        public async Task<Project> CreateAsync(string name, string description, Guid instanceId)
         {
             var newEntity = new Core.Models.Data.Project()
             {

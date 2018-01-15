@@ -1,8 +1,10 @@
-﻿namespace MyRE.Core.Models.Data
+﻿using System;
+
+namespace MyRE.Core.Models.Data
 {
     public class BlockStatement
     {
-        public long BlockStatementId { get; set; }
+        public Guid BlockStatementId { get; set; }
         public int Position { get; set; }
         public Statement Statement { get; set; }
     }

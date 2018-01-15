@@ -1,10 +1,11 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
 
 namespace MyRE.Core.Models.Data
 {
     public class Routine
     {
-        public long RoutineId { get; set; }
+        public Guid RoutineId { get; set; }
 
         [MaxLength(1024)]
         public string Name { get; set; }

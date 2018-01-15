@@ -132,7 +132,7 @@ namespace MyRE.Data.Migrations
 
             modelBuilder.Entity("MyRE.Core.Models.Data.Account", b =>
                 {
-                    b.Property<long>("AccountId")
+                    b.Property<Guid>("AccountId")
                         .ValueGeneratedOnAdd();
 
                     b.Property<string>("RemoteAccountId")
@@ -152,12 +152,12 @@ namespace MyRE.Data.Migrations
 
             modelBuilder.Entity("MyRE.Core.Models.Data.AppInstance", b =>
                 {
-                    b.Property<long>("AppInstanceId")
+                    b.Property<Guid>("AppInstanceId")
                         .ValueGeneratedOnAdd();
 
                     b.Property<string>("AccessToken");
 
-                    b.Property<long>("AccountId");
+                    b.Property<Guid>("AccountId");
 
                     b.Property<string>("InstanceServerBaseUri");
 
@@ -229,7 +229,7 @@ namespace MyRE.Data.Migrations
 
             modelBuilder.Entity("MyRE.Core.Models.Data.Block", b =>
                 {
-                    b.Property<long>("BlockId")
+                    b.Property<Guid>("BlockId")
                         .ValueGeneratedOnAdd();
 
                     b.HasKey("BlockId");
@@ -239,14 +239,14 @@ namespace MyRE.Data.Migrations
 
             modelBuilder.Entity("MyRE.Core.Models.Data.BlockStatement", b =>
                 {
-                    b.Property<long>("BlockStatementId")
+                    b.Property<Guid>("BlockStatementId")
                         .ValueGeneratedOnAdd();
 
-                    b.Property<long?>("BlockId");
+                    b.Property<Guid?>("BlockId");
 
                     b.Property<int>("Position");
 
-                    b.Property<long?>("StatementId");
+                    b.Property<Guid?>("StatementId");
 
                     b.HasKey("BlockStatementId");
 
@@ -259,7 +259,7 @@ namespace MyRE.Data.Migrations
 
             modelBuilder.Entity("MyRE.Core.Models.Data.Expression", b =>
                 {
-                    b.Property<long>("ExpressionId")
+                    b.Property<Guid>("ExpressionId")
                         .ValueGeneratedOnAdd();
 
                     b.Property<string>("Discriminator")
@@ -275,14 +275,14 @@ namespace MyRE.Data.Migrations
 
             modelBuilder.Entity("MyRE.Core.Models.Data.FunctionParameter", b =>
                 {
-                    b.Property<long>("FunctionParameterId")
+                    b.Property<Guid>("FunctionParameterId")
                         .ValueGeneratedOnAdd();
 
-                    b.Property<long?>("InvocationExpressionExpressionId");
+                    b.Property<Guid?>("InvocationExpressionExpressionId");
 
                     b.Property<int>("Position");
 
-                    b.Property<long?>("ValueExpressionId");
+                    b.Property<Guid?>("ValueExpressionId");
 
                     b.HasKey("FunctionParameterId");
 
@@ -295,14 +295,14 @@ namespace MyRE.Data.Migrations
 
             modelBuilder.Entity("MyRE.Core.Models.Data.Project", b =>
                 {
-                    b.Property<long>("ProjectId")
+                    b.Property<Guid>("ProjectId")
                         .ValueGeneratedOnAdd();
 
                     b.Property<string>("Description");
 
                     b.Property<string>("Name");
 
-                    b.Property<long>("ParentInstanceId");
+                    b.Property<Guid>("ParentInstanceId");
 
                     b.HasKey("ProjectId");
 
@@ -313,10 +313,10 @@ namespace MyRE.Data.Migrations
 
             modelBuilder.Entity("MyRE.Core.Models.Data.Routine", b =>
                 {
-                    b.Property<long>("RoutineId")
+                    b.Property<Guid>("RoutineId")
                         .ValueGeneratedOnAdd();
 
-                    b.Property<long?>("BlockId");
+                    b.Property<Guid?>("BlockId");
 
                     b.Property<string>("Description")
                         .HasMaxLength(4096);
@@ -326,7 +326,7 @@ namespace MyRE.Data.Migrations
                     b.Property<string>("Name")
                         .HasMaxLength(1024);
 
-                    b.Property<long?>("ProjectId");
+                    b.Property<Guid?>("ProjectId");
 
                     b.HasKey("RoutineId");
 
@@ -339,7 +339,7 @@ namespace MyRE.Data.Migrations
 
             modelBuilder.Entity("MyRE.Core.Models.Data.Statement", b =>
                 {
-                    b.Property<long>("StatementId")
+                    b.Property<Guid>("StatementId")
                         .ValueGeneratedOnAdd();
 
                     b.Property<string>("Discriminator")
@@ -394,7 +394,7 @@ namespace MyRE.Data.Migrations
                 {
                     b.HasBaseType("MyRE.Core.Models.Data.Statement");
 
-                    b.Property<long?>("ExpressionToEvaluateExpressionId");
+                    b.Property<Guid?>("ExpressionToEvaluateExpressionId");
 
                     b.HasIndex("ExpressionToEvaluateExpressionId");
 
@@ -407,7 +407,7 @@ namespace MyRE.Data.Migrations
                 {
                     b.HasBaseType("MyRE.Core.Models.Data.Statement");
 
-                    b.Property<long?>("BlockId");
+                    b.Property<Guid?>("BlockId");
 
                     b.Property<string>("Event")
                         .HasMaxLength(128);
@@ -423,10 +423,10 @@ namespace MyRE.Data.Migrations
                 {
                     b.HasBaseType("MyRE.Core.Models.Data.Statement");
 
-                    b.Property<long?>("BlockId")
+                    b.Property<Guid?>("BlockId")
                         .HasColumnName("IfStatement_BlockId");
 
-                    b.Property<long?>("ConditionExpressionId");
+                    b.Property<Guid?>("ConditionExpressionId");
 
                     b.HasIndex("BlockId");
 
@@ -441,9 +441,9 @@ namespace MyRE.Data.Migrations
                 {
                     b.HasBaseType("MyRE.Core.Models.Data.Statement");
 
-                    b.Property<long?>("ValueExpressionId");
+                    b.Property<Guid?>("ValueExpressionId");
 
-                    b.Property<long?>("VariableNameExpressionExpressionId");
+                    b.Property<Guid?>("VariableNameExpressionExpressionId");
 
                     b.HasIndex("ValueExpressionId");
 
@@ -458,7 +458,7 @@ namespace MyRE.Data.Migrations
                 {
                     b.HasBaseType("MyRE.Core.Models.Data.Statement");
 
-                    b.Property<long?>("VariableNameExpressionExpressionId")
+                    b.Property<Guid?>("VariableNameExpressionExpressionId")
                         .HasColumnName("VariableDefinitionStatement_VariableNameExpressionExpressionId");
 
                     b.Property<int>("VariableType");
@@ -474,10 +474,10 @@ namespace MyRE.Data.Migrations
                 {
                     b.HasBaseType("MyRE.Core.Models.Data.Statement");
 
-                    b.Property<long?>("BlockId")
+                    b.Property<Guid?>("BlockId")
                         .HasColumnName("WhileStatement_BlockId");
 
-                    b.Property<long?>("ConditionExpressionId")
+                    b.Property<Guid?>("ConditionExpressionId")
                         .HasColumnName("WhileStatement_ConditionExpressionId");
 
                     b.HasIndex("BlockId");

@@ -1,10 +1,12 @@
-﻿namespace MyRE.Core.Models.Domain
+﻿using System;
+
+namespace MyRE.Core.Models.Domain
 {
     public class Project
     {
-        public long Id { get; set; }
+        public Guid Id { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
-        public long InstanceId { get; set; }
+        public Guid InstanceId { get; set; }
     }
 }

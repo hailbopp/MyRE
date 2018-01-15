@@ -4,7 +4,7 @@ namespace MyRE.Core.Models.Data
 {
     public class Account
     {
-        public long AccountId { get; set; }
+        public Guid AccountId { get; set; }
         
         public string RemoteAccountId { get; set; }
 
