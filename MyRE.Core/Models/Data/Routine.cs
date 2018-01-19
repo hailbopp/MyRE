@@ -12,10 +12,14 @@ namespace MyRE.Core.Models.Data
 
         [MaxLength(4096)]
         public string Description { get; set; }
+
+        public Guid ProjectId { get; set; }
         public Project Project { get; set; }
-        public RoutineExecutionMethod ExecutionMethod { get; set; }
         
+        public Guid BlockId { get; set; }
         public Block Block { get; set; }
+
+        public RoutineExecutionMethod ExecutionMethod { get; set; }
 
         public enum RoutineExecutionMethod
         {

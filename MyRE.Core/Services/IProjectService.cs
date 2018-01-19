@@ -12,5 +12,7 @@ namespace MyRE.Core.Services
         Task<Project> GetByIdAsync(Guid projectId);
         Task<Project> CreateAsync(string name, string description, Guid instanceId);
         Task DeleteAsync(Guid projectId);
+
+        Task<IEnumerable<Routine>> GetRoutines(Guid projectId);
     }
 }

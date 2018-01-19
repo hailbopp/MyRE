@@ -13,10 +13,12 @@ using MyRE.Core.Models.Data;
 using MyRE.Core.Repositories;
 using MyRE.Core.Services;
 using MyRE.Data.Repositories;
+using MyRE.Data.Services;
 using MyRE.SmartApp.Api.Client;
 using MyRE.Web.Authorization;
 using Newtonsoft.Json.Serialization;
 using Swashbuckle.AspNetCore.Swagger;
+using Routine = MyRE.Core.Models.Domain.Routine;
 
 namespace MyRE.Web
 {
@@ -66,6 +68,8 @@ namespace MyRE.Web
             services.AddTransient<IUserService, UserService>();
             services.AddTransient<IProjectRepository, ProjectRepository>();
             services.AddTransient<IProjectService, ProjectService>();
+
+            services.AddSingleton<IDomainModelMappingService<Core.Models.Data.Routine, Routine>, RoutineModelMappingService>();
 
             services.AddTransient<IAuthorizationHandler, ProjectAuthorizationHandler>();
 

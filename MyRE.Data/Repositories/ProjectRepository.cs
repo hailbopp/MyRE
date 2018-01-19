@@ -59,5 +59,10 @@ namespace MyRE.Data.Repositories
             var deleteResult = _dbContext.Projects.Remove(entity);
             var saveResult = await _dbContext.SaveChangesAsync();
         }
+
+        public async Task<IEnumerable<Routine>> GetRoutines(Guid projectId)
+        {
+            return await _dbContext.Routines.Where(r => r.Project.ProjectId == projectId).ToListAsync();
+        }
     }
 }

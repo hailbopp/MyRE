@@ -6,6 +6,8 @@ import { Instance, User } from 'MyRE/Api/Models';
 import { List } from 'immutable';
 import { Option } from 'ts-option';
 import { NeedsInitializationAlert } from 'MyRE/Components/NeedsInitializationAlert';
+import { PageHeader } from 'MyRE/Components/PageHeader';
+import { Container } from 'reactstrap';
 
 interface IOwnProps { }
 interface IConnectedState {
@@ -32,9 +34,9 @@ class DashboardComponent extends React.Component<DashboardProps> {
         }
 
         return (
-            <div>
-                Dashboard
-            </div>);
+            <Container>
+                <PageHeader>Dashboard</PageHeader>
+            </Container>);
     }
 }
 

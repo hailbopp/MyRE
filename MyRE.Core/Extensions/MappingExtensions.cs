@@ -8,7 +8,7 @@ namespace MyRE.Core.Extensions
         // Project
         public static Domain.Project ToDomainModel(this Data.Project self) => new Domain.Project()
         {
-            Id = self.ProjectId,
+            ProjectId = self.ProjectId,
             Name = self.Name,
             Description = self.Description,
             InstanceId = self.ParentInstanceId,
@@ -16,7 +16,7 @@ namespace MyRE.Core.Extensions
 
         public static Data.Project ToDataModel(this Domain.Project self) => new Data.Project()
         {
-            ProjectId = self.Id,
+            ProjectId = self.ProjectId,
             Name = self.Name,
             Description = self.Description,
             ParentInstanceId = self.InstanceId,
@@ -29,7 +29,6 @@ namespace MyRE.Core.Extensions
             Name = self.Name,
             AccountId = self.AccountId,
         };
-
-
+        
     }
 }

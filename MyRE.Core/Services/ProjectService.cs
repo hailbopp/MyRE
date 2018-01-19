@@ -28,5 +28,10 @@ namespace MyRE.Core.Services
         {
             await _projectRepository.DeleteAsync(projectId);
         }
+
+        public async Task<IEnumerable<Routine>> GetRoutines(Guid projectId)
+        {
+            return await _projectRepository.GetRoutines(projectId);
+        }
     }
 }

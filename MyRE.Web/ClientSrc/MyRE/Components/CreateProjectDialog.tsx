@@ -65,9 +65,9 @@ class CreateProjectDialogComponent extends React.PureComponent<IConnectedState &
     public render() {
 
         if (this.props.instances.count() === 1) {
-            if (this.props.instances.first().Id != this.props.newProject.InstanceId) {
+            if (this.props.instances.first().InstanceId != this.props.newProject.InstanceId) {
                 Promise.resolve()
-                    .then(_ => this.props.changeNewProjectProperties(this.props.newProject.Name, this.props.newProject.Description, this.props.instances.first().Id));                
+                    .then(_ => this.props.changeNewProjectProperties(this.props.newProject.Name, this.props.newProject.Description, this.props.instances.first().InstanceId));                
             }
         }
 

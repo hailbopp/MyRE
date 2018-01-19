@@ -9,13 +9,13 @@ export interface User {
 }
 
 export interface Instance {
-    Id: string;
+    InstanceId: string;
     Name: string;
     AccountId: string;
 }
 
 export interface ProjectListing {
-    Id: string;
+    ProjectId: string;
     Name: string;
     Description: string;
     InstanceId: string;
@@ -25,4 +25,13 @@ export interface CreateProjectRequest {
     Name: string;
     Description: string;
     InstanceId: string;
+}
+
+export interface Routine {
+    RoutineId: string;
+    Name: string;
+    Description: string;
+    ProjectId: string;
+    BlockId: string;
+    ExecutionMethod: string;
 }

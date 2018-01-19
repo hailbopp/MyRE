@@ -1,21 +1,15 @@
-﻿import { ProjectListing, CreateProjectRequest } from "MyRE/Api/Models";
+﻿import { ProjectListing, CreateProjectRequest, Routine } from "MyRE/Api/Models";
 import { List } from "immutable";
 import { ApiError } from "MyRE/Api/Models/Results";
+import { ApiResponseAction } from "MyRE/Actions";
 
-export type RequestProjectListApiAction = {
+export type ProjectListRequestApiAction = {
     type: 'API_REQUEST_PROJECT_LIST';
 }
 
-export type ReceivedProjectListApiAction = {
-    type: 'API_RECEIVED_PROJECTS';
-    projects: List<ProjectListing>;
-}
+export type ProjectListResponseApiAction = ApiResponseAction<ProjectListRequestApiAction, List<ProjectListing>>;
 
-export type FailedProjectListApiAction = {
-    type: 'API_FAILED_PROJECT_LIST';
-}
-
-export const requestProjectList = (): RequestProjectListApiAction => ({
+export const requestProjectList = (): ProjectListRequestApiAction => ({
     type: 'API_REQUEST_PROJECT_LIST'
 });
 
@@ -37,56 +31,59 @@ export const changeNewProjectData = (value: CreateProjectRequest): ChangeNewProj
     value,
 })
 
-export type CreateNewProjectApiAction = {
+export type CreateNewProjectRequestApiAction = {
     type: 'API_CREATE_NEW_PROJECT';
     newProject: CreateProjectRequest;
 }
 
-export type SuccessfullyCreatedProjectApiAction = {
-    type: 'API_SUCCESSFUL_CREATE_PROJECT';
-    newProject: ProjectListing;
-}
+export type CreateNewProjectResponseApiAction = ApiResponseAction<CreateNewProjectRequestApiAction, ProjectListing>;
 
-export type FailedCreateProjectApiAction = {
-    type: 'API_FAILED_CREATE_PROJECT';
-    error: ApiError;
-}
-
-export const createNewProject = (newProject: CreateProjectRequest): CreateNewProjectApiAction => ({
+export const createNewProject = (newProject: CreateProjectRequest): CreateNewProjectRequestApiAction => ({
     type: 'API_CREATE_NEW_PROJECT',
     newProject,
 });
 
-export type DeleteProjectApiAction = {
+export type DeleteProjectRequestApiAction = {
     type: 'API_DELETE_PROJECT';
     projectId: string;
 }
 
-export type SuccessfullyDeletedProjectApiAction = {
-    type: 'API_SUCCESSFUL_DELETE_PROJECT';
-}
+export type DeleteProjectResponseApiAction = ApiResponseAction<DeleteProjectRequestApiAction, null>;
 
-export type FailedDeleteProjectApiAction = {
-    type: 'API_FAILED_DELETE_PROJECT';
-    error: ApiError;
-}
-
-export const deleteProject = (projectId: string): DeleteProjectApiAction => ({
+export const deleteProject = (projectId: string): DeleteProjectRequestApiAction => ({
     type: 'API_DELETE_PROJECT',
     projectId
 });
 
-export type ProjectAction =
-    | RequestProjectListApiAction
-    | ReceivedProjectListApiAction
-    | FailedProjectListApiAction
+export type ListProjectRoutinesRequestApiAction = {
+    type: 'API_LIST_PROJECT_ROUTINES';
+    projectId: string;
+}
+export type ListProjectRoutinesResponseApiAction = ApiResponseAction<ListProjectRoutinesRequestApiAction, List<Routine>>;
+
+export const listProjectRoutines = (projectId: string): ListProjectRoutinesRequestApiAction => ({
+    type: 'API_LIST_PROJECT_ROUTINES',
+    projectId,
+})
+
+export type ProjectApiRequestAction =
+    | ProjectListRequestApiAction
+    | CreateNewProjectRequestApiAction
+    | DeleteProjectRequestApiAction
+    | ListProjectRoutinesRequestApiAction
+
+export type ProjectApiResponseAction =
+    | ProjectListResponseApiAction
+    | CreateNewProjectResponseApiAction
+    | DeleteProjectResponseApiAction
+    | ListProjectRoutinesResponseApiAction
+
+export type ProjectUIAction =
     | ToggleCreateProjectDialogUIAction
     | ChangeNewProjectDataUIAction
 
-    | CreateNewProjectApiAction
-    | SuccessfullyCreatedProjectApiAction
-    | FailedCreateProjectApiAction
 
-    | DeleteProjectApiAction
-    | SuccessfullyDeletedProjectApiAction
-    | FailedDeleteProjectApiAction
+export type ProjectAction =
+    | ProjectApiRequestAction
+    | ProjectApiResponseAction
+    | ProjectUIAction

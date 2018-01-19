@@ -1,7 +1,17 @@
-﻿import { User, ErrorResponse, ProjectListing, Instance, CreateProjectRequest } from "MyRE/Api/Models";
+﻿import { User, ErrorResponse, ProjectListing, Instance, CreateProjectRequest, Routine } from "MyRE/Api/Models";
 import { JsonConvert } from "json2typescript";
 import { Option, some, none } from "ts-option";
 import { ApiResult, ApiSuccess, ApiError } from "MyRE/Api/Models/Results";
+import { List } from "immutable";
+
+const convertArrayToImmutableList = <T>(res: ApiResult<Array<T>>): ApiResult<List<T>> => {
+    switch (res.result) {
+        case 'error':
+            return res;
+        case 'success':
+            return new ApiSuccess(List(res.data));
+    }
+}
 
 export class MyREApiClient {
     private baseUri: string;
@@ -10,7 +20,7 @@ export class MyREApiClient {
         this.baseUri = baseUri;
     }
 
-    private static paths = {
+    private paths = {
         logIn: '/api/Auth/Login',
         logOut: '/api/Auth/Logout',
         register: '/api/Auth/Register',
@@ -21,16 +31,8 @@ export class MyREApiClient {
         listProjects: '/api/Projects',
         createProject: '/api/Projects',
         deleteProject: (projectId: string) => `/api/Projects/${projectId}`,
-    }
 
-    private getEndpointUrl<S extends keyof typeof MyREApiClient.paths>(pathName: S, ...args: string[]) {
-        let path = MyREApiClient.paths[pathName];
-        if (typeof path === 'string' || path instanceof String) {
-            return this.baseUri + path;
-        } else {
-            let result = (<(...a: string[]) => string>path)(...args);
-            return result;
-        }        
+        listProjectRoutines: (projectId: string) => `/api/Projects/${projectId}/Routines`,
     }
 
     private async parseError(r: Response): Promise<ErrorResponse> {
@@ -54,7 +56,7 @@ export class MyREApiClient {
             }
         }
         let message = (await this.parseError(response)).Message;
-        return new ApiError(response.status, some(message));        
+        return new ApiError(response.status, some(message));
     }
 
     private async get<T>(input: RequestInfo): Promise<ApiResult<T>> {
@@ -64,7 +66,7 @@ export class MyREApiClient {
 
         return await this.performRequest<T>(input, init);
     }
-    
+
     private async post<T>(input: RequestInfo, body?: any): Promise<ApiResult<T>> {
         let init: RequestInit = {};
         init.body = JSON.stringify(body);
@@ -84,32 +86,35 @@ export class MyREApiClient {
 
         return await this.performRequest<any>(input, init);
     }
-        
+
     public logIn = async (email: string, password: string): Promise<ApiResult<any>> =>
-        this.post<any>(this.getEndpointUrl('logIn'), {
+        this.post<any>(this.paths.logIn, {
             Email: email, Password: password
         });
 
     public logOut = async (): Promise<ApiResult<any>> =>
-        this.post<any>(this.getEndpointUrl("logOut"));
+        this.post<any>(this.paths.logOut);
 
     public register = async (email: string, password: string): Promise<ApiResult<any>> =>
-        this.post<any>(this.getEndpointUrl('register'), {
+        this.post<any>(this.paths.register, {
             Email: email, Password: password
         });
 
     public getCurrentUser = async (): Promise<ApiResult<User>> =>
-        this.get<User>(this.getEndpointUrl('getCurrentUser'));
+        this.get<User>(this.paths.getCurrentUser);
 
-    public listUserInstances = async (userId: string): Promise<ApiResult<Instance[]>> =>
-        this.get<Instance[]>(this.getEndpointUrl('listUserInstances', userId));
+    public listUserInstances = async (userId: string): Promise<ApiResult<List<Instance>>> =>
+        this.get<Array<Instance>>(this.paths.listUserInstances(userId)).then(convertArrayToImmutableList);
 
-    public listProjects = async (): Promise<ApiResult<ProjectListing[]>> =>
-        await this.get<ProjectListing[]>(this.getEndpointUrl('listProjects'));
+    public listProjects = async (): Promise<ApiResult<List<ProjectListing>>> =>
+        await this.get<Array<ProjectListing>>(this.paths.listProjects).then(convertArrayToImmutableList);
 
     public createProject = async (newEntity: CreateProjectRequest): Promise<ApiResult<ProjectListing>> =>
-        this.post<ProjectListing>(this.getEndpointUrl('createProject'), newEntity);
+        this.post<ProjectListing>(this.paths.createProject, newEntity);
 
     public deleteProject = async (projectId: string): Promise<ApiResult<any>> =>
-        this.delete(this.getEndpointUrl('deleteProject', projectId));
+        this.delete(this.paths.deleteProject(projectId));
+
+    public listProjectRoutines = async (projectId: string): Promise<ApiResult<List<Routine>>> =>
+        this.get<Array<Routine>>(this.paths.listProjectRoutines(projectId)).then(convertArrayToImmutableList);
 }

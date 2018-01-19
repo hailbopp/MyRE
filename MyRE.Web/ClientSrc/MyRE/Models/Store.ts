@@ -40,8 +40,40 @@ export namespace Store {
         retrievingInstances: boolean;
     }
 
+    export interface Statement {
+        statementId: string;
+    }
+
+    export interface BlockStatement {
+        blockStatementId: string;
+        position: number;
+        statement: Option<Statement>;
+    }
+
+    export interface Block {
+        blockId: string;
+        statements: Option<List<BlockStatement>>;
+    }
+
+    export interface Routine {
+        routineId: string;
+        name: string;
+        description: string;
+        projectId: string;
+        block: Option<Block>;
+    }
+
+    export interface Project {
+        projectId: string;
+        name: string;
+        description: string;
+        instanceId: string;
+
+        routines: Option<List<Routine>>;
+    }
+
     export interface Projects {
-        projects: Option<List<ProjectListing>>;
+        projects: Option<List<Project>>;
         retrievingProjects: boolean;
 
         createProjectModalOpen: boolean;

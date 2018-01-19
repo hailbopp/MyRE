@@ -1,19 +1,31 @@
 ﻿import { List } from "immutable";
 import { Instance } from "MyRE/Api/Models";
+import { ApiResponseAction } from "MyRE/Actions";
 
 
 
-export type RequestUserInstanceListApiAction = {
+export type UserInstanceListRequestApiAction = {
     type: 'API_REQUEST_USER_INSTANCE_LIST';
     userId: string;
 }
 
-export type ReceivedUserInstanceListApiAction = {
-    type: 'API_RECEIVED_USER_INSTANCE_LIST';
-    instances: List<Instance>;
-}
+export type UserInstanceListResponseApiAction = ApiResponseAction<UserInstanceListRequestApiAction, List<Instance>>;
 
-export const listUserInstances = (userId: string): RequestUserInstanceListApiAction => ({
+export const listUserInstances = (userId: string): UserInstanceListRequestApiAction => ({
     type: 'API_REQUEST_USER_INSTANCE_LIST',
     userId,
 });
+
+export type InstanceApiRequestAction =
+    | UserInstanceListRequestApiAction;
+
+export type InstanceApiResponseAction =
+    | UserInstanceListResponseApiAction;
+
+export type InstanceApiAction =
+    | InstanceApiRequestAction
+    | InstanceApiResponseAction;
+
+export type InstanceAction =
+    | InstanceApiAction;
+

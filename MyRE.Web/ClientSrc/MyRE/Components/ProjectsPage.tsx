@@ -1,34 +1,28 @@
 ﻿import * as React from 'react';
 import { Store } from 'MyRE/Models/Store';
 import { Dispatch, connect } from 'react-redux';
-import { RouteComponentProps } from 'react-router';
+import { RouteComponentProps, Route } from 'react-router';
 import { Container, Table, Row, Col, Button } from 'reactstrap';
-import { ProjectListing } from 'MyRE/Api/Models';
 import { List } from 'immutable';
 import { Option } from 'ts-option';
-import { requestProjectList, toggleCreateProjectDialog, deleteProject } from 'MyRE/Actions/Projects';
+import { toggleCreateProjectDialog, deleteProject } from 'MyRE/Actions/Projects';
 import { CreateProjectDialog } from 'MyRE/Components/CreateProjectDialog';
+import { PageHeader } from 'MyRE/Components/PageHeader';
 
 interface IOwnProps { }
 interface IConnectedState {
-    projects: Option<List<ProjectListing>>;
-    retrievingProjects: boolean;
+    projects: Option<List<Store.Project>>;
 }
 interface IConnectedDispatch {
-    getProjects: () => void;
     toggleCreateModal: () => void;
     deleteProject: (projectId: string) => void;
 }
 
 const mapStateToProps = (state: Store.All, ownProps: IOwnProps): IConnectedState => ({
     projects: state.projects.projects,
-    retrievingProjects: state.projects.retrievingProjects,
 });
 
 const mapDispatchToProps = (dispatch: Dispatch<Store.All>): IConnectedDispatch => ({
-    getProjects: () => {
-        dispatch(requestProjectList());
-    },
     toggleCreateModal: () => {
         dispatch(toggleCreateProjectDialog());
     },
@@ -42,21 +36,15 @@ class ProjectsPageComponent extends React.Component<IOwnProps & IConnectedDispat
         return () => {
             this.props.deleteProject(projectId);
         }
-    } 
-
-    public componentWillMount() {
-        if (!this.props.retrievingProjects && this.props.projects.isEmpty) {
-            this.props.getProjects();
-        }
     }
-
+    
     public render() {
         return (
             <div>
                 <Container>
                     <Row>
                         <Col xs="12" sm="10">
-                            <h4>Projects</h4>
+                            <PageHeader>Projects</PageHeader>
                         </Col>
                         <Col xs="12" sm="2">
                             <Button color="primary" className="float-right" size="sm" onClick={this.props.toggleCreateModal}>New Project</Button>
@@ -75,13 +63,13 @@ class ProjectsPageComponent extends React.Component<IOwnProps & IConnectedDispat
                                 this.props.projects.isDefined &&
                                 this.props.projects.get.toArray().map((p, idx) =>
                                     <tr key={idx}>
-                                        <td>{p.Name}</td>
-                                        <td>{p.Description}</td>
+                                        <td>{p.name}</td>
+                                        <td>{p.description}</td>
                                         <td>
                                             <span className="float-right">
-                                                <Button outline size="sm" color="primary" onClick={() => this.props.history.push(`/projects/${p.Id}/edit`)}>Edit</Button>
+                                                <Button outline size="sm" color="primary" onClick={() => this.props.history.push(`/projects/${p.projectId}`)}>Edit</Button>
                                                 {' '}
-                                                <Button outline size="sm" color="danger" onClick={() => this.props.deleteProject(p.Id)}>Delete</Button>
+                                                <Button outline size="sm" color="danger" onClick={() => this.props.deleteProject(p.projectId)}>Delete</Button>
                                             </span>
                                         </td>
                                     </tr>)

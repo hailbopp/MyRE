@@ -1,8 +1,8 @@
-﻿export type OpenNavPaneAction = {
+﻿type OpenNavPaneAction = {
     type: 'NAV_PANE_OPEN',
 }
 
-export type CloseNavPaneAction = {
+type CloseNavPaneAction = {
     type: 'NAV_PANE_CLOSE',
 }
 
@@ -13,3 +13,7 @@ export const openNavPane = (): OpenNavPaneAction => ({
 export const closeNavPane = (): CloseNavPaneAction => ({
     type: 'NAV_PANE_CLOSE'
 })
+
+export type NavAction =
+    | OpenNavPaneAction
+    | CloseNavPaneAction;

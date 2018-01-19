@@ -1,6 +1,8 @@
 ﻿import { User } from "MyRE/Api/Models";
 import { Option, some } from "ts-option";
 import { Store } from "MyRE/Models/Store";
+import { ApiResponseAction } from "MyRE/Actions";
+import { ApiError } from "MyRE/Api/Models/Results";
 
 export interface Credentials {
     email: string;
@@ -17,20 +19,13 @@ export const clearAuthMessages = (): ClearAuthScreenStatusMessagesAction => ({
 })
 
 // Get current User
-export type RequestCurrentUserApiAction = {
+export type GetCurrentUserRequestApiAction = {
     type: 'API_REQUEST_CURRENT_USER';
 }
 
-export type ReceivedCurrentUserApiAction = {
-    type: 'API_RECEIVED_CURRENT_USER';
-    user: User;
-}
+export type GetCurrentUserResponseApiAction = ApiResponseAction<GetCurrentUserRequestApiAction, User>; 
 
-export type FailedGetCurrentUserApiAction = {
-    type: 'API_FAILED_TO_GET_CURRENT_USER';
-}
-
-export const retrieveCurrentUser = (): RequestCurrentUserApiAction => ({
+export const retrieveCurrentUser = (): GetCurrentUserRequestApiAction => ({
     type: 'API_REQUEST_CURRENT_USER',
 });
 
@@ -56,79 +51,68 @@ export const updateRegistrationForm = (values: Store.EmailPasswordForm): UpdateR
 });
 
 // Log in
-export type AttemptLoginApiAction = {
+export type AttemptLoginRequestApiAction = {
     type: 'API_ATTEMPT_LOGIN';
     credentials: Credentials;
 }
+export type AttemptLoginResponseApiAction = ApiResponseAction<AttemptLoginRequestApiAction, any>;
 
-export type SuccessfulLoginApiAction = {
-    type: 'API_SUCCESSFUL_LOGIN';
-}
-
-export type FailedLoginApiAction = {
-    type: 'API_FAILED_LOGIN';
-    message: string;
-}
-
-export const attemptLogin = (credentials: Credentials): AttemptLoginApiAction => ({
+export const attemptLogin = (credentials: Credentials): AttemptLoginRequestApiAction => ({
     type: 'API_ATTEMPT_LOGIN',
     credentials: credentials,
 });
 
-export const sendLoginError = (message: string): FailedLoginApiAction => ({
-    type: 'API_FAILED_LOGIN',
-    message: message
+export const sendLoginError = (message: string): AttemptLoginResponseApiAction => ({
+    type: 'API_RESPONSE',
+    action: 'API_ATTEMPT_LOGIN',
+    response: new ApiError(400, some(message)),
 });
 
 // Log out
-export type LogOutApiAction = {
+export type LogOutRequestApiAction = {
     type: 'API_LOGOUT';
 }
 
-export type SuccessfulLogoutApiAction = {
-    type: 'API_SUCCESSFUL_LOGOUT';
-}
+export type LogOutResponseApiAction = ApiResponseAction<LogOutRequestApiAction, any>;
 
-export const initiateLogout = (): LogOutApiAction => ({
+export const initiateLogout = (): LogOutRequestApiAction => ({
     type: 'API_LOGOUT',
-});
+})
 
 // Registration
-export type AttemptAccountRegistrationApiAction = {
+export type RegisterRequestApiAction = {
     type: 'API_ATTEMPT_REGISTER';
     credentials: Credentials;
 }
 
-export type SuccessfulRegistrationApiAction = {
-    type: 'API_SUCCESSFUL_REGISTRATION';
-}
+export type RegisterResponseApiAction = ApiResponseAction<RegisterRequestApiAction, any>;
 
-export type FailedRegistrationApiAction = {
-    type: 'API_FAILED_REGISTRATION';
-    message: Option<string>;
-}
-
-export const attemptRegistration = (credentials: Credentials): AttemptAccountRegistrationApiAction => ({
+export const attemptRegistration = (credentials: Credentials): RegisterRequestApiAction => ({
     type: 'API_ATTEMPT_REGISTER',
     credentials,
 });
 
-export type AuthAction =
+export type AuthApiRequestAction =
+    | RegisterRequestApiAction
+    | AttemptLoginRequestApiAction
+    | LogOutRequestApiAction
+    | GetCurrentUserRequestApiAction;
+
+export type AuthApiResponseAction =
+    | AttemptLoginResponseApiAction
+    | RegisterResponseApiAction
+    | LogOutResponseApiAction
+    | GetCurrentUserResponseApiAction;
+
+export type AuthApiAction =
+    | AuthApiRequestAction
+    | AuthApiResponseAction;
+
+export type AuthUIAction =
     | UpdateLoginFormValues
-    | UpdateRegistrationFormValues
-
-    | AttemptAccountRegistrationApiAction
-    | SuccessfulRegistrationApiAction
-    | FailedRegistrationApiAction
-
-    | AttemptLoginApiAction
-    | SuccessfulLoginApiAction
-    | FailedLoginApiAction
-    | LogOutApiAction
-    | SuccessfulLogoutApiAction
-
-    | RequestCurrentUserApiAction
-    | ReceivedCurrentUserApiAction
-    | FailedGetCurrentUserApiAction
-
+    | UpdateRegistrationFormValues    
     | ClearAuthScreenStatusMessagesAction;
+
+export type AuthAction =
+    | AuthApiAction
+    | AuthUIAction;
