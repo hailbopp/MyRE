@@ -22,7 +22,7 @@ export type IProjectsProperties = IOwnProps & IConnectedState & IConnectedDispat
 
 const mapStateToProps = (state: Store.All, ownProps: IOwnProps): IConnectedState => ({
     projects: state.projects.projects,
-    retrievingProjects: state.projects.retrievingProjects,
+    retrievingProjects: state.asyncActions.currentAsyncActions.toArray().some(a => a.type === 'API_REQUEST_PROJECT_LIST'),
 });
 
 const mapDispatchToProps = (dispatch: Dispatch<Store.All>): IConnectedDispatch => ({

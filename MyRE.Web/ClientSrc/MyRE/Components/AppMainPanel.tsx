@@ -26,7 +26,7 @@ interface IConnectedDispatch {
 
 const mapStateToProps = (state: Store.All, ownProps: IOwnProps): IConnectedState => ({
     instances: state.instanceState.instances,
-    instancesLoading: state.instanceState.retrievingInstances,
+    instancesLoading: state.asyncActions.currentAsyncActions.toArray().some(a => a.type === 'API_REQUEST_USER_INSTANCE_LIST'),
     isLoggedIn: state.auth.isLoggedIn,
     userId: state.auth.currentUser.map(u => u.UserId),
 });

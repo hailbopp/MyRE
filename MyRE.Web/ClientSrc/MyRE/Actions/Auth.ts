@@ -21,12 +21,14 @@ export const clearAuthMessages = (): ClearAuthScreenStatusMessagesAction => ({
 // Get current User
 export type GetCurrentUserRequestApiAction = {
     type: 'API_REQUEST_CURRENT_USER';
+    asyncActionType: 'API_REQUEST';
 }
 
-export type GetCurrentUserResponseApiAction = ApiResponseAction<GetCurrentUserRequestApiAction, User>; 
+export type GetCurrentUserResponseApiAction = ApiResponseAction<GetCurrentUserRequestApiAction, User>;
 
 export const retrieveCurrentUser = (): GetCurrentUserRequestApiAction => ({
     type: 'API_REQUEST_CURRENT_USER',
+    asyncActionType: 'API_REQUEST',
 });
 
 // Login/Registration Form Values
@@ -53,35 +55,43 @@ export const updateRegistrationForm = (values: Store.EmailPasswordForm): UpdateR
 // Log in
 export type AttemptLoginRequestApiAction = {
     type: 'API_ATTEMPT_LOGIN';
+    asyncActionType: 'API_REQUEST';
     credentials: Credentials;
 }
 export type AttemptLoginResponseApiAction = ApiResponseAction<AttemptLoginRequestApiAction, any>;
 
 export const attemptLogin = (credentials: Credentials): AttemptLoginRequestApiAction => ({
     type: 'API_ATTEMPT_LOGIN',
+    asyncActionType: 'API_REQUEST',
     credentials: credentials,
 });
 
 export const sendLoginError = (message: string): AttemptLoginResponseApiAction => ({
     type: 'API_RESPONSE',
-    action: 'API_ATTEMPT_LOGIN',
+    requestType: 'API_ATTEMPT_LOGIN',
+    requestAction: {
+        type: 'API_ATTEMPT_LOGIN', asyncActionType: 'API_REQUEST', credentials: { email: '', password: '' }
+    },
     response: new ApiError(400, some(message)),
 });
 
 // Log out
 export type LogOutRequestApiAction = {
     type: 'API_LOGOUT';
+    asyncActionType: 'API_REQUEST';
 }
 
 export type LogOutResponseApiAction = ApiResponseAction<LogOutRequestApiAction, any>;
 
 export const initiateLogout = (): LogOutRequestApiAction => ({
     type: 'API_LOGOUT',
+    asyncActionType: 'API_REQUEST',
 })
 
 // Registration
 export type RegisterRequestApiAction = {
     type: 'API_ATTEMPT_REGISTER';
+    asyncActionType: 'API_REQUEST';
     credentials: Credentials;
 }
 
@@ -89,6 +99,7 @@ export type RegisterResponseApiAction = ApiResponseAction<RegisterRequestApiActi
 
 export const attemptRegistration = (credentials: Credentials): RegisterRequestApiAction => ({
     type: 'API_ATTEMPT_REGISTER',
+    asyncActionType: 'API_REQUEST',
     credentials,
 });
 
@@ -110,7 +121,7 @@ export type AuthApiAction =
 
 export type AuthUIAction =
     | UpdateLoginFormValues
-    | UpdateRegistrationFormValues    
+    | UpdateRegistrationFormValues
     | ClearAuthScreenStatusMessagesAction;
 
 export type AuthAction =

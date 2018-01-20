@@ -9,7 +9,7 @@ export const reduceProjects = (state: Store.Projects, action: AppAction): Store.
 
     switch (action.type) {
         case 'API_RESPONSE':
-            if (action.action === 'API_REQUEST_PROJECT_LIST') {
+            if (action.requestType === 'API_REQUEST_PROJECT_LIST') {
                 if (action.response.result === 'success') {
                     newState.projects = some(List(action.response.data.map(p => ({
                         projectId: p.ProjectId,
@@ -18,41 +18,48 @@ export const reduceProjects = (state: Store.Projects, action: AppAction): Store.
                         instanceId: p.InstanceId,
                         routines: none,
                     }))));
-                    newState.retrievingProjects = false;
                 }
-            } else if (action.action === 'API_CREATE_NEW_PROJECT') {
+            } else if (action.requestType === 'API_CREATE_NEW_PROJECT') {
                 if (action.response.result === "success") {
-                    newState.newProjectSubmitting = false;
                     newState.createProjectModalOpen = false;
                     newState.createProjectMessage = none;
                     newState.newProject = { Name: '', Description: '', InstanceId: '' };
                 } else {
-                    newState.newProjectSubmitting = false;
                     newState.createProjectMessage = some<Store.AlertMessage>({
                         level: 'danger',
                         message: action.response.message.getOrElse(action.response.status.toString()),
                     });
                 }
-            } else if (action.action === 'API_LOGOUT') {
+            } else if (action.requestType === 'API_LOGOUT') {
                 if (action.response.result === "success") {
                     newState.projects = none;
-                    newState.retrievingProjects = false;
                 }
-            } else if (action.action === 'API_ATTEMPT_LOGIN') {
+            } else if (action.requestType === 'API_ATTEMPT_LOGIN') {
                 if (action.response.result === "success") {
                     newState.projects = none;
-                    newState.retrievingProjects = false;
                 } else {
                     newState.projects = some(List([]));
-                    newState.retrievingProjects = false;
+                }
+            } else if (action.requestType === 'API_LIST_PROJECT_ROUTINES') {
+                if (action.response.result === 'success') {
+                    let response = action.response;
+                    newState.projects = some(List(state.projects.getOrElse(List([])).map(p => {
+                        if (p.projectId === action.requestAction.projectId) {
+                            let newProject = Object.assign({}, p);
+                            newProject.routines = some(response.data.map((r): Store.Routine => ({
+                                routineId: r.RoutineId,
+                                projectId: r.ProjectId,
+                                name: r.Name,
+                                description: r.Description,
+                                block: none,
+                            })).toList());
+                        } 
+                        return p;
+                    })))
                 }
             }
             return newState;
-
-        case 'API_REQUEST_PROJECT_LIST':
-            newState.retrievingProjects = true
-            return newState;
-
+            
         case 'UI_TOGGLE_CREATE_PROJECT_DIALOG':
             if (state.createProjectModalOpen) {
                 // Close the modal and clear out state data.
@@ -68,7 +75,6 @@ export const reduceProjects = (state: Store.Projects, action: AppAction): Store.
             return newState;
 
         case 'API_CREATE_NEW_PROJECT':
-            newState.newProjectSubmitting = true;
             newState.createProjectMessage = none;
             return newState;
             

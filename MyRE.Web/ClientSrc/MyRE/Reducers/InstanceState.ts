@@ -7,27 +7,19 @@ import { AttemptLoginResponseApiAction, LogOutResponseApiAction } from "MyRE/Act
 export const reduceInstanceState = (state: Store.InstanceState, action: AppAction): Store.InstanceState => {
     switch (action.type) {
         case 'API_RESPONSE':
-            if (action.action === 'API_REQUEST_USER_INSTANCE_LIST') {
+            if (action.requestType === 'API_REQUEST_USER_INSTANCE_LIST') {
                 if (action.response.result === "success") {
                     return {
                         instances: some(action.response.data),
-                        retrievingInstances: false,
                     };
                 }
-            } else if (action.action === 'API_ATTEMPT_LOGIN' || action.action === 'API_LOGOUT') {
+            } else if (action.requestType === 'API_ATTEMPT_LOGIN' || action.requestType === 'API_LOGOUT') {
                 if (action.response.result === "success") {
                     return {
                         instances: none,
-                        retrievingInstances: false,
                     };
                 }
-            } 
-
-        case 'API_REQUEST_USER_INSTANCE_LIST':
-            return {
-                instances: state.instances,
-                retrievingInstances: true,
-            };
+            }
 
         default:
             return state;

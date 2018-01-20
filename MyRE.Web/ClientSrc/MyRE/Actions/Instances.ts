@@ -6,6 +6,7 @@ import { ApiResponseAction } from "MyRE/Actions";
 
 export type UserInstanceListRequestApiAction = {
     type: 'API_REQUEST_USER_INSTANCE_LIST';
+    asyncActionType: 'API_REQUEST';
     userId: string;
 }
 
@@ -13,6 +14,7 @@ export type UserInstanceListResponseApiAction = ApiResponseAction<UserInstanceLi
 
 export const listUserInstances = (userId: string): UserInstanceListRequestApiAction => ({
     type: 'API_REQUEST_USER_INSTANCE_LIST',
+    asyncActionType: 'API_REQUEST',
     userId,
 });
 

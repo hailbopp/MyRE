@@ -13,14 +13,14 @@ export const reduceAuth = (state: Store.Auth, action: AppAction): Store.Auth => 
 
     switch (action.type) {
         case 'API_RESPONSE':
-            if (action.action === 'API_REQUEST_CURRENT_USER') {
+            if (action.requestType === 'API_REQUEST_CURRENT_USER') {
                 if (action.response.result === "success") {
                     newState.currentUser = some(action.response.data);
                     newState.isLoggedIn = some(true);
                 } else {
                     newState.isLoggedIn = some(false);
                 }
-            } else if (action.action === 'API_ATTEMPT_REGISTER') {
+            } else if (action.requestType === 'API_ATTEMPT_REGISTER') {
                 if (action.response.result === "success") {
                     newState.registrationMessage = some({
                         level: 'success',
@@ -34,7 +34,7 @@ export const reduceAuth = (state: Store.Auth, action: AppAction): Store.Auth => 
                         message: action.response.message.getOrElse("There was a problem completing your registration."),
                     });
                 }
-            } else if (action.action === 'API_ATTEMPT_LOGIN') {
+            } else if (action.requestType === 'API_ATTEMPT_LOGIN') {
                 if (action.response.result === "success") {
                     newState.isLoggedIn = some(true);
                     newState.registrationForm = Object.assign({}, baseAuthFormState);
@@ -46,7 +46,7 @@ export const reduceAuth = (state: Store.Auth, action: AppAction): Store.Auth => 
                     });
                     return newState;
                 }
-            } else if (action.action === 'API_LOGOUT') {
+            } else if (action.requestType === 'API_LOGOUT') {
                 if (action.response.result === 'success') {
                     newState.currentUser = none;
                     newState.isLoggedIn = some(false);

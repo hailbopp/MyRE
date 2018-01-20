@@ -12,14 +12,14 @@ import { ApiServiceMiddleware } from 'MyRE/Middleware/Api';
 export const APP_NAME = "MyRE";
 const globalStyles = require('./global.scss');
 
-const middleware = [
-    ApiServiceMiddleware,
-    LoggerMiddleware,
-]
-
-export const store: ReduxStore<Store.All> = createStore(reduce, initialState, applyMiddleware(...middleware));
-
 export const init = (debug: boolean = false) => {
+    const middleware = [
+        ApiServiceMiddleware,
+        LoggerMiddleware,
+    ]
+
+    const store: ReduxStore<Store.All> = createStore(reduce, initialState, applyMiddleware(...middleware));
+
     if (debug) {
         console.warn(`[${APP_NAME}] Debug mode enabled.`);
     }

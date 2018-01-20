@@ -1,7 +1,7 @@
 ﻿import { Option } from 'ts-option';
 import { List } from 'immutable';
 import { User, Instance, ProjectListing, CreateProjectRequest } from "MyRE/Api/Models";
-import { AppAction } from 'MyRE/Actions';
+import { AppAction, ApiRequestAction } from 'MyRE/Actions';
 
 
 export namespace Store {
@@ -37,7 +37,6 @@ export namespace Store {
     export interface InstanceState {
         // If instances is none, then we haven't yet attempted to grab instances from the API.
         instances: Option<List<Instance>>;
-        retrievingInstances: boolean;
     }
 
     export interface Statement {
@@ -74,18 +73,22 @@ export namespace Store {
 
     export interface Projects {
         projects: Option<List<Project>>;
-        retrievingProjects: boolean;
 
         createProjectModalOpen: boolean;
         newProject: CreateProjectRequest;
-        newProjectSubmitting: boolean;
         createProjectMessage: Option<AlertMessage>;
     }
 
+    export interface AsyncActions {
+        currentAsyncActions: List<ApiRequestAction>;
+    }
+    
     export interface All {
         auth: Auth;
         nav: Nav;
         instanceState: InstanceState;
         projects: Projects;
+
+        asyncActions: AsyncActions;
     }
 }

@@ -6,6 +6,7 @@ import { List } from "immutable";
 import { AppAction } from "MyRE/Actions";
 import { reduceInstanceState } from "MyRE/Reducers/InstanceState";
 import { reduceProjects } from "MyRE/Reducers/Projects";
+import { reduceAsyncActions } from "MyRE/Reducers/AsyncActions";
 
 export const initialState: Store.All = {
     auth: {
@@ -31,12 +32,10 @@ export const initialState: Store.All = {
 
     instanceState: {
         instances: none,
-        retrievingInstances: false,
     },
 
     projects: {
         projects: none,
-        retrievingProjects: false,
 
         createProjectModalOpen: false,
         newProject: {
@@ -44,9 +43,12 @@ export const initialState: Store.All = {
             Description: '',
             InstanceId: '',
         },
-        newProjectSubmitting: false,
         createProjectMessage: none,
-    }
+    },
+
+    asyncActions: {
+        currentAsyncActions: List([])
+    },
 }
 
 export const reduce = (state: Store.All, action: any): Store.All => ({
@@ -54,4 +56,5 @@ export const reduce = (state: Store.All, action: any): Store.All => ({
     nav: reduceNav(state.nav, action),
     instanceState: reduceInstanceState(state.instanceState, action),
     projects: reduceProjects(state.projects, action),
+    asyncActions: reduceAsyncActions(state.asyncActions, action),
 })

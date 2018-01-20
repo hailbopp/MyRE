@@ -5,12 +5,14 @@ import { ApiResponseAction } from "MyRE/Actions";
 
 export type ProjectListRequestApiAction = {
     type: 'API_REQUEST_PROJECT_LIST';
+    asyncActionType: 'API_REQUEST';
 }
 
 export type ProjectListResponseApiAction = ApiResponseAction<ProjectListRequestApiAction, List<ProjectListing>>;
 
 export const requestProjectList = (): ProjectListRequestApiAction => ({
-    type: 'API_REQUEST_PROJECT_LIST'
+    type: 'API_REQUEST_PROJECT_LIST',
+    asyncActionType: 'API_REQUEST',
 });
 
 export type ToggleCreateProjectDialogUIAction = {
@@ -33,6 +35,7 @@ export const changeNewProjectData = (value: CreateProjectRequest): ChangeNewProj
 
 export type CreateNewProjectRequestApiAction = {
     type: 'API_CREATE_NEW_PROJECT';
+    asyncActionType: 'API_REQUEST';
     newProject: CreateProjectRequest;
 }
 
@@ -40,11 +43,13 @@ export type CreateNewProjectResponseApiAction = ApiResponseAction<CreateNewProje
 
 export const createNewProject = (newProject: CreateProjectRequest): CreateNewProjectRequestApiAction => ({
     type: 'API_CREATE_NEW_PROJECT',
+    asyncActionType: 'API_REQUEST',
     newProject,
 });
 
 export type DeleteProjectRequestApiAction = {
     type: 'API_DELETE_PROJECT';
+    asyncActionType: 'API_REQUEST';
     projectId: string;
 }
 
@@ -52,17 +57,20 @@ export type DeleteProjectResponseApiAction = ApiResponseAction<DeleteProjectRequ
 
 export const deleteProject = (projectId: string): DeleteProjectRequestApiAction => ({
     type: 'API_DELETE_PROJECT',
+    asyncActionType: 'API_REQUEST',
     projectId
 });
 
 export type ListProjectRoutinesRequestApiAction = {
     type: 'API_LIST_PROJECT_ROUTINES';
+    asyncActionType: 'API_REQUEST';
     projectId: string;
 }
 export type ListProjectRoutinesResponseApiAction = ApiResponseAction<ListProjectRoutinesRequestApiAction, List<Routine>>;
 
 export const listProjectRoutines = (projectId: string): ListProjectRoutinesRequestApiAction => ({
     type: 'API_LIST_PROJECT_ROUTINES',
+    asyncActionType: 'API_REQUEST',
     projectId,
 })
 

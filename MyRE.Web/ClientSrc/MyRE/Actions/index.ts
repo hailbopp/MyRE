@@ -6,14 +6,17 @@ import { ApiResult } from 'MyRE/Api/Models/Results';
 
 type UndefinedAction = { type: '' };
 
-export type ApiRequestAction =
+type ApiRequestActionUnion =
     | Auth.AuthApiRequestAction
     | Projects.ProjectApiRequestAction
     | Instances.InstanceApiRequestAction;    
 
+export type ApiRequestAction = ApiRequestActionUnion & { asyncActionType: 'API_REQUEST'; };
+
 export interface ApiResponseAction<TRequestAction extends ApiRequestAction, TResponse> {
     type: 'API_RESPONSE';
-    action: TRequestAction['type'];
+    requestType: TRequestAction['type'];
+    requestAction: TRequestAction;
     response: ApiResult<TResponse>;
 }
 
