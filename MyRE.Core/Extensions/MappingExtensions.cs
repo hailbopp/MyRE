@@ -25,7 +25,7 @@ namespace MyRE.Core.Extensions
         // Instance
         public static Domain.Instance ToDomainModel(this Data.AppInstance self) => new Domain.Instance()
         {
-            Id = self.AppInstanceId,
+            InstanceId = self.AppInstanceId,
             Name = self.Name,
             AccountId = self.AccountId,
         };

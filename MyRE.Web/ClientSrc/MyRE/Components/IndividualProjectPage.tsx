@@ -6,6 +6,8 @@ import { Container } from 'reactstrap';
 import { PageHeader } from 'MyRE/Components/PageHeader';
 import { ProjectListing } from 'MyRE/Api/Models';
 import { List } from 'immutable';
+import { RoutineList } from 'MyRE/Components/RoutineList';
+import { ProjectEditor } from 'MyRE/Components/ProjectEditor';
 
 type IOwnProps = RouteComponentProps<{ projectId: string; }>;
 interface IConnectedState {
@@ -31,9 +33,7 @@ class IndividualProjectPageComponent extends React.PureComponent<IIndividualProj
         return (
             <Container>
                 <PageHeader>{this.props.projectMetadata && this.props.projectMetadata.name}</PageHeader>
-                <Switch>
-                    { /*<Route exact path="/projects/:projectId" component={ProjectEditPage} />*/ }
-                </Switch>
+                {this.props.projectMetadata && <ProjectEditor project={this.props.projectMetadata} />}
             </Container>
         );
     }
