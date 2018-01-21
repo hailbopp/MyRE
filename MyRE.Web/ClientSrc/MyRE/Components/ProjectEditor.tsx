@@ -1,12 +1,9 @@
 ﻿import * as React from 'react';
 import { connect, Dispatch } from 'react-redux';
 import { Store } from 'MyRE/Models/Store';
-import * as brace from 'brace';
-import AceEditor from 'react-ace';
 
-import 'brace/theme/kuroir';
-import 'brace/mode/javascript';
 import { List } from 'immutable';
+import { Row, Col } from 'reactstrap';
 
 interface IOwnProps {
     project: Store.Project;
@@ -27,17 +24,14 @@ const mapDispatchToProps = (dispatch: Dispatch<Store.All>): IConnectedDispatch =
 });
 
 
-
 class ProjectEditorComponent extends React.PureComponent<IProjectEditorProperties> {
-	public render() {
-		return (
-            <div>
-                <AceEditor mode="javascript" theme="kuroir" name="editor-{this.props.project.projectId}"
-                    width="100%"
-                    value={this.props.project.projectId} />
-			</div>
-		);
-	}
+    public render() {
+
+        return (
+            <Row>
+            </Row>
+        );
+    }
 }
 
 export const ProjectEditor =

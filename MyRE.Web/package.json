@@ -40,6 +40,7 @@
     "deep-equal": "^1.0.1",
     "immutable": "^3.8.2",
     "json2typescript": "^1.0.5",
+    "parjs": "^0.7.0",
     "radium": "^0.19.6",
     "react": "^16.0.0",
     "react-ace": "^5.9.0",
@@ -51,7 +52,6 @@
     "reactstrap": "^5.0.0-alpha.4",
     "redux": "^3.7.2",
     "ts-option": "^1.1.4",
-    "ts-pegjs": "^0.1.13",
     "typescript": "^2.7.0-dev.20171226"
   }
 }

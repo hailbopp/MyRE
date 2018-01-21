@@ -18,20 +18,30 @@
 
   <ItemGroup>
     <Compile Remove="ClientSrc\FreeCoRE\**" />
+    <Compile Remove="Services\**" />
     <Content Remove="ClientSrc\FreeCoRE\**" />
+    <Content Remove="Services\**" />
     <EmbeddedResource Remove="ClientSrc\FreeCoRE\**" />
+    <EmbeddedResource Remove="Services\**" />
     <None Remove="ClientSrc\FreeCoRE\**" />
+    <None Remove="Services\**" />
   </ItemGroup>
 
   <ItemGroup>
     <None Remove="ClientSrc\MyRE\Actions\Projects.ts" />
     <None Remove="ClientSrc\MyRE\Components\ProjectsPage.tsx" />
+    <None Remove="ClientSrc\MyRE\Reducers\AsyncActions.ts" />
     <None Remove="ClientSrc\MyRE\Reducers\Projects.ts" />
+    <None Remove="ClientSrc\MyRE\Utils\DslParser.ts" />
+    <None Remove="ClientSrc\MyRE\Utils\Models\Block.ts" />
+    <None Remove="ClientSrc\MyRE\Utils\Models\Expression.ts" />
+    <None Remove="ClientSrc\MyRE\Utils\Models\Statement.ts" />
+    <None Remove="ClientSrc\MyRE\Utils\Models\StatementTypes.ts" />
+    <None Remove="ClientSrc\MyRE\Utils\Parser.ts" />
     <None Remove="ClientSrc\typings\immutable.d.ts" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Services\" />
     <Folder Include="wwwroot\" />
   </ItemGroup>
 
@@ -56,7 +66,13 @@
   <ItemGroup>
     <TypeScriptCompile Include="ClientSrc\MyRE\Actions\Projects.ts" />
     <TypeScriptCompile Include="ClientSrc\MyRE\Components\ProjectsPage.tsx" />
+    <TypeScriptCompile Include="ClientSrc\MyRE\Reducers\AsyncActions.ts" />
     <TypeScriptCompile Include="ClientSrc\MyRE\Reducers\Projects.ts" />
+    <TypeScriptCompile Include="ClientSrc\MyRE\Utils\DslParser.ts" />
+    <TypeScriptCompile Include="ClientSrc\MyRE\Utils\Models\Block.ts" />
+    <TypeScriptCompile Include="ClientSrc\MyRE\Utils\Models\Expression.ts" />
+    <TypeScriptCompile Include="ClientSrc\MyRE\Utils\Models\Statement.ts" />
+    <TypeScriptCompile Include="ClientSrc\MyRE\Utils\Models\StatementTypes.ts" />
     <TypeScriptCompile Include="ClientSrc\typings\immutable.d.ts" />
   </ItemGroup>
 </Project>
