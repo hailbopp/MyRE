@@ -51,6 +51,7 @@
     "reactstrap": "^5.0.0-alpha.4",
     "redux": "^3.7.2",
     "ts-option": "^1.1.4",
+    "ts-pegjs": "^0.1.13",
     "typescript": "^2.7.0-dev.20171226"
   }
 }
