@@ -1,5 +1,4 @@
 ﻿import { User, ErrorResponse, ProjectListing, Instance, CreateProjectRequest, Routine } from "MyRE/Api/Models";
-import { JsonConvert } from "json2typescript";
 import { Option, some, none } from "ts-option";
 import { ApiResult, ApiSuccess, ApiError } from "MyRE/Api/Models/Results";
 import { List } from "immutable";

@@ -35,6 +35,7 @@ let config = {
     module: {
         rules: [
             { test: /\.tsx?$/, loader: 'awesome-typescript-loader' },
+            { test: /\.pegjs$/, loader: 'pegjs-loader'},
             {
                 test: /\.scss$/,
                 use: extractSass.extract({ use: ["css-loader", "resolve-url-loader", "sass-loader"], fallback: 'style-loader' })

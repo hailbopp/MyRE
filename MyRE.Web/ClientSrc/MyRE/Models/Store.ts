@@ -2,6 +2,7 @@
 import { List } from 'immutable';
 import { User, Instance, ProjectListing, CreateProjectRequest } from "MyRE/Api/Models";
 import { AppAction, ApiRequestAction } from 'MyRE/Actions';
+import { Program } from 'MyRE/Utils/Models/DslModels';
 
 
 export namespace Store {
@@ -59,7 +60,11 @@ export namespace Store {
         name: string;
         description: string;
         projectId: string;
-        block: Option<Block>;
+
+        remoteBlock: Option<Block>;
+        localBlock: Option<Block>;
+
+        blockAsCode: Option<string>;
     }
 
     export interface Project {

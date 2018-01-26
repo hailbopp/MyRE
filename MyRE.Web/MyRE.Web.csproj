@@ -32,11 +32,9 @@
     <None Remove="ClientSrc\MyRE\Components\ProjectsPage.tsx" />
     <None Remove="ClientSrc\MyRE\Reducers\AsyncActions.ts" />
     <None Remove="ClientSrc\MyRE\Reducers\Projects.ts" />
-    <None Remove="ClientSrc\MyRE\Utils\DslParser.ts" />
-    <None Remove="ClientSrc\MyRE\Utils\Models\Block.ts" />
-    <None Remove="ClientSrc\MyRE\Utils\Models\Expression.ts" />
-    <None Remove="ClientSrc\MyRE\Utils\Models\Statement.ts" />
-    <None Remove="ClientSrc\MyRE\Utils\Models\StatementTypes.ts" />
+    <None Remove="ClientSrc\MyRE\Utils\Models\Atom.ts" />
+    <None Remove="ClientSrc\MyRE\Utils\Models\DslModels.ts" />
+    <None Remove="ClientSrc\MyRE\Utils\Models\SExpression.ts" />
     <None Remove="ClientSrc\MyRE\Utils\Parser.ts" />
     <None Remove="ClientSrc\typings\immutable.d.ts" />
   </ItemGroup>
@@ -68,11 +66,9 @@
     <TypeScriptCompile Include="ClientSrc\MyRE\Components\ProjectsPage.tsx" />
     <TypeScriptCompile Include="ClientSrc\MyRE\Reducers\AsyncActions.ts" />
     <TypeScriptCompile Include="ClientSrc\MyRE\Reducers\Projects.ts" />
-    <TypeScriptCompile Include="ClientSrc\MyRE\Utils\DslParser.ts" />
-    <TypeScriptCompile Include="ClientSrc\MyRE\Utils\Models\Block.ts" />
-    <TypeScriptCompile Include="ClientSrc\MyRE\Utils\Models\Expression.ts" />
-    <TypeScriptCompile Include="ClientSrc\MyRE\Utils\Models\Statement.ts" />
-    <TypeScriptCompile Include="ClientSrc\MyRE\Utils\Models\StatementTypes.ts" />
+    <TypeScriptCompile Include="ClientSrc\MyRE\Utils\Models\Atom.ts" />
+    <TypeScriptCompile Include="ClientSrc\MyRE\Utils\Models\DslModels.ts" />
+    <TypeScriptCompile Include="ClientSrc\MyRE\Utils\Models\SExpression.ts" />
     <TypeScriptCompile Include="ClientSrc\typings\immutable.d.ts" />
   </ItemGroup>
 </Project>

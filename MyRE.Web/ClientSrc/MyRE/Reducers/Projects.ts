@@ -3,6 +3,7 @@ import { AppAction } from "MyRE/Actions";
 import { some, none } from "ts-option";
 import { List } from "immutable";
 import * as ProjectActions from 'MyRE/Actions/Projects';
+import { ProjectListing } from "MyRE/Api/Models";
 
 export const reduceProjects = (state: Store.Projects, action: AppAction): Store.Projects => {
     let newState = Object.assign({}, state);
@@ -11,7 +12,7 @@ export const reduceProjects = (state: Store.Projects, action: AppAction): Store.
         case 'API_RESPONSE':
             if (action.requestType === 'API_REQUEST_PROJECT_LIST') {
                 if (action.response.result === 'success') {
-                    newState.projects = some(List(action.response.data.map(p => ({
+                    newState.projects = some(List(action.response.data.map((p: ProjectListing): Store.Project => ({
                         projectId: p.ProjectId,
                         name: p.Name,
                         description: p.Description,
@@ -51,7 +52,9 @@ export const reduceProjects = (state: Store.Projects, action: AppAction): Store.
                                 projectId: r.ProjectId,
                                 name: r.Name,
                                 description: r.Description,
-                                block: none,
+                                remoteBlock: none,
+                                localBlock: none,
+                                blockAsCode: none,
                             })).toList());
                         } 
                         return p;
