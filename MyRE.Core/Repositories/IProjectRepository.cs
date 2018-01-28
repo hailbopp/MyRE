@@ -15,6 +15,6 @@ namespace MyRE.Core.Repositories
         Task DeleteAsync(Guid projectId);
 
         Task<ProjectSource> GetSourceById(Guid projectId);
-        Task<ProjectSource> SetProjectSource(Guid projectId, string source);
+        Task<ProjectSource> SetProjectSource(Guid projectId, string source, string expressionTree);
     }
 }

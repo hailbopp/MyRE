@@ -4,7 +4,7 @@ namespace MyRE.Core.Models.Data
 {
     public class ProjectSource
     {
-        public Guid ProjectSourceVersionId { get; set; }
+        public Guid ProjectSourceId { get; set; }
 
         public DateTimeOffset CreatedAt { get; set; }
 
@@ -12,5 +12,6 @@ namespace MyRE.Core.Models.Data
         public Project Project { get; set; }
 
         public string Source { get; set; }
+        public string ExpressionTree { get; set; }
     }
 }

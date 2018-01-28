@@ -19,6 +19,7 @@ namespace MyRE.Core.Services
         public async Task<Project> GetByIdAsync(Guid projectId)
         {
             var proj = await _projectRepository.GetByIdAsync(projectId);
+            return proj;
         }
 
         public Task<Project> CreateAsync(string name, string description, Guid instanceId) =>

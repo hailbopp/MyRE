@@ -62,7 +62,7 @@ namespace MyRE.Data.Repositories
             var saveResult = await _dbContext.SaveChangesAsync();
         }
 
-        public async Task<ProjectSource> SetProjectSource(Guid projectId, string source)
+        public async Task<ProjectSource> SetProjectSource(Guid projectId, string source, string expressionTree)
         {
             var entity = await _dbContext.Projects.FirstOrDefaultAsync(p => p.ProjectId == projectId);
 
@@ -78,7 +78,8 @@ namespace MyRE.Data.Repositories
                 var newSource = new ProjectSource()
                 {
                     Project = entity,
-                    Source = source
+                    Source = source,
+                    ExpressionTree = expressionTree
                 };
 
                 var addResult = await _dbContext.ProjectSourceVersions.AddAsync(newSource);
