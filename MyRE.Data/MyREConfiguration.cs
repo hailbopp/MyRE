@@ -15,14 +15,9 @@ namespace MyRE.Data
                 .HasAlternateKey(i => i.RemoteAppId)
                 .HasName("UNQ_RemoteAppId");
 
-            builder.Entity<Statement>()
-                .HasDiscriminator<string>("Discriminator")
-                .HasValue<ActionStatement>("Action")
-                .HasValue<EventHandlerStatement>("EventHandler")
-                .HasValue<IfStatement>("If")
-                .HasValue<VariableAssignmentStatement>("VariableAssignment")
-                .HasValue<VariableDefinitionStatement>("VariableDefinition")
-                .HasValue<WhileStatement>("While");
+            builder.Entity<ProjectSource>()
+                .Property(psv => psv.CreatedAt)
+                .HasDefaultValueSql("getutcdate()");
 
         }
     }

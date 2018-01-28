@@ -22,15 +22,11 @@ namespace MyRE.Web.Controllers
         private readonly IProjectService _project;
         private readonly IUserService _user;
 
-        private readonly IDomainModelMappingService<Core.Models.Data.Routine, Routine> _routineMappingService;
-
-        public ProjectsController(IProjectService project, IUserService user, IAuthorizationService authorizationService, 
-            IDomainModelMappingService<Core.Models.Data.Routine, Routine> routineMappingService)
+        public ProjectsController(IProjectService project, IUserService user, IAuthorizationService authorizationService)
         {
             _project = project;
             _user = user;
             _authorizationService = authorizationService;
-            _routineMappingService = routineMappingService;
         }
 
         [HttpGet("")]
@@ -68,15 +64,6 @@ namespace MyRE.Web.Controllers
         {
             return await DeleteAuthenticatedResource(_authorizationService, () => _project.GetByIdAsync(projectId),
                 project => _project.DeleteAsync(projectId));
-        }
-
-        [HttpGet("{projectId:Guid}/Routines")]
-        public async Task<IActionResult> ListProjectRoutines(Guid projectId)
-        {
-            return await RetrieveAuthenticatedResource(
-                _authorizationService,
-                () => _project.GetByIdAsync(projectId),
-                async project => Ok((await _project.GetRoutines(projectId)).Select(_routineMappingService.ToDomainModel)));
         }
     }
 }

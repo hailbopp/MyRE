@@ -16,9 +16,9 @@ namespace MyRE.Core.Services
         }
 
         public Task<IEnumerable<Project>> GetUserProjectsAsync(string userId) => _projectRepository.GetUserProjectsAsync(userId);
-        public Task<Project> GetByIdAsync(Guid projectId)
+        public async Task<Project> GetByIdAsync(Guid projectId)
         {
-            return _projectRepository.GetByIdAsync(projectId);
+            var proj = await _projectRepository.GetByIdAsync(projectId);
         }
 
         public Task<Project> CreateAsync(string name, string description, Guid instanceId) =>
@@ -28,10 +28,6 @@ namespace MyRE.Core.Services
         {
             await _projectRepository.DeleteAsync(projectId);
         }
-
-        public async Task<IEnumerable<Routine>> GetRoutines(Guid projectId)
-        {
-            return await _projectRepository.GetRoutines(projectId);
-        }
+        
     }
 }

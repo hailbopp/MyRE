@@ -35,6 +35,7 @@
     <None Remove="ClientSrc\MyRE\Utils\Models\Atom.ts" />
     <None Remove="ClientSrc\MyRE\Utils\Models\DslModels.ts" />
     <None Remove="ClientSrc\MyRE\Utils\Models\SExpression.ts" />
+    <None Remove="ClientSrc\MyRE\Utils\MyreLisp.d.ts" />
     <None Remove="ClientSrc\MyRE\Utils\Parser.ts" />
     <None Remove="ClientSrc\typings\immutable.d.ts" />
   </ItemGroup>
@@ -69,6 +70,7 @@
     <TypeScriptCompile Include="ClientSrc\MyRE\Utils\Models\Atom.ts" />
     <TypeScriptCompile Include="ClientSrc\MyRE\Utils\Models\DslModels.ts" />
     <TypeScriptCompile Include="ClientSrc\MyRE\Utils\Models\SExpression.ts" />
+    <TypeScriptCompile Include="ClientSrc\MyRE\Utils\MyreLisp.d.ts" />
     <TypeScriptCompile Include="ClientSrc\typings\immutable.d.ts" />
   </ItemGroup>
 </Project>

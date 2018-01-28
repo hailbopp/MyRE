@@ -8,5 +8,7 @@ namespace MyRE.Core.Models.Domain
         public string Name { get; set; }
         public string Description { get; set; }
         public Guid InstanceId { get; set; }
+
+        public string Source { get; set; }
     }
 }

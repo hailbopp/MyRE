@@ -41,26 +41,8 @@ export const reduceProjects = (state: Store.Projects, action: AppAction): Store.
                 } else {
                     newState.projects = some(List([]));
                 }
-            } else if (action.requestType === 'API_LIST_PROJECT_ROUTINES') {
-                if (action.response.result === 'success') {
-                    let response = action.response;
-                    newState.projects = some(List(state.projects.getOrElse(List([])).map(p => {
-                        if (p.projectId === action.requestAction.projectId) {
-                            let newProject = Object.assign({}, p);
-                            newProject.routines = some(response.data.map((r): Store.Routine => ({
-                                routineId: r.RoutineId,
-                                projectId: r.ProjectId,
-                                name: r.Name,
-                                description: r.Description,
-                                remoteBlock: none,
-                                localBlock: none,
-                                blockAsCode: none,
-                            })).toList());
-                        } 
-                        return p;
-                    })))
-                }
             }
+
             return newState;
             
         case 'UI_TOGGLE_CREATE_PROJECT_DIALOG':

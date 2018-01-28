@@ -8,7 +8,7 @@ import { retrieveCurrentUser, clearAuthMessages, attemptLogin, RegisterRequestAp
 import { some } from "ts-option";
 import { List } from "immutable";
 import { Instance, ProjectListing } from "MyRE/Api/Models";
-import { requestProjectList, ProjectListRequestApiAction, CreateNewProjectRequestApiAction, DeleteProjectRequestApiAction, ListProjectRoutinesRequestApiAction } from "MyRE/Actions/Projects";
+import { requestProjectList, ProjectListRequestApiAction, CreateNewProjectRequestApiAction, DeleteProjectRequestApiAction } from "MyRE/Actions/Projects";
 import { UserInstanceListRequestApiAction } from "MyRE/Actions/Instances";
 
 function isAction(a: AppAction): a is AppAction {
@@ -97,10 +97,6 @@ export const ApiServiceMiddleware: ExtendedMiddleware<Store.All> = <S extends St
                     ApiClient.deleteProject(action.projectId)
                         .then((result) => dispatch(apiResponse(action as DeleteProjectRequestApiAction, result)).then(_ => { if (result.result === "success") dispatch(requestProjectList()); }))
                     break;
-
-                case 'API_LIST_PROJECT_ROUTINES':
-                    ApiClient.listProjectRoutines(action.projectId)
-                        .then(result => dispatch(apiResponse(action as ListProjectRoutinesRequestApiAction, result)));
 
                 default:
                     return a;

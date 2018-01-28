@@ -36,6 +36,8 @@ namespace MyRE.Data.Repositories
             var createResult = await _dbContext.Projects.AddAsync(newEntity);
             var saveResult = await _dbContext.SaveChangesAsync();
 
+            var createNewSourceResult = await SetProjectSource(createResult.Entity.ProjectId, "");
+
             return createResult.Entity;
         }
 
@@ -60,9 +62,42 @@ namespace MyRE.Data.Repositories
             var saveResult = await _dbContext.SaveChangesAsync();
         }
 
-        public async Task<IEnumerable<Routine>> GetRoutines(Guid projectId)
+        public async Task<ProjectSource> SetProjectSource(Guid projectId, string source)
         {
-            return await _dbContext.Routines.Where(r => r.Project.ProjectId == projectId).ToListAsync();
+            var entity = await _dbContext.Projects.FirstOrDefaultAsync(p => p.ProjectId == projectId);
+
+            if (entity == null)
+            {
+                return null;
+            }
+
+            var existingSource = await _dbContext.ProjectSourceVersions.OrderByDescending(s => s.CreatedAt).FirstOrDefaultAsync(s => s.ProjectId == projectId);
+
+            if (existingSource == null)
+            {
+                var newSource = new ProjectSource()
+                {
+                    Project = entity,
+                    Source = source
+                };
+
+                var addResult = await _dbContext.ProjectSourceVersions.AddAsync(newSource);
+                var result = await _dbContext.SaveChangesAsync();
+
+                return addResult.Entity;
+            }
+            else
+            {
+                existingSource.Source = source;
+                await _dbContext.SaveChangesAsync();
+
+                return existingSource;
+            }
+        }
+
+        public async Task<ProjectSource> GetSourceById(Guid projectId)
+        {
+            return await _dbContext.ProjectSourceVersions.OrderByDescending(s => s.CreatedAt).FirstOrDefaultAsync(s => s.ProjectId == projectId);
         }
     }
 }

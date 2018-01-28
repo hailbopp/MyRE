@@ -30,8 +30,6 @@ export class MyREApiClient {
         listProjects: '/api/Projects',
         createProject: '/api/Projects',
         deleteProject: (projectId: string) => `/api/Projects/${projectId}`,
-
-        listProjectRoutines: (projectId: string) => `/api/Projects/${projectId}/Routines`,
     }
 
     private async parseError(r: Response): Promise<ErrorResponse> {
@@ -113,7 +111,4 @@ export class MyREApiClient {
 
     public deleteProject = async (projectId: string): Promise<ApiResult<any>> =>
         this.delete(this.paths.deleteProject(projectId));
-
-    public listProjectRoutines = async (projectId: string): Promise<ApiResult<List<Routine>>> =>
-        this.get<Array<Routine>>(this.paths.listProjectRoutines(projectId)).then(convertArrayToImmutableList);
 }

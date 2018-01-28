@@ -12,6 +12,6 @@ namespace MyRE.Core.Models.Data
         public Guid ParentInstanceId { get; set; }
         public AppInstance ParentInstance { get; set; }
 
-        public List<Routine> Routines { get; set; }
+        public ProjectSource Source { get; set; }
     }
 }

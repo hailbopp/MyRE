@@ -61,30 +61,15 @@ export const deleteProject = (projectId: string): DeleteProjectRequestApiAction 
     projectId
 });
 
-export type ListProjectRoutinesRequestApiAction = {
-    type: 'API_LIST_PROJECT_ROUTINES';
-    asyncActionType: 'API_REQUEST';
-    projectId: string;
-}
-export type ListProjectRoutinesResponseApiAction = ApiResponseAction<ListProjectRoutinesRequestApiAction, List<Routine>>;
-
-export const listProjectRoutines = (projectId: string): ListProjectRoutinesRequestApiAction => ({
-    type: 'API_LIST_PROJECT_ROUTINES',
-    asyncActionType: 'API_REQUEST',
-    projectId,
-})
-
 export type ProjectApiRequestAction =
     | ProjectListRequestApiAction
     | CreateNewProjectRequestApiAction
     | DeleteProjectRequestApiAction
-    | ListProjectRoutinesRequestApiAction
 
 export type ProjectApiResponseAction =
     | ProjectListResponseApiAction
     | CreateNewProjectResponseApiAction
     | DeleteProjectResponseApiAction
-    | ListProjectRoutinesResponseApiAction
 
 export type ProjectUIAction =
     | ToggleCreateProjectDialogUIAction
