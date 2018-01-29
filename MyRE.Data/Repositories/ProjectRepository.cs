@@ -36,7 +36,7 @@ namespace MyRE.Data.Repositories
             var createResult = await _dbContext.Projects.AddAsync(newEntity);
             var saveResult = await _dbContext.SaveChangesAsync();
 
-            var createNewSourceResult = await SetProjectSource(createResult.Entity.ProjectId, "");
+            var createNewSourceResult = await SetProjectSource(createResult.Entity.ProjectId, "", "[]");
 
             return createResult.Entity;
         }

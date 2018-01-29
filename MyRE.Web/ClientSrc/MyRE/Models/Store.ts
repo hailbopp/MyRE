@@ -50,30 +50,14 @@ export namespace Store {
         statement: Option<Statement>;
     }
 
-    export interface Block {
-        blockId: string;
-        statements: Option<List<BlockStatement>>;
-    }
-
-    export interface Routine {
-        routineId: string;
-        name: string;
-        description: string;
-        projectId: string;
-
-        remoteBlock: Option<Block>;
-        localBlock: Option<Block>;
-
-        blockAsCode: Option<string>;
-    }
-
     export interface Project {
         projectId: string;
         name: string;
         description: string;
         instanceId: string;
 
-        routines: Option<List<Routine>>;
+        source: string;
+        expressionTree: Program | SyntaxError;
     }
 
     export interface Projects {

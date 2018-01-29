@@ -5,6 +5,9 @@ import { List } from "immutable";
 import * as ProjectActions from 'MyRE/Actions/Projects';
 import { ProjectListing } from "MyRE/Api/Models";
 
+import * as ParserTypes from 'MyRE/Utils/Models/Parser';
+var parser = require('MyRE/Utils/MyreLisp.pegjs') as ParserTypes.Parser;
+
 export const reduceProjects = (state: Store.Projects, action: AppAction): Store.Projects => {
     let newState = Object.assign({}, state);
 
@@ -17,7 +20,8 @@ export const reduceProjects = (state: Store.Projects, action: AppAction): Store.
                         name: p.Name,
                         description: p.Description,
                         instanceId: p.InstanceId,
-                        routines: none,
+                        source: p.Source,
+                        expressionTree: p.ExpressionTree,
                     }))));
                 }
             } else if (action.requestType === 'API_CREATE_NEW_PROJECT') {
@@ -61,6 +65,26 @@ export const reduceProjects = (state: Store.Projects, action: AppAction): Store.
 
         case 'API_CREATE_NEW_PROJECT':
             newState.createProjectMessage = none;
+            return newState;
+
+        case 'UI_CHANGE_PROJECT_SOURCE':
+            newState.projects = some(List(newState.projects.getOrElse(List([])).map(p => {
+                if (p.projectId !== action.projectId) {
+                    return p;
+                } else {
+                    var newProj = Object.assign({}, p);
+                    newProj.source = action.newSource;
+
+                    try {
+                        var parseResult = parser.parse(action.newSource, {});
+
+                        newProj.expressionTree = parseResult;
+                    } catch (e) {}
+
+                    return newProj;
+                }
+            })));
+
             return newState;
             
         default:

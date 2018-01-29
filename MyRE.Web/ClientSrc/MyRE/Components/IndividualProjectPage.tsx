@@ -6,7 +6,6 @@ import { Container } from 'reactstrap';
 import { PageHeader } from 'MyRE/Components/PageHeader';
 import { ProjectListing } from 'MyRE/Api/Models';
 import { List } from 'immutable';
-import { RoutineList } from 'MyRE/Components/RoutineList';
 import { ProjectEditor } from 'MyRE/Components/ProjectEditor';
 
 type IOwnProps = RouteComponentProps<{ projectId: string; }>;

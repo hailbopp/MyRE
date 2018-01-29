@@ -22,11 +22,14 @@ namespace MyRE.Web.Controllers
         private readonly IProjectService _project;
         private readonly IUserService _user;
 
-        public ProjectsController(IProjectService project, IUserService user, IAuthorizationService authorizationService)
+        private readonly IProjectMappingService _projectMappingService;
+
+        public ProjectsController(IProjectService project, IUserService user, IAuthorizationService authorizationService, IProjectMappingService projectMappingService)
         {
             _project = project;
             _user = user;
             _authorizationService = authorizationService;
+            _projectMappingService = projectMappingService;
         }
 
         [HttpGet("")]
@@ -36,7 +39,7 @@ namespace MyRE.Web.Controllers
             var currentUser = await _user.GetAuthenticatedUserFromContextAsync(HttpContext);
             var projects = await _project.GetUserProjectsAsync(currentUser.UserId);
 
-            return projects.Select(p => p.ToDomainModel());
+            return projects.Select(_projectMappingService.ToDomainModel);
         }
 
         [HttpGet("{projectId:Guid}")]
@@ -46,7 +49,7 @@ namespace MyRE.Web.Controllers
             return await RetrieveAuthenticatedResource(
                 _authorizationService, 
                 () => _project.GetByIdAsync(projectId),
-                project => Task.FromResult(Ok(project.ToDomainModel())));
+                project => Task.FromResult(Ok(_projectMappingService.ToDomainModel(project))));
         }
 
         [HttpPost("")]

@@ -7,11 +7,9 @@ import { Row, Col } from 'reactstrap';
 import AceEditor from 'react-ace';
 import brace = require('brace');
 
-//const Parser = require('MyRE/Utils/MyreLisp.pegjs')
-import * as Parser from 'MyRE/Utils/MyreLisp.pegjs';
-
 import 'brace/mode/lisp';
 import 'brace/theme/kuroir';
+import { changeProjectSource } from 'MyRE/Actions/Projects';
 
 interface IOwnProps {
     project: Store.Project;
@@ -21,6 +19,7 @@ interface IConnectedState {
 }
 
 interface IConnectedDispatch {
+    changeSource: (projectId: string, newSource: string) => void;
 }
 
 export type IProjectEditorProperties = IOwnProps & IConnectedState & IConnectedDispatch;
@@ -29,27 +28,32 @@ const mapStateToProps = (state: Store.All, ownProps: IOwnProps): IConnectedState
 });
 
 const mapDispatchToProps = (dispatch: Dispatch<Store.All>): IConnectedDispatch => ({
+    changeSource: (projectId, newSource) => {
+        dispatch(changeProjectSource(projectId, newSource));
+    }
 });
 
 
 class ProjectEditorComponent extends React.PureComponent<IProjectEditorProperties> {
     private onChangeHandler = (value: string) => {
-
+        this.props.changeSource(this.props.project.projectId, value);
     }
 
     public render() {
-        console.log(Parser);
-
         return (
             <Row>
                 <AceEditor
                     mode="lisp"
                     theme="kuroir"
                     width="100%"
+                    value={this.props.project.source}
                     onChange={this.onChangeHandler}
                     name={"editor" + this.props.project.projectId}
                     editorProps={{ $blockScrolling: true }}
                 />
+                <pre>
+                    {JSON.stringify(this.props.project.expressionTree, null, 2)}
+                </pre>
             </Row>
         );
     }

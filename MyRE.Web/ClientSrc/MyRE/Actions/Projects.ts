@@ -61,6 +61,18 @@ export const deleteProject = (projectId: string): DeleteProjectRequestApiAction 
     projectId
 });
 
+export type ChangeProjectSourceAction = {
+    type: 'UI_CHANGE_PROJECT_SOURCE';
+    projectId: string;
+    newSource: string;
+}
+
+export const changeProjectSource = (projectId: string, source: string): ChangeProjectSourceAction => ({
+    type: 'UI_CHANGE_PROJECT_SOURCE',
+    projectId: projectId,
+    newSource: source,
+});
+
 export type ProjectApiRequestAction =
     | ProjectListRequestApiAction
     | CreateNewProjectRequestApiAction
@@ -74,6 +86,7 @@ export type ProjectApiResponseAction =
 export type ProjectUIAction =
     | ToggleCreateProjectDialogUIAction
     | ChangeNewProjectDataUIAction
+    | ChangeProjectSourceAction
 
 
 export type ProjectAction =

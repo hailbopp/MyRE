@@ -29,6 +29,10 @@ namespace MyRE.Core.Services
         {
             await _projectRepository.DeleteAsync(projectId);
         }
-        
+
+        public Task<ProjectSource> GetSource(Guid projectId)
+        {
+            return _projectRepository.GetSourceById(projectId);
+        }
     }
 }

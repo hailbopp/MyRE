@@ -66,7 +66,8 @@ namespace MyRE.Web
             services.AddTransient<IUserService, UserService>();
             services.AddTransient<IProjectRepository, ProjectRepository>();
             services.AddTransient<IProjectService, ProjectService>();
-            
+
+            services.AddTransient<IProjectMappingService, ProjectModelMappingService>();
 
             services.AddTransient<IAuthorizationHandler, ProjectAuthorizationHandler>();
 

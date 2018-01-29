@@ -4,4 +4,6 @@
     {
         TDomain ToDomainModel(TData dataModel);
     }
+
+    public interface IProjectMappingService : IDomainModelMappingService<Core.Models.Data.Project, Core.Models.Domain.Project> { }
 }

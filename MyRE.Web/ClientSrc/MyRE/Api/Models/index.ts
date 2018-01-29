@@ -19,6 +19,8 @@ export interface ProjectListing {
     Name: string;
     Description: string;
     InstanceId: string;
+    Source: string;
+    ExpressionTree: any;
 }
 
 export interface CreateProjectRequest {
