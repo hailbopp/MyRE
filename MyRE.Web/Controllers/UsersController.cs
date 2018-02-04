@@ -1,6 +1,8 @@
-﻿using System.Threading.Tasks;
+﻿using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using MyRE.Core.Extensions;
 using MyRE.Core.Models.Domain;
 using MyRE.Core.Services;
 
@@ -55,7 +57,7 @@ namespace MyRE.Web.Controllers
             var currentUser = await _user.GetAuthenticatedUserFromContextAsync(HttpContext);
             if (await _user.UserCanAccessUserDataAsync(currentUser, userId))
             {
-                return Ok(await _user.GetUserInstancesAsync(userId));
+                return Ok((await _user.GetUserInstancesAsync(userId)).Select(i => i.ToDomainModel()));
             }
             else
             {

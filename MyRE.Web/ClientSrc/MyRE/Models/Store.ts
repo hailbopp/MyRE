@@ -1,6 +1,6 @@
 ﻿import { Option } from 'ts-option';
 import { List } from 'immutable';
-import { User, Instance, ProjectListing, CreateProjectRequest } from "MyRE/Api/Models";
+import { User, ProjectListing, CreateProjectRequest, DeviceInfo } from "MyRE/Api/Models";
 import { AppAction, ApiRequestAction } from 'MyRE/Actions';
 import { Program } from 'MyRE/Utils/Models/DslModels';
 
@@ -34,6 +34,14 @@ export namespace Store {
         loginForm: EmailPasswordForm;
         registrationForm: EmailPasswordForm;
     }
+
+    export interface Instance {
+        instanceId: string;
+        name: string;
+        accountId: string;
+
+        devices: Option<List<DeviceInfo>>
+    }
     
     export interface InstanceState {
         // If instances is none, then we haven't yet attempted to grab instances from the API.
@@ -66,11 +74,12 @@ export namespace Store {
         createProjectModalOpen: boolean;
         newProject: CreateProjectRequest;
         createProjectMessage: Option<AlertMessage>;
-    }
+    }    
 
     export interface AsyncActions {
         currentAsyncActions: List<ApiRequestAction>;
     }
+
     
     export interface All {
         auth: Auth;

@@ -58,7 +58,7 @@ namespace MyRE.Web.Controllers
         {
             var createdProject = await _project.CreateAsync(newProject.Name, newProject.Description, newProject.InstanceId);
 
-            return Created(GetUriOfResource($"/api/Projects/{createdProject.ProjectId}"), createdProject.ToDomainModel());
+            return Created(GetUriOfResource($"/api/Projects/{createdProject.ProjectId}"), _projectMappingService.ToDomainModel(createdProject));
         }
 
         [HttpDelete("{projectId:Guid}")]

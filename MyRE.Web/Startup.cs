@@ -57,8 +57,9 @@ namespace MyRE.Web
             });
 
             // IoC Binding
-
             services.AddTransient<IMyreSmartAppApiClientFactory, MyreSmartAppApiClientFactory>();
+            services.AddTransient<ISmartAppService, SmartAppService>();
+
             services.AddTransient<IAccountRepository, AccountRepository>();
             services.AddTransient<IAppInstanceRepository, AppInstanceRepository>();
             services.AddTransient<IAuthService, AuthService>();

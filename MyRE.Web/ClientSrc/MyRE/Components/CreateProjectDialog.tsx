@@ -3,7 +3,7 @@ import { connect, Dispatch } from 'react-redux';
 import { Store } from 'MyRE/Models/Store';
 import { Modal, ModalHeader, ModalBody, ModalFooter, Container, FormGroup, Label, Col, Input, Button } from 'reactstrap';
 import { toggleCreateProjectDialog, changeNewProjectData, createNewProject } from 'MyRE/Actions/Projects';
-import { Instance, CreateProjectRequest } from 'MyRE/Api/Models';
+import { CreateProjectRequest } from 'MyRE/Api/Models';
 import { List } from 'immutable';
 import { AlertRow } from 'MyRE/Components/AlertRow';
 import { Option } from 'ts-option';
@@ -11,7 +11,7 @@ import { Option } from 'ts-option';
 interface IOwnProps { }
 interface IConnectedState {
     isOpen: boolean;
-    instances: List<Instance>;
+    instances: List<Store.Instance>;
     newProject: CreateProjectRequest;
     alertMessage: Option<Store.AlertMessage>;
 }
@@ -65,9 +65,9 @@ class CreateProjectDialogComponent extends React.PureComponent<IConnectedState &
     public render() {
 
         if (this.props.instances.count() === 1) {
-            if (this.props.instances.first().InstanceId !== this.props.newProject.InstanceId) {
+            if (this.props.instances.first().instanceId !== this.props.newProject.InstanceId) {
                 Promise.resolve()
-                    .then(_ => this.props.changeNewProjectProperties(this.props.newProject.Name, this.props.newProject.Description, this.props.instances.first().InstanceId));                
+                    .then(_ => this.props.changeNewProjectProperties(this.props.newProject.Name, this.props.newProject.Description, this.props.instances.first().instanceId));                
             }
         }
 

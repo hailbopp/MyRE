@@ -14,4 +14,8 @@
     <Folder Include="Utilities\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\MyRE.SmartApp.Api.Client\MyRE.SmartApp.Api.Client.csproj" />
+  </ItemGroup>
+
 </Project>

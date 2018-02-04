@@ -29,9 +29,11 @@
 
   <ItemGroup>
     <None Remove="ClientSrc\MyRE\Actions\Projects.ts" />
+    <None Remove="ClientSrc\MyRE\Api\Utilities.ts" />
     <None Remove="ClientSrc\MyRE\Components\ProjectsPage.tsx" />
     <None Remove="ClientSrc\MyRE\Reducers\AsyncActions.ts" />
     <None Remove="ClientSrc\MyRE\Reducers\Projects.ts" />
+    <None Remove="ClientSrc\Tests\MyRE\Api\Utilities.spec.ts" />
     <None Remove="ClientSrc\MyRE\Utils\Models\Atom.ts" />
     <None Remove="ClientSrc\MyRE\Utils\Models\DslModels.ts" />
     <None Remove="ClientSrc\MyRE\Utils\Models\Parser.ts" />
@@ -59,14 +61,15 @@
   <ItemGroup>
     <ProjectReference Include="..\MyRE.Core\MyRE.Core.csproj" />
     <ProjectReference Include="..\MyRE.Data\MyRE.Data.csproj" />
-    <ProjectReference Include="..\MyRE.SmartApp.Api.Client\MyRE.SmartApp.Api.Client.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <TypeScriptCompile Include="ClientSrc\MyRE\Actions\Projects.ts" />
+    <TypeScriptCompile Include="ClientSrc\MyRE\Api\Utilities.ts" />
     <TypeScriptCompile Include="ClientSrc\MyRE\Components\ProjectsPage.tsx" />
     <TypeScriptCompile Include="ClientSrc\MyRE\Reducers\AsyncActions.ts" />
     <TypeScriptCompile Include="ClientSrc\MyRE\Reducers\Projects.ts" />
+    <TypeScriptCompile Include="ClientSrc\Tests\MyRE\Api\Utilities.spec.ts" />
     <TypeScriptCompile Include="ClientSrc\MyRE\Utils\Models\Atom.ts" />
     <TypeScriptCompile Include="ClientSrc\MyRE\Utils\Models\DslModels.ts" />
     <TypeScriptCompile Include="ClientSrc\MyRE\Utils\Models\Parser.ts" />

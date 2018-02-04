@@ -15,7 +15,7 @@ export const reduceProjects = (state: Store.Projects, action: AppAction): Store.
         case 'API_RESPONSE':
             if (action.requestType === 'API_REQUEST_PROJECT_LIST') {
                 if (action.response.result === 'success') {
-                    newState.projects = some(List(action.response.data.map((p: ProjectListing): Store.Project => ({
+                    newState.projects = some(List(action.response.data.toArray().map((p: ProjectListing): Store.Project => ({
                         projectId: p.ProjectId,
                         name: p.Name,
                         description: p.Description,
@@ -68,7 +68,7 @@ export const reduceProjects = (state: Store.Projects, action: AppAction): Store.
             return newState;
 
         case 'UI_CHANGE_PROJECT_SOURCE':
-            newState.projects = some(List(newState.projects.getOrElse(List([])).map(p => {
+            newState.projects = some(List(newState.projects.getOrElse(List([])).toArray().map(p => {
                 if (p.projectId !== action.projectId) {
                     return p;
                 } else {

@@ -10,6 +10,6 @@ namespace MyRE.Core.Models.Domain
         public Guid InstanceId { get; set; }
 
         public string Source { get; set; }
-        public string ExpressionTree { get; set; }
+        public Object ExpressionTree { get; set; }
     }
 }

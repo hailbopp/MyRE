@@ -1,4 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
+using MyRE.Core.Models.Language;
+using Newtonsoft.Json;
 
 namespace MyRE.Core.Models.Data
 {
@@ -13,5 +17,11 @@ namespace MyRE.Core.Models.Data
 
         public string Source { get; set; }
         public string ExpressionTree { get; set; }
+
+        [NotMapped]
+        public List<BaseGrammarElement> ParsedExpressionTree {
+            get => JsonConvert.DeserializeObject<List<BaseGrammarElement>>(ExpressionTree);
+            set => ExpressionTree = JsonConvert.SerializeObject(value);
+        }
     }
 }

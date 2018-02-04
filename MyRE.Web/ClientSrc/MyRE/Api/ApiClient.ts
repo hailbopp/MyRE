@@ -1,16 +1,10 @@
-﻿import { User, ErrorResponse, ProjectListing, Instance, CreateProjectRequest, Routine } from "MyRE/Api/Models";
+﻿import { User, ErrorResponse, ProjectListing, Instance, CreateProjectRequest, Routine, DeviceInfo } from "MyRE/Api/Models";
 import { Option, some, none } from "ts-option";
 import { ApiResult, ApiSuccess, ApiError } from "MyRE/Api/Models/Results";
 import { List } from "immutable";
+import { convertArrayToImmutableList } from "MyRE/Api/Utilities";
 
-const convertArrayToImmutableList = <T>(res: ApiResult<Array<T>>): ApiResult<List<T>> => {
-    switch (res.result) {
-        case 'error':
-            return res;
-        case 'success':
-            return new ApiSuccess(List(res.data));
-    }
-}
+type QueryStringParameterGroup = any;
 
 export class MyREApiClient {
     private baseUri: string;
@@ -30,6 +24,8 @@ export class MyREApiClient {
         listProjects: '/api/Projects',
         createProject: '/api/Projects',
         deleteProject: (projectId: string) => `/api/Projects/${projectId}`,
+
+        listDevices: '/api/Devices',
     }
 
     private async parseError(r: Response): Promise<ErrorResponse> {
@@ -42,8 +38,16 @@ export class MyREApiClient {
         }
     }
 
-    private async performRequest<T>(input: RequestInfo, init: RequestInit, noResponseType: boolean = false): Promise<ApiResult<T>> {
-        let response = await fetch(input, init);
+    private async performRequest<T>(input: RequestInfo, init: RequestInit, querystringParameters?: QueryStringParameterGroup): Promise<ApiResult<T>> {
+        let qs = new URLSearchParams();
+        if (querystringParameters) {
+            for (let k in querystringParameters) {
+                if (!querystringParameters.hasOwnProperty(k)) continue;
+                qs.append(k, querystringParameters[k]);
+            }
+        }
+
+        let response = await fetch(querystringParameters ? `${input}?${qs}` : input, init);
         if (response.ok) {
             try {
                 let entity: T = <T>(await response.json());
@@ -56,15 +60,15 @@ export class MyREApiClient {
         return new ApiError(response.status, some(message));
     }
 
-    private async get<T>(input: RequestInfo): Promise<ApiResult<T>> {
+    private async get<T>(input: RequestInfo, querystringParameters?: QueryStringParameterGroup): Promise<ApiResult<T>> {
         let init: RequestInit = {
             credentials: 'include',
         };
 
-        return await this.performRequest<T>(input, init);
+        return await this.performRequest<T>(input, init, querystringParameters);
     }
 
-    private async post<T>(input: RequestInfo, body?: any): Promise<ApiResult<T>> {
+    private async post<T>(input: RequestInfo, body?: any, querystringParameters?: QueryStringParameterGroup): Promise<ApiResult<T>> {
         let init: RequestInit = {};
         init.body = JSON.stringify(body);
         init.method = 'POST';
@@ -72,16 +76,16 @@ export class MyREApiClient {
         init.headers['Content-Type'] = 'application/json';
         init.credentials = 'include';
 
-        return await this.performRequest<T>(input, init);
+        return await this.performRequest<T>(input, init, querystringParameters);
     }
 
-    private async delete(input: RequestInfo): Promise<ApiResult<any>> {
+    private async delete(input: RequestInfo, querystringParameters?: QueryStringParameterGroup): Promise<ApiResult<any>> {
         let init: RequestInit = {
             credentials: 'include',
             method: 'DELETE',
         };
 
-        return await this.performRequest<any>(input, init);
+        return await this.performRequest<any>(input, init, querystringParameters);
     }
 
     public logIn = async (email: string, password: string): Promise<ApiResult<any>> =>
@@ -111,4 +115,9 @@ export class MyREApiClient {
 
     public deleteProject = async (projectId: string): Promise<ApiResult<any>> =>
         this.delete(this.paths.deleteProject(projectId));
+    
+    public listInstanceDevices = async (instanceId: string): Promise<ApiResult<List<DeviceInfo>>> => {
+        return this.get<Array<DeviceInfo>>(this.paths.listDevices, { instanceId }).then(convertArrayToImmutableList);
+    }
+        
 }

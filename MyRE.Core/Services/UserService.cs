@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using MyRE.Core.Extensions;
+using MyRE.Core.Models.Data;
 using MyRE.Core.Models.Domain;
 using MyRE.Core.Repositories;
 
@@ -26,6 +27,6 @@ namespace MyRE.Core.Services
 
         public async Task<User> GetUserAsync(string userId) => await _userRepository.GetUserAsync(userId);
 
-        public async Task<IEnumerable<Instance>> GetUserInstancesAsync(string userId) => (await _instanceRepository.GetByUserIdAsync(userId)).Select(i => i.ToDomainModel());
+        public async Task<IEnumerable<AppInstance>> GetUserInstancesAsync(string userId) => (await _instanceRepository.GetByUserIdAsync(userId));
     }
 }

@@ -37,3 +37,36 @@ export interface Routine {
     BlockId: string;
     ExecutionMethod: string;
 }
+
+export interface AttributeInfo {
+    Name: string;
+    Type: string;
+    Values: Array<string>;
+}
+
+export interface ArgumentDataType {
+    EnumType: string;
+    Name: string;
+}
+
+export interface CommandInfo {
+    Name: string;
+    Arguments: Array<ArgumentDataType>;
+}
+
+export interface CapabilityInfo {
+    Name: string;
+    Attributes: Array<AttributeInfo>;
+    Commands: Array<CommandInfo>;
+}
+
+export interface DeviceInfo {
+    DeviceId: string;
+    Label: string;
+    DisplayName: string;
+    ModelName: string;
+    Manufacturer: string;
+    Attributes: Array<AttributeInfo>;
+    Commands: Array<CommandInfo>;
+    Capabilities: Array<CapabilityInfo>;
+}

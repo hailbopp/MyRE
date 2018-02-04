@@ -7,14 +7,13 @@ import { Dashboard } from 'MyRE/Components/Dashboard';
 import { Option } from 'ts-option';
 import { retrieveCurrentUser } from 'MyRE/Actions/Auth';
 import { LoginPage } from 'MyRE/Components/LoginPage';
-import { Instance } from 'MyRE/Api/Models';
 import { List } from 'immutable';
 import { listUserInstances } from 'MyRE/Actions/Instances';
 import { Projects } from 'MyRE/Components/Projects';
 
 interface IOwnProps { }
 interface IConnectedState {
-    instances: Option<List<Instance>>;
+    instances: Option<List<Store.Instance>>;
     instancesLoading: boolean;
     isLoggedIn: Option<boolean>;
     userId: Option<string>;

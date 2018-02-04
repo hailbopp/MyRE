@@ -9,7 +9,7 @@ import { some } from "ts-option";
 import { List } from "immutable";
 import { Instance, ProjectListing } from "MyRE/Api/Models";
 import { requestProjectList, ProjectListRequestApiAction, CreateNewProjectRequestApiAction, DeleteProjectRequestApiAction } from "MyRE/Actions/Projects";
-import { UserInstanceListRequestApiAction } from "MyRE/Actions/Instances";
+import { UserInstanceListRequestApiAction, InstanceDevicesRequestApiAction, listInstanceDevices } from "MyRE/Actions/Instances";
 
 function isAction(a: AppAction): a is AppAction {
     return (a as AppAction).type !== undefined;
@@ -79,10 +79,24 @@ export const ApiServiceMiddleware: ExtendedMiddleware<Store.All> = <S extends St
                     ApiClient.getCurrentUser()
                         .then((result) => dispatch(apiResponse(action as GetCurrentUserRequestApiAction, result)));
                     break;
+
                 case "API_REQUEST_USER_INSTANCE_LIST":
                     ApiClient.listUserInstances(action.userId)
-                        .then((result) => dispatch(apiResponse(action as UserInstanceListRequestApiAction, result)));
+                        .then((result) => {
+                            dispatch(apiResponse(action as UserInstanceListRequestApiAction, result));
+                            if (result.result == "success") {
+                                result.data.forEach((i) => {
+                                    if (i) dispatch(listInstanceDevices(i.InstanceId));
+                                });
+                            }
+                        });
                     break;
+
+                case "API_REQUEST_INSTANCE_DEVICES_LIST":
+                    ApiClient.listInstanceDevices(action.instanceId)
+                        .then((result) => dispatch(apiResponse(action as InstanceDevicesRequestApiAction, result)));
+                    break;
+
                 case 'API_REQUEST_PROJECT_LIST':
                     ApiClient.listProjects()
                         .then((result) => dispatch(apiResponse(action as ProjectListRequestApiAction, result)));

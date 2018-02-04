@@ -1,8 +1,6 @@
 ﻿import { List } from "immutable";
-import { Instance } from "MyRE/Api/Models";
+import { Instance, DeviceInfo } from "MyRE/Api/Models";
 import { ApiResponseAction } from "MyRE/Actions";
-
-
 
 export type UserInstanceListRequestApiAction = {
     type: 'API_REQUEST_USER_INSTANCE_LIST';
@@ -18,11 +16,25 @@ export const listUserInstances = (userId: string): UserInstanceListRequestApiAct
     userId,
 });
 
+export type InstanceDevicesRequestApiAction = {
+    type: 'API_REQUEST_INSTANCE_DEVICES_LIST';
+    asyncActionType: 'API_REQUEST';
+    instanceId: string;
+}
+export type InstanceDevicesResponseApiAction = ApiResponseAction<InstanceDevicesRequestApiAction, List<DeviceInfo>>;
+export const listInstanceDevices = (instanceId: string): InstanceDevicesRequestApiAction => ({
+    type: 'API_REQUEST_INSTANCE_DEVICES_LIST',
+    asyncActionType: 'API_REQUEST',
+    instanceId
+});
+
 export type InstanceApiRequestAction =
-    | UserInstanceListRequestApiAction;
+    | UserInstanceListRequestApiAction
+    | InstanceDevicesRequestApiAction;
 
 export type InstanceApiResponseAction =
-    | UserInstanceListResponseApiAction;
+    | UserInstanceListResponseApiAction
+    | InstanceDevicesResponseApiAction;
 
 export type InstanceApiAction =
     | InstanceApiRequestAction

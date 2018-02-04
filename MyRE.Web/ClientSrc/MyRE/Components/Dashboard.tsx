@@ -2,7 +2,7 @@
 import { Store } from 'MyRE/Models/Store';
 import { Dispatch, connect } from 'react-redux';
 import { RouteComponentProps } from 'react-router';
-import { Instance, User } from 'MyRE/Api/Models';
+import { User } from 'MyRE/Api/Models';
 import { List } from 'immutable';
 import { Option } from 'ts-option';
 import { NeedsInitializationAlert } from 'MyRE/Components/NeedsInitializationAlert';
@@ -11,7 +11,7 @@ import { Container } from 'reactstrap';
 
 interface IOwnProps { }
 interface IConnectedState {
-    instances: Option<List<Instance>>;
+    instances: Option<List<Store.Instance>>;
     user: Option<User>;
 }
 interface IConnectedDispatch {
