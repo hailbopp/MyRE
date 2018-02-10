@@ -5,7 +5,9 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using MyRE.Core.Extensions;
 using MyRE.Core.Models.Data;
+using MyRE.Core.Models.Language;
 using MyRE.Core.Repositories;
+using Newtonsoft.Json;
 
 namespace MyRE.Data.Repositories
 {
@@ -62,6 +64,22 @@ namespace MyRE.Data.Repositories
             var saveResult = await _dbContext.SaveChangesAsync();
         }
 
+        public async Task<Project> UpdateAsync(Project entity)
+        {
+            var existingProject = await _dbContext.Projects.FirstOrDefaultAsync(p => p.ProjectId == entity.ProjectId);
+
+            existingProject.Name = entity.Name;
+            existingProject.Description = entity.Description;
+
+            var existingSource = await _dbContext.ProjectSourceVersions.OrderByDescending(s => s.CreatedAt).FirstOrDefaultAsync(s => s.ProjectId == entity.ProjectId);
+            existingSource.ParsedExpressionTree = entity.Source.ParsedExpressionTree;
+            existingSource.Source = entity.Source.Source;
+
+            var saveResult = await _dbContext.SaveChangesAsync();
+
+            return existingProject;
+        }
+
         public async Task<ProjectSource> SetProjectSource(Guid projectId, string source, string expressionTree)
         {
             var entity = await _dbContext.Projects.FirstOrDefaultAsync(p => p.ProjectId == projectId);
@@ -79,7 +97,7 @@ namespace MyRE.Data.Repositories
                 {
                     Project = entity,
                     Source = source,
-                    ExpressionTree = expressionTree
+                    ParsedExpressionTree = JsonConvert.DeserializeObject<List<Object>>(expressionTree)
                 };
 
                 var addResult = await _dbContext.ProjectSourceVersions.AddAsync(newSource);
@@ -90,6 +108,8 @@ namespace MyRE.Data.Repositories
             else
             {
                 existingSource.Source = source;
+                existingSource.ParsedExpressionTree = JsonConvert.DeserializeObject<List<Object>>(expressionTree);
+
                 await _dbContext.SaveChangesAsync();
 
                 return existingSource;

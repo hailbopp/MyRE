@@ -6,6 +6,7 @@ import * as ProjectActions from 'MyRE/Actions/Projects';
 import { ProjectListing } from "MyRE/Api/Models";
 
 import * as ParserTypes from 'MyRE/Utils/Models/Parser';
+import { Program } from "MyRE/Utils/Models/DslModels";
 var parser = require('MyRE/Utils/MyreLisp.pegjs') as ParserTypes.Parser;
 
 export const reduceProjects = (state: Store.Projects, action: AppAction): Store.Projects => {
@@ -20,8 +21,7 @@ export const reduceProjects = (state: Store.Projects, action: AppAction): Store.
                         name: p.Name,
                         description: p.Description,
                         instanceId: p.InstanceId,
-                        source: p.Source,
-                        expressionTree: p.ExpressionTree,
+                        source: p.Source
                     }))));
                 }
             } else if (action.requestType === 'API_CREATE_NEW_PROJECT') {
@@ -68,23 +68,27 @@ export const reduceProjects = (state: Store.Projects, action: AppAction): Store.
             return newState;
 
         case 'UI_CHANGE_PROJECT_SOURCE':
-            newState.projects = some(List(newState.projects.getOrElse(List([])).toArray().map(p => {
-                if (p.projectId !== action.projectId) {
-                    return p;
-                } else {
-                    var newProj = Object.assign({}, p);
-                    newProj.source = action.newSource;
-
-                    try {
-                        var parseResult = parser.parse(action.newSource, {});
-
-                        newProj.expressionTree = parseResult;
-                    } catch (e) {}
-
-                    return newProj;
+            if (state.activeProject.isDefined && state.activeProject.get.projectId == action.projectId) {
+                let newSource = Object.assign({}, state.activeProject.get.source);
+                newSource.Source = action.newSource;
+                try {
+                    newSource.ExpressionTree = parser.parse(action.newSource, {});
+                } catch (e) {
+                    newSource.ExpressionTree = e;
                 }
-            })));
 
+                let newProj = Object.assign({}, state.activeProject.get);
+                newProj.source = newSource;
+
+                newState.activeProject = some(newProj);
+            }
+            return newState;
+
+        case 'UI_SET_ACTIVE_PROJECT':
+            const project = state.projects.getOrElse(List([])).find(p => !!p && p.projectId === action.projectId);
+            if (!!project) {
+                newState.activeProject = some(JSON.parse(JSON.stringify(project)) as Store.Project);
+            }
             return newState;
             
         default:

@@ -1,3 +1,3 @@
-﻿import * as MyRE from 'MyRE';
+﻿import * as MyRE from "MyRE";
 
 MyRE.init(true);

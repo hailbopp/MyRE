@@ -47,6 +47,20 @@ export const createNewProject = (newProject: CreateProjectRequest): CreateNewPro
     newProject,
 });
 
+export type UpdateProjectRequestApiAction = {
+    type: 'API_UPDATE_PROJECT';
+    asyncActionType: 'API_REQUEST';
+    updatedEntity: ProjectListing;
+}
+
+export type UpdateProjectResponseApiAction = ApiResponseAction<UpdateProjectRequestApiAction, ProjectListing>;
+
+export const updateProject = (updatedEntity: ProjectListing): UpdateProjectRequestApiAction => ({
+    type: 'API_UPDATE_PROJECT',
+    asyncActionType: 'API_REQUEST',
+    updatedEntity,
+});
+
 export type DeleteProjectRequestApiAction = {
     type: 'API_DELETE_PROJECT';
     asyncActionType: 'API_REQUEST';
@@ -73,20 +87,33 @@ export const changeProjectSource = (projectId: string, source: string): ChangePr
     newSource: source,
 });
 
+export type SetActiveProjectAction = {
+    type: 'UI_SET_ACTIVE_PROJECT';
+    projectId: string;
+}
+
+export const setActiveProject = (projectId: string): SetActiveProjectAction => ({
+    type: 'UI_SET_ACTIVE_PROJECT',
+    projectId,
+});
+
 export type ProjectApiRequestAction =
     | ProjectListRequestApiAction
     | CreateNewProjectRequestApiAction
+    | UpdateProjectRequestApiAction
     | DeleteProjectRequestApiAction
 
 export type ProjectApiResponseAction =
     | ProjectListResponseApiAction
     | CreateNewProjectResponseApiAction
+    | UpdateProjectResponseApiAction
     | DeleteProjectResponseApiAction
 
 export type ProjectUIAction =
     | ToggleCreateProjectDialogUIAction
     | ChangeNewProjectDataUIAction
     | ChangeProjectSourceAction
+    | SetActiveProjectAction
 
 
 export type ProjectAction =

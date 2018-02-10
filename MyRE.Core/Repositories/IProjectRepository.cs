@@ -13,6 +13,7 @@ namespace MyRE.Core.Repositories
         Task<Project> GetByIdAsync(Guid projectId);
         Task<ApplicationUser> GetOwnerAsync(Guid projectId);
         Task DeleteAsync(Guid projectId);
+        Task<Project> UpdateAsync(Project entity);
 
         Task<ProjectSource> GetSourceById(Guid projectId);
         Task<ProjectSource> SetProjectSource(Guid projectId, string source, string expressionTree);

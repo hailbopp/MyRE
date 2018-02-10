@@ -9,10 +9,12 @@ namespace MyRE.Core.Services
     public class ProjectService : IProjectService
     {
         private readonly IProjectRepository _projectRepository;
+        private readonly IProjectSourceMappingService _projectSourceMapping;
 
-        public ProjectService(IProjectRepository projectRepository)
+        public ProjectService(IProjectRepository projectRepository, IProjectSourceMappingService projectSourceMapping)
         {
             _projectRepository = projectRepository;
+            _projectSourceMapping = projectSourceMapping;
         }
 
         public Task<IEnumerable<Project>> GetUserProjectsAsync(string userId) => _projectRepository.GetUserProjectsAsync(userId);
@@ -28,6 +30,11 @@ namespace MyRE.Core.Services
         public async Task DeleteAsync(Guid projectId)
         {
             await _projectRepository.DeleteAsync(projectId);
+        }
+
+        public async Task<Project> UpdateAsync(Project entity)
+        {
+            return await _projectRepository.UpdateAsync(entity);
         }
 
         public Task<ProjectSource> GetSource(Guid projectId)

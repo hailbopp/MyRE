@@ -1,4 +1,7 @@
-﻿
+﻿import { Program } from "MyRE/Utils/Models/DslModels";
+import * as ParserTypes from "MyRE/Utils/Models/Parser";
+
+
 export interface ErrorResponse {
     Message: string;
 }
@@ -14,13 +17,22 @@ export interface Instance {
     AccountId: string;
 }
 
+type ExpressionTree = Program | ParserTypes.SyntaxError;
+
+export interface ProjectSource {
+    ProjectSourceId: string;
+    CreatedAt: Date;
+    ProjectId: string;
+    Source: string;
+    ExpressionTree: ExpressionTree
+}
+
 export interface ProjectListing {
     ProjectId: string;
     Name: string;
     Description: string;
     InstanceId: string;
-    Source: string;
-    ExpressionTree: any;
+    Source: ProjectSource;
 }
 
 export interface CreateProjectRequest {

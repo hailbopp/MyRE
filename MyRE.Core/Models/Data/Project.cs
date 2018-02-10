@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MyRE.Core.Models.Data
 {
@@ -10,8 +11,10 @@ namespace MyRE.Core.Models.Data
         public string Description { get; set; }
 
         public Guid ParentInstanceId { get; set; }
-        public AppInstance ParentInstance { get; set; }
 
+        [ForeignKey("ParentInstanceId")]
+        public AppInstance ParentInstance { get; set; }
+        
         public ProjectSource Source { get; set; }
     }
 }

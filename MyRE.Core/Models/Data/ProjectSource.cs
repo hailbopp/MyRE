@@ -13,14 +13,16 @@ namespace MyRE.Core.Models.Data
         public DateTimeOffset CreatedAt { get; set; }
 
         public Guid ProjectId { get; set; }
+
+        [ForeignKey("ProjectId")]
         public Project Project { get; set; }
 
         public string Source { get; set; }
-        public string ExpressionTree { get; set; }
+        public string ExpressionTree { get; private set; }
 
         [NotMapped]
-        public List<BaseGrammarElement> ParsedExpressionTree {
-            get => JsonConvert.DeserializeObject<List<BaseGrammarElement>>(ExpressionTree);
+        public List<Object> ParsedExpressionTree {
+            get => JsonConvert.DeserializeObject<List<Object>>(ExpressionTree);
             set => ExpressionTree = JsonConvert.SerializeObject(value);
         }
     }

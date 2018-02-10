@@ -23,6 +23,7 @@ export class MyREApiClient {
 
         listProjects: '/api/Projects',
         createProject: '/api/Projects',
+        updateProject: (project: ProjectListing) => `/api/Projects/${project.ProjectId}`,
         deleteProject: (projectId: string) => `/api/Projects/${projectId}`,
 
         listDevices: '/api/Devices',
@@ -68,23 +69,31 @@ export class MyREApiClient {
         return await this.performRequest<T>(input, init, querystringParameters);
     }
 
-    private async post<T>(input: RequestInfo, body?: any, querystringParameters?: QueryStringParameterGroup): Promise<ApiResult<T>> {
-        let init: RequestInit = {};
-        init.body = JSON.stringify(body);
-        init.method = 'POST';
-        init.headers = {};
-        init.headers['Content-Type'] = 'application/json';
-        init.credentials = 'include';
+    private prepareRequest(method: string, body?: any): RequestInit {
+        let init: RequestInit = {
+            body: !!body ? JSON.stringify(body) : undefined,
+            method: method,
+            headers: {
+                "Content-Type": "application/json"
+            },
+            credentials: 'include',
+        };
 
+        return init
+    }
+
+    private async post<T>(input: RequestInfo, body?: any, querystringParameters?: QueryStringParameterGroup): Promise<ApiResult<T>> {
+        let init = this.prepareRequest("POST", body);
+        return await this.performRequest<T>(input, init, querystringParameters);
+    }
+
+    private async put<T>(input: RequestInfo, body: any, querystringParameters?: QueryStringParameterGroup): Promise<ApiResult<T>> {
+        let init = this.prepareRequest("PUT", body);
         return await this.performRequest<T>(input, init, querystringParameters);
     }
 
     private async delete(input: RequestInfo, querystringParameters?: QueryStringParameterGroup): Promise<ApiResult<any>> {
-        let init: RequestInit = {
-            credentials: 'include',
-            method: 'DELETE',
-        };
-
+        let init = this.prepareRequest("DELETE");
         return await this.performRequest<any>(input, init, querystringParameters);
     }
 
@@ -112,6 +121,9 @@ export class MyREApiClient {
 
     public createProject = async (newEntity: CreateProjectRequest): Promise<ApiResult<ProjectListing>> =>
         this.post<ProjectListing>(this.paths.createProject, newEntity);
+
+    public updateProject = async (updatedEntity: ProjectListing): Promise<ApiResult<ProjectListing>> =>
+        this.put<ProjectListing>(this.paths.updateProject(updatedEntity), updatedEntity);
 
     public deleteProject = async (projectId: string): Promise<ApiResult<any>> =>
         this.delete(this.paths.deleteProject(projectId));

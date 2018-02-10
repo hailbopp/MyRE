@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MyRE.Core.Models.Data
 {
@@ -16,6 +17,8 @@ namespace MyRE.Core.Models.Data
         public string AccessToken { get; set; }
 
         public Guid AccountId { get; set; }
+
+        [ForeignKey("AccountId")]
         public Account Account { get; set; }
 
         public List<Project> Projects { get; set; }

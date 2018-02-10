@@ -17,7 +17,6 @@ sexp
 
 atom
 	= _ a:sexp _ { return a; }
-    / _ a:booleanLiteral _ { return a; }
     / _ a:integer _ { return a; }
     / _ a:float _ { return a; }
     / _ a:string _ { return a; }
@@ -43,7 +42,7 @@ atomList = _ "[" _ atoms:atom+ _ "]" { return { type: 'LITERAL_LIST', value: ato
 listLiteral = emptyList / atomList
 
 boolean = 't' / 'nil'
-booleanLiteral = b:boolean { let s = stringify(b); return { type: 'LITERAL_BOOL', value: b === 't' ? true : false }; }
+booleanLiteral = b:boolean _ { let s = stringify(b); return { type: 'LITERAL_BOOL', value: b === 't' ? true : false }; }
     
 integer	= i:([0-9]+) { return { type: 'LITERAL_INT', value: parseInt(i.join(''), 10) } }    
 float = ipart:([0-9]+) '.' fpart:([0-9]+) { return { type: 'LITERAL_FLOAT', value: parseFloat(stringify(ipart) + '.' + stringify(fpart)) }; }

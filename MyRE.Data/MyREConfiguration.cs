@@ -18,7 +18,6 @@ namespace MyRE.Data
             builder.Entity<ProjectSource>()
                 .Property(psv => psv.CreatedAt)
                 .HasDefaultValueSql("getutcdate()");
-
         }
     }
 }

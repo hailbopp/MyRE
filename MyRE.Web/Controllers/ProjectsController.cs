@@ -10,6 +10,8 @@ using MyRE.Core.Extensions;
 using MyRE.Core.Models.Domain;
 using MyRE.Core.Services;
 using MyRE.Web.Authorization;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace MyRE.Web.Controllers
 {
@@ -39,7 +41,16 @@ namespace MyRE.Web.Controllers
             var currentUser = await _user.GetAuthenticatedUserFromContextAsync(HttpContext);
             var projects = await _project.GetUserProjectsAsync(currentUser.UserId);
 
-            return projects.Select(_projectMappingService.ToDomainModel);
+            return projects.Select(_projectMappingService.ToDomain);
+        }
+
+        [HttpPost("")]
+        [ProducesResponseType(typeof(Project), 201)]
+        public async Task<IActionResult> CreateNewProject([FromBody]Project newProject)
+        {
+            var createdProject = await _project.CreateAsync(newProject.Name, newProject.Description, newProject.InstanceId);
+
+            return Created(GetUriOfResource($"/api/Projects/{createdProject.ProjectId}"), _projectMappingService.ToDomain(createdProject));
         }
 
         [HttpGet("{projectId:Guid}")]
@@ -49,16 +60,15 @@ namespace MyRE.Web.Controllers
             return await RetrieveAuthenticatedResource(
                 _authorizationService, 
                 () => _project.GetByIdAsync(projectId),
-                project => Task.FromResult(Ok(_projectMappingService.ToDomainModel(project))));
+                project => Task.FromResult(Ok(_projectMappingService.ToDomain(project))));
         }
 
-        [HttpPost("")]
-        [ProducesResponseType(typeof(Project), 201)]
-        public async Task<IActionResult> CreateNewProject([FromBody]Project newProject)
+        [HttpPut("{projectId:Guid}")]
+        public async Task<IActionResult> UpdateProjectAsync([FromRoute] Guid projectId, [FromBody] JToken rawBody)
         {
-            var createdProject = await _project.CreateAsync(newProject.Name, newProject.Description, newProject.InstanceId);
+            var body = rawBody.ToObject<Project>();
 
-            return Created(GetUriOfResource($"/api/Projects/{createdProject.ProjectId}"), _projectMappingService.ToDomainModel(createdProject));
+            return Ok(_projectMappingService.ToDomain(await _project.UpdateAsync(_projectMappingService.ToData((Project)body))));
         }
 
         [HttpDelete("{projectId:Guid}")]

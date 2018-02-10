@@ -9,7 +9,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MyRE.Core", "MyRE.Core\MyRE
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MyRE.Data", "MyRE.Data\MyRE.Data.csproj", "{CAD2A9D4-726E-4AC3-B55D-575BDBF36F34}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyRE.SmartApp.Api.Client", "MyRE.SmartApp.Api.Client\MyRE.SmartApp.Api.Client.csproj", "{C386B897-2C72-4151-ABE4-3C3460ADD195}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MyRE.SmartApp.Api.Client", "MyRE.SmartApp.Api.Client\MyRE.SmartApp.Api.Client.csproj", "{C386B897-2C72-4151-ABE4-3C3460ADD195}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "MyRE.Core.Language", "MyRE.Core.Language\MyRE.Core.Language.fsproj", "{8BFD79A3-7436-41DE-99DD-4C5E2686C66F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +35,10 @@ Global
 		{C386B897-2C72-4151-ABE4-3C3460ADD195}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C386B897-2C72-4151-ABE4-3C3460ADD195}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C386B897-2C72-4151-ABE4-3C3460ADD195}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8BFD79A3-7436-41DE-99DD-4C5E2686C66F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8BFD79A3-7436-41DE-99DD-4C5E2686C66F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8BFD79A3-7436-41DE-99DD-4C5E2686C66F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8BFD79A3-7436-41DE-99DD-4C5E2686C66F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

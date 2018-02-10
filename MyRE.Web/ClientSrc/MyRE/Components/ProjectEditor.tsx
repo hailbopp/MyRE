@@ -33,7 +33,6 @@ const mapDispatchToProps = (dispatch: Dispatch<Store.All>): IConnectedDispatch =
     }
 });
 
-
 class ProjectEditorComponent extends React.PureComponent<IProjectEditorProperties> {
     private onChangeHandler = (value: string) => {
         this.props.changeSource(this.props.project.projectId, value);
@@ -46,14 +45,11 @@ class ProjectEditorComponent extends React.PureComponent<IProjectEditorPropertie
                     mode="lisp"
                     theme="kuroir"
                     width="100%"
-                    value={this.props.project.source}
+                    value={this.props.project.source.Source}
                     onChange={this.onChangeHandler}
                     name={"editor" + this.props.project.projectId}
                     editorProps={{ $blockScrolling: true }}
                 />
-                <pre>
-                    {JSON.stringify(this.props.project.expressionTree, null, 2)}
-                </pre>
             </Row>
         );
     }

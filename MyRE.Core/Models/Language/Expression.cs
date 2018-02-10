@@ -4,11 +4,11 @@ using System.Text;
 
 namespace MyRE.Core.Models.Language
 {
-    public abstract class BaseGrammarElement
+    public class BaseGrammarElement
     {
         public string Type { get; set; }
     }
-
+    
     public class SExpression : BaseGrammarElement
     {
         public string Func { get; set; }

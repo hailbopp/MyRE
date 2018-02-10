@@ -1,4 +1,6 @@
 ﻿using System;
+using System.ComponentModel.DataAnnotations.Schema;
+using Newtonsoft.Json;
 
 namespace MyRE.Core.Models.Domain
 {
@@ -9,7 +11,6 @@ namespace MyRE.Core.Models.Domain
         public string Description { get; set; }
         public Guid InstanceId { get; set; }
 
-        public string Source { get; set; }
-        public Object ExpressionTree { get; set; }
+        public ProjectSource Source { get; set; }
     }
 }

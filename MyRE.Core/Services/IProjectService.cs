@@ -13,6 +13,8 @@ namespace MyRE.Core.Services
         Task<Project> CreateAsync(string name, string description, Guid instanceId);
         Task DeleteAsync(Guid projectId);
 
+        Task<Project> UpdateAsync(Project entity);
+
         Task<ProjectSource> GetSource(Guid projectId);
     }
 }

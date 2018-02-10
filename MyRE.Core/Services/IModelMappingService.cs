@@ -2,8 +2,10 @@
 {
     public interface IDomainModelMappingService<TData, TDomain>
     {
-        TDomain ToDomainModel(TData dataModel);
+        TDomain ToDomain(TData dataModel);
+        TData ToData(TDomain domain);
     }
 
     public interface IProjectMappingService : IDomainModelMappingService<Core.Models.Data.Project, Core.Models.Domain.Project> { }
+    public interface IProjectSourceMappingService : IDomainModelMappingService<Models.Data.ProjectSource, Models.Domain.ProjectSource> { }
 }

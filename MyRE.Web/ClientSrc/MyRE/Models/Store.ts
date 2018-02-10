@@ -1,6 +1,6 @@
 ﻿import { Option } from 'ts-option';
 import { List } from 'immutable';
-import { User, ProjectListing, CreateProjectRequest, DeviceInfo } from "MyRE/Api/Models";
+import { User, ProjectListing, CreateProjectRequest, DeviceInfo, ProjectSource } from "MyRE/Api/Models";
 import { AppAction, ApiRequestAction } from 'MyRE/Actions';
 import { Program } from 'MyRE/Utils/Models/DslModels';
 
@@ -64,12 +64,12 @@ export namespace Store {
         description: string;
         instanceId: string;
 
-        source: string;
-        expressionTree: Program | SyntaxError;
+        source: ProjectSource;
     }
 
     export interface Projects {
         projects: Option<List<Project>>;
+        activeProject: Option<Project>;
 
         createProjectModalOpen: boolean;
         newProject: CreateProjectRequest;

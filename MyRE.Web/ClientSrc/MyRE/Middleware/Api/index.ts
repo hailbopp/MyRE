@@ -8,7 +8,7 @@ import { retrieveCurrentUser, clearAuthMessages, attemptLogin, RegisterRequestAp
 import { some } from "ts-option";
 import { List } from "immutable";
 import { Instance, ProjectListing } from "MyRE/Api/Models";
-import { requestProjectList, ProjectListRequestApiAction, CreateNewProjectRequestApiAction, DeleteProjectRequestApiAction } from "MyRE/Actions/Projects";
+import { requestProjectList, ProjectListRequestApiAction, CreateNewProjectRequestApiAction, DeleteProjectRequestApiAction, UpdateProjectRequestApiAction } from "MyRE/Actions/Projects";
 import { UserInstanceListRequestApiAction, InstanceDevicesRequestApiAction, listInstanceDevices } from "MyRE/Actions/Instances";
 
 function isAction(a: AppAction): a is AppAction {
@@ -104,12 +104,19 @@ export const ApiServiceMiddleware: ExtendedMiddleware<Store.All> = <S extends St
 
                 case 'API_CREATE_NEW_PROJECT':
                     ApiClient.createProject(action.newProject)
-                        .then((result) => dispatch(apiResponse(action as CreateNewProjectRequestApiAction, result)).then(_ => { if (result.result === "success") dispatch(requestProjectList()); }));                        
+                        .then((result) => dispatch(apiResponse(action as CreateNewProjectRequestApiAction, result))
+                            .then(_ => { if (result.result === "success") dispatch(requestProjectList()); }));                        
+                    break;
+
+                case 'API_UPDATE_PROJECT':
+                    ApiClient.updateProject(action.updatedEntity)
+                        .then(result => dispatch(apiResponse(action as UpdateProjectRequestApiAction, result)));
                     break;
 
                 case 'API_DELETE_PROJECT':
                     ApiClient.deleteProject(action.projectId)
-                        .then((result) => dispatch(apiResponse(action as DeleteProjectRequestApiAction, result)).then(_ => { if (result.result === "success") dispatch(requestProjectList()); }))
+                        .then((result) => dispatch(apiResponse(action as DeleteProjectRequestApiAction, result))
+                            .then(_ => { if (result.result === "success") dispatch(requestProjectList()); }))
                     break;
 
                 default:
