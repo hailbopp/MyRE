@@ -42,9 +42,8 @@ class ProjectEditorComponent extends React.PureComponent<IProjectEditorPropertie
     }
 
     public componentDidMount() {
-        const myrelispMode = new MyreLispAceMode();
-        // @ts-ignore
-        this.aceEditor.getSession().setMode(myrelispMode);
+        const myrelispMode = new MyreLispAceMode();        
+        this.aceEditor && this.aceEditor.getSession().setMode(myrelispMode);        
     }
 
     public render() {
