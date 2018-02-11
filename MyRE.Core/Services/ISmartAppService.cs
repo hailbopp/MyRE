@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using MyRE.Core.Models.Data;
 using MyRE.Core.Models.Domain;
@@ -10,5 +11,8 @@ namespace MyRE.Core.Services
     {
         Task<IEnumerable<DeviceInfo>> ListInstanceDevicesAsync(AppInstance instance);
         Task<IEnumerable<DeviceInfo>> ListUserDevicesAsync(User user);
+
+        Task<DeviceState> GetDeviceState(AppInstance instance, Guid remoteDeviceId);
+        Task<DeviceState> GetDeviceState(User user, Guid remoteDeviceId);
     }
 }

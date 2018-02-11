@@ -6,4 +6,19 @@ declare module 'brace' {
     export interface IEditSession {
         setMode(mode: object): void;
     }
+
+    export interface TokenInfo {
+        index: number;
+        start: number;
+        type: string;
+        value: string;
+    }
+
+    export interface TokenIterator {
+        stepBackward(): TokenInfo;
+        stepForward(): TokenInfo;
+        getCurrentToken(): TokenInfo;
+        getCurrentTokenRow(): number;
+        getCurrentTokenColumn(): number;
+    }
 }

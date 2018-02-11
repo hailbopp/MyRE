@@ -38,5 +38,21 @@ namespace MyRE.Web.Controllers
 
             return Ok(await _smartApp.ListInstanceDevicesAsync(requestedInstance));
         }
+
+        [HttpGet("{remoteDeviceId:Guid}")]
+        public async Task<IActionResult> GetDeviceState([FromRoute] Guid remoteDeviceId)
+        {
+            var user = await _user.GetAuthenticatedUserFromContextAsync(HttpContext);
+
+            var result = await _smartApp.GetDeviceState(user, remoteDeviceId);
+            if (result == null)
+            {
+                return NotFound();
+            }
+            else
+            {
+                return Ok(result);
+            }
+        }
     }
 }

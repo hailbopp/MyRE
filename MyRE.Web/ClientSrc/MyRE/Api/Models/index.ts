@@ -82,3 +82,16 @@ export interface DeviceInfo {
     Commands: Array<CommandInfo>;
     Capabilities: Array<CapabilityInfo>;
 }
+
+export interface AttributeState {
+    Name: string;
+    Timestamp: Date;
+    Value: string;
+}
+
+export interface DeviceState {
+    DeviceId: string;
+    Label: string;
+    DisplayName: string;
+    AttributeStates: Array<AttributeState>;
+}

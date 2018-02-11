@@ -46,5 +46,30 @@ namespace MyRE.Core.Services
                         .Select(async i => await ListInstanceDevicesAsync(i))))
                 .SelectMany(r => r);
         }
+
+        public async Task<DeviceState> GetDeviceState(AppInstance instance, Guid remoteDeviceId)
+        {
+            var result = await CreateInstanceClient(instance).GetDeviceStatusAsync(remoteDeviceId.ToString());
+
+            if (result.Error.HasValue)
+            {
+                return null;
+            }
+            else
+            {
+                return result.Data;
+            }
+        }
+
+        public async Task<DeviceState> GetDeviceState(User user, Guid remoteDeviceId)
+        {
+            var instances = await _user.GetUserInstancesAsync(user.UserId);
+
+            var result = await Task.WhenAll(
+                instances
+                    .Select(async i => await GetDeviceState(i, remoteDeviceId)));
+
+            return result.FirstOrDefault(s => s != null);
+        }
     }
 }

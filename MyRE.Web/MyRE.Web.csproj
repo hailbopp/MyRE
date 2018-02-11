@@ -33,12 +33,14 @@
     <None Remove="ClientSrc\MyRE\Components\ProjectsPage.tsx" />
     <None Remove="ClientSrc\MyRE\Reducers\AsyncActions.ts" />
     <None Remove="ClientSrc\MyRE\Reducers\Projects.ts" />
+    <None Remove="ClientSrc\MyRE\Utils\Ace\MyreLispAceMode.ts" />
     <None Remove="ClientSrc\Tests\MyRE\Api\Utilities.spec.ts" />
     <None Remove="ClientSrc\MyRE\Utils\Models\Atom.ts" />
     <None Remove="ClientSrc\MyRE\Utils\Models\DslModels.ts" />
     <None Remove="ClientSrc\MyRE\Utils\Models\Parser.ts" />
     <None Remove="ClientSrc\MyRE\Utils\Models\SExpression.ts" />
     <None Remove="ClientSrc\MyRE\Utils\Parser.ts" />
+    <None Remove="ClientSrc\typings\brace.d.ts" />
     <None Remove="ClientSrc\typings\immutable.d.ts" />
   </ItemGroup>
 
@@ -69,11 +71,13 @@
     <TypeScriptCompile Include="ClientSrc\MyRE\Components\ProjectsPage.tsx" />
     <TypeScriptCompile Include="ClientSrc\MyRE\Reducers\AsyncActions.ts" />
     <TypeScriptCompile Include="ClientSrc\MyRE\Reducers\Projects.ts" />
+    <TypeScriptCompile Include="ClientSrc\MyRE\Utils\Ace\MyreLispAceMode.ts" />
     <TypeScriptCompile Include="ClientSrc\Tests\MyRE\Api\Utilities.spec.ts" />
     <TypeScriptCompile Include="ClientSrc\MyRE\Utils\Models\Atom.ts" />
     <TypeScriptCompile Include="ClientSrc\MyRE\Utils\Models\DslModels.ts" />
     <TypeScriptCompile Include="ClientSrc\MyRE\Utils\Models\Parser.ts" />
     <TypeScriptCompile Include="ClientSrc\MyRE\Utils\Models\SExpression.ts" />
+    <TypeScriptCompile Include="ClientSrc\typings\brace.d.ts" />
     <TypeScriptCompile Include="ClientSrc\typings\immutable.d.ts" />
   </ItemGroup>
 </Project>

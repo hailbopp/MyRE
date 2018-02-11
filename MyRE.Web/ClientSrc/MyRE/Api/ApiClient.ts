@@ -1,4 +1,4 @@
-﻿import { User, ErrorResponse, ProjectListing, Instance, CreateProjectRequest, Routine, DeviceInfo } from "MyRE/Api/Models";
+﻿import { User, ErrorResponse, ProjectListing, Instance, CreateProjectRequest, Routine, DeviceInfo, DeviceState } from "MyRE/Api/Models";
 import { Option, some, none } from "ts-option";
 import { ApiResult, ApiSuccess, ApiError } from "MyRE/Api/Models/Results";
 import { List } from "immutable";
@@ -27,6 +27,7 @@ export class MyREApiClient {
         deleteProject: (projectId: string) => `/api/Projects/${projectId}`,
 
         listDevices: '/api/Devices',
+        getDeviceState: (deviceId: string) => `/api/Devices/${deviceId}`,
     }
 
     private async parseError(r: Response): Promise<ErrorResponse> {
@@ -128,8 +129,9 @@ export class MyREApiClient {
     public deleteProject = async (projectId: string): Promise<ApiResult<any>> =>
         this.delete(this.paths.deleteProject(projectId));
     
-    public listInstanceDevices = async (instanceId: string): Promise<ApiResult<List<DeviceInfo>>> => {
-        return this.get<Array<DeviceInfo>>(this.paths.listDevices, { instanceId }).then(convertArrayToImmutableList);
-    }
-        
+    public listInstanceDevices = async (instanceId: string): Promise<ApiResult<List<DeviceInfo>>> => 
+        this.get<Array<DeviceInfo>>(this.paths.listDevices, { instanceId }).then(convertArrayToImmutableList);
+    
+    public getDeviceState = async (deviceId: string): Promise<ApiResult<DeviceState>> =>
+        this.get<DeviceState>(this.paths.getDeviceState(deviceId));
 }
