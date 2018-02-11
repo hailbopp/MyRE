@@ -25,7 +25,9 @@ atom
     / _ a:comment _ { return a; }
     
 variableDefExpr = _ "(" _ "def" _ name:symbol _ value:expr _ ")" _ { return { type: 'VARIABLE_DEFINITION', name, value }; }
-functionDefExpr = _ "(" _ "defun" _ name:symbol _ args:argumentList _ block:expr+ _ ")" _ { return { type: 'NAMED_FUNCTION_DEFINITION', name: name, args: args, body: block }; }
+
+functionDefToken = "defun" / "defn"
+functionDefExpr = _ "(" _ functionDefToken _ name:symbol _ args:argumentList _ block:expr+ _ ")" _ { return { type: 'NAMED_FUNCTION_DEFINITION', name: name, args: args, body: block }; }
 eventHandlerExpr = _ "(" _ "defev" _ name:eventHandlerName _ event:expr _ handler:expr _ ")" _ { return { type: 'EVENT_HANDLER_DEFINITION', name: name, event: event, body: handler }; }
 lambdaExpr = _ "(" _ "lambda" _ args:argumentList _ block:expr+ _ ")" _ { return { type: 'ANONYMOUS_FUNCTION_DEFINITION', args: args, body: block }; }
 getPropertyExpr = _ "(" _ "get" _ objectName:expr _ propertyName:expr _ ")" _ { return { type: 'GET_PROPERTY_DEFINITION', object: objectName, property: propertyName }; }

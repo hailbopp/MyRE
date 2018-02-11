@@ -7,6 +7,8 @@ import { Row, Col } from 'reactstrap';
 import AceEditor from 'react-ace';
 import brace = require('brace');
 
+import 'brace/ext/language_tools'
+
 import MyreLispAceMode from 'MyRE/Utils/Ace/MyreLispAceMode';
 
 import 'brace/theme/kuroir';
@@ -43,7 +45,20 @@ class ProjectEditorComponent extends React.PureComponent<IProjectEditorPropertie
 
     public componentDidMount() {
         const myrelispMode = new MyreLispAceMode();        
-        this.aceEditor && this.aceEditor.getSession().setMode(myrelispMode);        
+        if (this.aceEditor) {
+            const langTools = brace.acequire('ace/ext/language_tools');
+
+            //langTools.setCompleters([]);
+            this.aceEditor.getSession().setMode(myrelispMode);
+            (window as any).langtools = langTools;
+            langTools.setCompleters([myrelispMode.$completer]);
+
+            this.aceEditor.setOptions({
+                enableBasicAutocompletion: true,
+                enableLiveAutocompletion: true
+            });
+        }
+        
     }
 
     public render() {
@@ -51,14 +66,13 @@ class ProjectEditorComponent extends React.PureComponent<IProjectEditorPropertie
             <Row>
                 <AceEditor
                     ref={(ref) => { if (ref) this.aceEditor = (ref as any).editor as brace.Editor }}
-                    mode={"lisp"}
+                    mode={"text"}
                     theme="kuroir"
                     width="100%"
                     value={this.props.project.source.Source}
                     onChange={this.onChangeHandler}
                     name={"editor" + this.props.project.projectId}
                     editorProps={{ $blockScrolling: true }}
-                    enableLiveAutocompletion={true}
                 />
             </Row>
         );
