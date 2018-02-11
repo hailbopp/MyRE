@@ -7,7 +7,8 @@ import { Row, Col } from 'reactstrap';
 import AceEditor from 'react-ace';
 import brace = require('brace');
 
-import 'brace/mode/lisp';
+import MyreLispAceMode from 'MyRE/Utils/Ace/MyreLispAceMode';
+
 import 'brace/theme/kuroir';
 import { changeProjectSource } from 'MyRE/Actions/Projects';
 
@@ -34,21 +35,31 @@ const mapDispatchToProps = (dispatch: Dispatch<Store.All>): IConnectedDispatch =
 });
 
 class ProjectEditorComponent extends React.PureComponent<IProjectEditorProperties> {
+    private aceEditor?: brace.Editor;
+
     private onChangeHandler = (value: string) => {
         this.props.changeSource(this.props.project.projectId, value);
+    }
+
+    public componentDidMount() {
+        const myrelispMode = new MyreLispAceMode();
+        // @ts-ignore
+        this.aceEditor.getSession().setMode(myrelispMode);
     }
 
     public render() {
         return (
             <Row>
                 <AceEditor
-                    mode="lisp"
+                    ref={(ref) => { if (ref) this.aceEditor = (ref as any).editor as brace.Editor }}
+                    mode={"lisp"}
                     theme="kuroir"
                     width="100%"
                     value={this.props.project.source.Source}
                     onChange={this.onChangeHandler}
                     name={"editor" + this.props.project.projectId}
                     editorProps={{ $blockScrolling: true }}
+                    enableLiveAutocompletion={true}
                 />
             </Row>
         );
