@@ -60,7 +60,7 @@ def getAllDevices() {
     return parent.getManagedDevices()
 }
 
-List<object> getExpressionChildren(node) {
+def getExpressionChildren(node) {
     if(node.type == "LITERAL_LIST") {
         return node.value;
     } else if(node.type == "S-EXPR") {

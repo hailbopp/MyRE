@@ -2,13 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="8246168c-087f-4b1a-af40-19e4a7f39155" name="Default" comment="">
-      <change beforePath="$PROJECT_DIR$/MyRE.Web/ClientSrc/MyRE/Api/Models/index.ts" afterPath="$PROJECT_DIR$/MyRE.Web/ClientSrc/MyRE/Api/Models/index.ts" />
-      <change beforePath="$PROJECT_DIR$/MyRE.Web/ClientSrc/MyRE/Components/ProjectEditor.tsx" afterPath="$PROJECT_DIR$/MyRE.Web/ClientSrc/MyRE/Components/ProjectEditor.tsx" />
-      <change beforePath="$PROJECT_DIR$/MyRE.Web/ClientSrc/MyRE/Models/Store.ts" afterPath="$PROJECT_DIR$/MyRE.Web/ClientSrc/MyRE/Models/Store.ts" />
-      <change beforePath="$PROJECT_DIR$/MyRE.Web/ClientSrc/MyRE/Reducers/Projects.ts" afterPath="$PROJECT_DIR$/MyRE.Web/ClientSrc/MyRE/Reducers/Projects.ts" />
-      <change beforePath="$PROJECT_DIR$/MyRE.Web/ClientSrc/MyRE/Reducers/index.ts" afterPath="$PROJECT_DIR$/MyRE.Web/ClientSrc/MyRE/Reducers/index.ts" />
-      <change beforePath="$PROJECT_DIR$/MyRE.Web/MyRE.Web.csproj" afterPath="$PROJECT_DIR$/MyRE.Web/MyRE.Web.csproj" />
-      <change beforePath="$PROJECT_DIR$/smartapps/zabracks/myre.src/myre.groovy" afterPath="$PROJECT_DIR$/smartapps/zabracks/myre.src/myre.groovy" />
+      <change beforePath="$PROJECT_DIR$/smartapps/zabracks/myre-worker.src/myre-worker.groovy" afterPath="$PROJECT_DIR$/smartapps/zabracks/myre-worker.src/myre-worker.groovy" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -40,8 +34,8 @@
           <file leaf-file-name="myre-worker.groovy" pinned="false" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/smartapps/zabracks/myre-worker.src/myre-worker.groovy">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="844">
-                  <caret line="94" column="41" lean-forward="true" selection-start-line="94" selection-start-column="41" selection-end-line="94" selection-end-column="41" />
+                <state relative-caret-position="214">
+                  <caret line="59" column="23" lean-forward="false" selection-start-line="59" selection-start-column="23" selection-end-line="59" selection-end-column="23" />
                   <folding />
                 </state>
               </provider>
@@ -252,12 +246,12 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1518961895980</updated>
-      <workItem from="1518961897862" duration="8721000" />
+      <workItem from="1518961897862" duration="8967000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="8721000" />
+    <option name="totallyTimeSpent" value="8967000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-8" y="-8" width="1936" height="1186" extended-state="6" />
@@ -320,8 +314,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/smartapps/zabracks/myre-worker.src/myre-worker.groovy">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="844">
-          <caret line="94" column="41" lean-forward="true" selection-start-line="94" selection-start-column="41" selection-end-line="94" selection-end-column="41" />
+        <state relative-caret-position="214">
+          <caret line="59" column="23" lean-forward="false" selection-start-line="59" selection-start-column="23" selection-end-line="59" selection-end-column="23" />
           <folding />
         </state>
       </provider>
