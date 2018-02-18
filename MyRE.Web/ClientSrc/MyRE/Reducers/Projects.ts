@@ -4,12 +4,11 @@ import { some, none } from "ts-option";
 import { List } from "immutable";
 import * as ProjectActions from 'MyRE/Actions/Projects';
 import { ProjectListing } from "MyRE/Api/Models";
+import { parseSource, convertInternalSourceToDisplayFormat, convertDisplaySourceToInternalFormat } from "MyRE/Utils/Helpers/Project";
+import { filterDevices } from "MyRE/Utils/Helpers/Instance";
 
-import * as ParserTypes from 'MyRE/Utils/Models/Parser';
-import { Program } from "MyRE/Utils/Models/DslModels";
-var parser = require('MyRE/Utils/MyreLisp.pegjs') as ParserTypes.Parser;
-
-export const reduceProjects = (state: Store.Projects, action: AppAction): Store.Projects => {
+export const reduceProjects = (fullState: Store.All, action: AppAction): Store.Projects => {
+    const state = fullState.projects;
     let newState = Object.assign({}, state);
 
     switch (action.type) {
@@ -45,6 +44,9 @@ export const reduceProjects = (state: Store.Projects, action: AppAction): Store.
                 } else {
                     newState.projects = some(List([]));
                 }
+            } else if (action.requestType === 'API_REQUEST_INSTANCE_DEVICES_LIST') {
+                // Force a refresh of the active project so that we can properly display human-readable devices
+                newState.activeProject = none;
             }
 
             return newState;
@@ -71,14 +73,13 @@ export const reduceProjects = (state: Store.Projects, action: AppAction): Store.
             if (state.activeProject.isDefined && state.activeProject.get.projectId == action.projectId) {
                 let newSource = Object.assign({}, state.activeProject.get.source);
                 newSource.Source = action.newSource;
-                try {
-                    newSource.ExpressionTree = parser.parse(action.newSource, {});
-                } catch (e) {
-                    newSource.ExpressionTree = e;
-                }
+                newSource.ExpressionTree = parseSource(action.newSource);
 
                 let newProj = Object.assign({}, state.activeProject.get);
-                newProj.source = newSource;
+                newProj.displaySource = newSource;
+
+                let newInternalSource = convertDisplaySourceToInternalFormat(newProj.displaySource, filterDevices(newProj.instanceId, fullState.instanceState));
+                newProj.source = newInternalSource;
 
                 newState.activeProject = some(newProj);
             }
@@ -87,7 +88,15 @@ export const reduceProjects = (state: Store.Projects, action: AppAction): Store.
         case 'UI_SET_ACTIVE_PROJECT':
             const project = state.projects.getOrElse(List([])).find(p => !!p && p.projectId === action.projectId);
             if (!!project) {
-                newState.activeProject = some(JSON.parse(JSON.stringify(project)) as Store.Project);
+                let newDisplaySource = Object.assign({}, project.source);
+
+                let newActiveProject =
+                    Object.assign({
+                        displaySource: convertInternalSourceToDisplayFormat(newDisplaySource, filterDevices(project.instanceId, fullState.instanceState))
+                    }, JSON.parse(JSON.stringify(project)) as Store.Project);
+
+                newActiveProject.displaySource
+                newState.activeProject = some(newActiveProject);
             }
             return newState;
             

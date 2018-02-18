@@ -50,12 +50,12 @@ export const initialState: Store.All = {
     asyncActions: {
         currentAsyncActions: List([])
     },
-}
+};
 
 export const reduce = (state: Store.All, action: any): Store.All => ({
     auth: reduceAuth(state.auth, action),
     nav: reduceNav(state.nav, action),
     instanceState: reduceInstanceState(state.instanceState, action),
-    projects: reduceProjects(state.projects, action),
+    projects: reduceProjects(state, action),
     asyncActions: reduceAsyncActions(state.asyncActions, action),
-})
+});

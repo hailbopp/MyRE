@@ -17,7 +17,7 @@ export interface Instance {
     AccountId: string;
 }
 
-type ExpressionTree = Program | ParserTypes.SyntaxError;
+export type ExpressionTree = Program | ParserTypes.SyntaxError;
 
 export interface ProjectSource {
     ProjectSourceId: string;

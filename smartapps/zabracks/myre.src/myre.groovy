@@ -1,13 +1,20 @@
-def getAPP_NAME() { return "MyRE" }
-def getVERSION() { return "0.0.1" }
+import groovy.json.JsonOutput
+import groovy.transform.TypeChecked
+import groovy.transform.CompileStatic
+
+String getNAMESPACE() { return "zabracks" }
+String getAPP_NAME() { return "MyRE" }
+String getVERSION() { return "0.0.1" }
+
+String WORKER_APP_NAME() { return APP_NAME + "-worker" }
 
 definition(
     name: APP_NAME,
-    namespace: "zabracks",
+    namespace: NAMESPACE,
     author: "Drew Worthey",
     description: "Automate all the things!",
     category: "Convenience",
-    singleInstance: true,
+    singleInstance: false,
     iconUrl: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience.png",
     iconX2Url: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience@2x.png",
     iconX3Url: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience@2x.png"
@@ -18,7 +25,6 @@ preferences {
     page(name: "pageFinishInstall")    
     page(name: "pageSettings")
 }
-
 
 // Info
 private generateNewExecutionToken() {
@@ -94,7 +100,7 @@ def pageInit() {
                 }
             }
 
-            def isOkay = isOAuthEnabled() && location.getTimeZone()
+            Boolean isOkay = isOAuthEnabled() && location.getTimeZone()
 
             if (isOkay) {
                 sectionDomainEntry()
@@ -202,6 +208,11 @@ private initialize() {
     }
 }
 
+/// Core functionality
+def getChildren() {
+    return getAllChildApps()
+}
+
 /// API Logic
 def mapAttributeInfo(attribute) {
 	return [
@@ -268,6 +279,39 @@ def getDeviceStatusById(deviceId) {
     return null    
 }
 
+def isProjectInputValid(proj) {
+    return proj && proj.projectId && proj.name && proj.description && proj.expressionTree
+}
+
+def isProjectListValid(projList) {
+    def isValid = true
+
+    projList.each {
+        if(!isProjectInputValid(it)) {
+            isValid = false
+        }
+    }
+
+    return isValid
+}
+
+def generateUniqueChildName(String baseName) {
+    List<String> childNames = getChildren().collect { it.getName() }
+
+    def name = baseName
+    int iteration = 0
+    while(childNames.contains(name)) {
+        iteration++
+        name = "${baseName} ${iteration}"
+    }
+}
+
+def createProjectChildApp(proj) {
+    def newSmartapp = addChildApp(NAMESPACE, WORKER_APP_NAME, generateUniqueChildName(proj.name))
+    def success = newSmartapp.setup(proj.name, proj.description, proj.expressionTree)
+    if(hubUID) newSmartapp.installed()
+}
+
 // Endpoints
 mappings {
     path("/status") {
@@ -285,10 +329,15 @@ mappings {
             GET: 'getDeviceById'
         ]
     }
+    path("/projects") {
+        action: [
+            PUT: 'replaceProjects'
+        ]
+    }    
 }
 
 def renderJson(data) {
-    return render(contentType: "application/json", data: groovy.json.JsonOutput.toJson(data))
+    return render(contentType: "application/json", data: JsonOutput.toJson(data))
 }
 
 // GET /status
@@ -320,6 +369,20 @@ def getDeviceById() {
     	return result
     } else {
     	return render(status: 404, data: "Device with that ID does not exist.")
+    }
+}
+
+// PUT /projects
+/**
+ * Replace child projects on this SmartApp instance with the projects in the input.
+ * The assumed input format for this endpoint is a JSON object of type:
+ * { projects: Array<{ projectId: string; name: string; description: string; expressionTree: Array<object> }> }
+ */
+def replaceProjects() {
+    if(request.JSON) {
+        
+    } else {
+        return render(status: 400)
     }
 }
 

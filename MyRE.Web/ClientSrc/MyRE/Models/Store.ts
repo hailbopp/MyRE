@@ -1,6 +1,6 @@
 ﻿import { Option } from 'ts-option';
 import { List } from 'immutable';
-import { User, ProjectListing, CreateProjectRequest, DeviceInfo, ProjectSource } from "MyRE/Api/Models";
+import { User, ProjectListing, CreateProjectRequest, DeviceInfo, ProjectSource, ExpressionTree } from "MyRE/Api/Models";
 import { AppAction, ApiRequestAction } from 'MyRE/Actions';
 import { Program } from 'MyRE/Utils/Models/DslModels';
 
@@ -47,17 +47,7 @@ export namespace Store {
         // If instances is none, then we haven't yet attempted to grab instances from the API.
         instances: Option<List<Instance>>;
     }
-
-    export interface Statement {
-        statementId: string;
-    }
-
-    export interface BlockStatement {
-        blockStatementId: string;
-        position: number;
-        statement: Option<Statement>;
-    }
-
+    
     export interface Project {
         projectId: string;
         name: string;

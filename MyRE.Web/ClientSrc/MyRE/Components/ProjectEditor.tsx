@@ -14,6 +14,8 @@ import MyreLispAceMode, { MyreLispCompletions } from 'MyRE/Utils/Ace/MyreLispAce
 import 'brace/theme/kuroir';
 import { changeProjectSource } from 'MyRE/Actions/Projects';
 import { DeviceInfo } from 'MyRE/Api/Models';
+import { filterDevices } from 'MyRE/Utils/Helpers/Instance';
+import { convertInternalSourceToDisplayFormat } from 'MyRE/Utils/Helpers/Project';
 
 interface IOwnProps {
     project: Store.Project;
@@ -30,7 +32,7 @@ interface IConnectedDispatch {
 export type IProjectEditorProperties = IOwnProps & IConnectedState & IConnectedDispatch;
 
 const mapStateToProps = (state: Store.All, ownProps: IOwnProps): IConnectedState => ({
-    availableDevices: state.instanceState.instances.map(il => il.find(inst => !!inst && inst.instanceId === ownProps.project.instanceId).devices.getOrElse(List([])).toArray()).getOrElse([])
+    availableDevices: filterDevices(ownProps.project.instanceId, state.instanceState).toArray()
 });
 
 const mapDispatchToProps = (dispatch: Dispatch<Store.All>): IConnectedDispatch => ({
@@ -70,6 +72,10 @@ class ProjectEditorComponent extends React.PureComponent<IProjectEditorPropertie
         if (this.props.availableDevices.length !== prevProps.availableDevices.length) {
             this.setCompletionHandler();
         }
+    }
+
+    private humanizeSource(src: ProjectSource): string {
+        return convertInternalSourceToDisplayFormat(src, List(this.props.availableDevices)).Source;
     }
 
     public render() {
