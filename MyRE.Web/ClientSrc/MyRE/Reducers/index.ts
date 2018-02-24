@@ -36,6 +36,7 @@ export const initialState: Store.All = {
 
     projects: {
         projects: none,
+        
         activeProject: none,
 
         createProjectModalOpen: false,

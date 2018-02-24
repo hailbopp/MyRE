@@ -2,6 +2,7 @@ bin/
 obj/
 .vs/
 .vscode/
+.idea/
 MyRE.Web/wwwroot/*
 MyRE.Web/node_modules/
 PublishProfiles/

@@ -68,6 +68,19 @@ def getExpressionChildren(node) {
     } //TODO: add the rest
 }
 
+def iterateExpressionTree(nodes) {
+    def allNodes = []
+
+    nodes.each {
+        allNodes.add(it)
+        
+    }
+}
+
+def getEventHandlerNodes() {
+
+}
+
 def getNodeReferences(node, parentDevices) {
     def referencedDevices = []
 
@@ -93,6 +106,7 @@ def setDeviceSubscriptions() {
     referencedDevices.each { d ->
         if(!state.subscriptions.contains(d.id)) {
             state.subscriptions.add(d.id)
+            // TODO
         }
     }
 }

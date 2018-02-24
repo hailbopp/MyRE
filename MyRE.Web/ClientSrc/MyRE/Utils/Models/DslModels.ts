@@ -2,7 +2,11 @@
 import { SExpression } from "MyRE/Utils/Models/SExpression";
 
 export type Expression =
-    | SExpression
-    | Atom;
+    | string
+    | number;
 
-export type Program = Expression[];
+export type ExprTree =
+    | Expression
+    | Expression[];
+
+export type Program = ExprTree;

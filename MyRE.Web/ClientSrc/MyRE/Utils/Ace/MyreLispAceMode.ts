@@ -92,7 +92,7 @@ export class MyreLispCompletions {
         var token = session.getTokenAt(pos.row, pos.column);
 
         const sendResults = (results: ICompletion[]) => {
-            console.log({ token, prefix, pos, session, editor, results });
+            console.debug({ token, prefix, pos, session, editor, results });
             return callback(null, results);
         }
         

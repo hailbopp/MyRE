@@ -1,4 +1,4 @@
-﻿import { ProjectListing, CreateProjectRequest, Routine } from "MyRE/Api/Models";
+﻿import { ProjectListing, CreateProjectRequest, Routine, DeviceInfo } from "MyRE/Api/Models";
 import { List } from "immutable";
 import { ApiError } from "MyRE/Api/Models/Results";
 import { ApiResponseAction } from "MyRE/Actions";
@@ -78,23 +78,39 @@ export const deleteProject = (projectId: string): DeleteProjectRequestApiAction 
 export type ChangeProjectSourceAction = {
     type: 'UI_CHANGE_PROJECT_SOURCE';
     projectId: string;
+    availableDevices: DeviceInfo[];
     newSource: string;
 }
 
-export const changeProjectSource = (projectId: string, source: string): ChangeProjectSourceAction => ({
+export const changeProjectSource = (projectId: string, availableDevices: DeviceInfo[], source: string): ChangeProjectSourceAction => ({
     type: 'UI_CHANGE_PROJECT_SOURCE',
     projectId: projectId,
+    availableDevices: availableDevices,
     newSource: source,
 });
 
 export type SetActiveProjectAction = {
     type: 'UI_SET_ACTIVE_PROJECT';
+    availableDevices: DeviceInfo[];
     projectId: string;
 }
 
-export const setActiveProject = (projectId: string): SetActiveProjectAction => ({
+export const setActiveProject = (projectId: string, availableDevices: DeviceInfo[]): SetActiveProjectAction => ({
     type: 'UI_SET_ACTIVE_PROJECT',
+    availableDevices,
     projectId,
+});
+
+export type RefreshActiveProjectAction = {
+    type: 'UI_REFRESH_ACTIVE_PROJECT';
+    instanceId: string;
+    availableDevices: DeviceInfo[];
+}
+
+export const refreshActiveProject = (instanceId: string, availableDevices: DeviceInfo[]): RefreshActiveProjectAction => ({
+    type: 'UI_REFRESH_ACTIVE_PROJECT',
+    instanceId,
+    availableDevices
 });
 
 export type ProjectApiRequestAction =
@@ -114,6 +130,7 @@ export type ProjectUIAction =
     | ChangeNewProjectDataUIAction
     | ChangeProjectSourceAction
     | SetActiveProjectAction
+    | RefreshActiveProjectAction
 
 
 export type ProjectAction =

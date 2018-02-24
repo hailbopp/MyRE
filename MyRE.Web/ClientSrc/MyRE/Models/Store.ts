@@ -57,9 +57,15 @@ export namespace Store {
         source: ProjectSource;
     }
 
+    export interface ActiveProject {
+        display: Project;
+        internal: Project;
+    }
+
     export interface Projects {
         projects: Option<List<Project>>;
-        activeProject: Option<Project>;
+        
+        activeProject: Option<ActiveProject>;
 
         createProjectModalOpen: boolean;
         newProject: CreateProjectRequest;

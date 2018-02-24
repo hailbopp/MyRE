@@ -43,7 +43,7 @@ private populateConnectionInfo() {
         state.accessToken = accessToken
         state.apiServerBaseUrl = apiServerUrl("")
         state.appId = app.id
-    } 
+    }
 }
 
 private isOAuthEnabled() {

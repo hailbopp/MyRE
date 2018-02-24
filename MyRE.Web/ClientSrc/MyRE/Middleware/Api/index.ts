@@ -8,7 +8,7 @@ import { retrieveCurrentUser, clearAuthMessages, attemptLogin, RegisterRequestAp
 import { some } from "ts-option";
 import { List } from "immutable";
 import { Instance, ProjectListing } from "MyRE/Api/Models";
-import { requestProjectList, ProjectListRequestApiAction, CreateNewProjectRequestApiAction, DeleteProjectRequestApiAction, UpdateProjectRequestApiAction } from "MyRE/Actions/Projects";
+import { requestProjectList, ProjectListRequestApiAction, CreateNewProjectRequestApiAction, DeleteProjectRequestApiAction, UpdateProjectRequestApiAction, refreshActiveProject } from "MyRE/Actions/Projects";
 import { UserInstanceListRequestApiAction, InstanceDevicesRequestApiAction, listInstanceDevices } from "MyRE/Actions/Instances";
 
 function isAction(a: AppAction): a is AppAction {
@@ -51,14 +51,14 @@ export const ApiServiceMiddleware: ExtendedMiddleware<Store.All> = <S extends St
                 // If we receive an action to send an API request, do it.
                 case "API_ATTEMPT_LOGIN":
                     dispatch(clearAuthMessages());
-                        ApiClient.logIn(action.credentials.email, action.credentials.password)
-                            .then((result) => 
-                                dispatch(apiResponse(action as AttemptLoginRequestApiAction, result)).then(_ => {
-                                    if (result.result == 'success')
-                                        return dispatch(retrieveCurrentUser());                                
-                                    return _;
-                                })
-                            );
+                    ApiClient.logIn(action.credentials.email, action.credentials.password)
+                        .then((result) =>
+                            dispatch(apiResponse(action as AttemptLoginRequestApiAction, result)).then(_ => {
+                                if (result.result == 'success')
+                                    return dispatch(retrieveCurrentUser());
+                                return _;
+                            })
+                        );
                     break;
                 case "API_LOGOUT":
                     ApiClient.logOut()
@@ -94,7 +94,14 @@ export const ApiServiceMiddleware: ExtendedMiddleware<Store.All> = <S extends St
 
                 case "API_REQUEST_INSTANCE_DEVICES_LIST":
                     ApiClient.listInstanceDevices(action.instanceId)
-                        .then((result) => dispatch(apiResponse(action as InstanceDevicesRequestApiAction, result)));
+                        .then((result) => {
+                            let a = action as InstanceDevicesRequestApiAction;
+                            dispatch(apiResponse(a, result)).then(aa => {
+                                if (result.result === "success") {
+                                    dispatch(refreshActiveProject(a.instanceId, result.data.toArray()));
+                                }
+                            });
+                        });
                     break;
 
                 case 'API_REQUEST_PROJECT_LIST':

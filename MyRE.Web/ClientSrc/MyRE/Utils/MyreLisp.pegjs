@@ -7,12 +7,10 @@ program = expr*
 expr =  sexp / atom
     
 sexp
-	= functionDefExpr
-    / eventHandlerExpr
-   	/ lambdaExpr
-    / variableDefExpr
-    / getPropertyExpr
-    / _ "(" _ atoms:atom+ _ ")" _ { return { type: 'S-EXPR', func: atoms[0], args: atoms.slice(1) }; }
+	= _ "(" _ atoms:atom+ _ ")" _ { 
+			//return { type: 'S-EXPR', func: atoms[0], args: atoms.slice(1) }; 
+			return atoms;
+		}
 	/ _ v:listLiteral _ { return v; }
 
 atom
@@ -24,33 +22,79 @@ atom
     / _ a:reference _ { return a; }
     / _ a:comment _ { return a; }
     
-variableDefExpr = _ "(" _ "def" _ name:symbol _ value:expr _ ")" _ { return { type: 'VARIABLE_DEFINITION', name, value }; }
+lineComment = ";;" s:(!EOL sourcechar)* EOL { 
+	//return { type: 'COMMENT', contents: stringify(s) }; 
+	return ["comment", stringify(s)];
+}
 
-functionDefToken = "defun" / "defn"
-functionDefExpr = _ "(" _ functionDefToken _ name:symbol _ args:argumentList _ block:expr+ _ ")" _ { return { type: 'NAMED_FUNCTION_DEFINITION', name: name, args: args, body: block }; }
-eventHandlerExpr = _ "(" _ "defev" _ name:eventHandlerName _ event:expr _ handler:expr _ ")" _ { return { type: 'EVENT_HANDLER_DEFINITION', name: name, event: event, body: handler }; }
-lambdaExpr = _ "(" _ "lambda" _ args:argumentList _ block:expr+ _ ")" _ { return { type: 'ANONYMOUS_FUNCTION_DEFINITION', args: args, body: block }; }
-getPropertyExpr = _ "(" _ "get" _ objectName:expr _ propertyName:expr _ ")" _ { return { type: 'GET_PROPERTY_DEFINITION', object: objectName, property: propertyName }; }
-    
-argumentList = _ "(" _ atoms:atom* _ ")" { return { type: 'ARGUMENT_LIST', value: atoms }; }
-eventHandlerName = symbol / string
-    
-lineComment = ";;" s:(!EOL sourcechar)* EOL { return { type: 'COMMENT', contents: stringify(s) }; }
-blockComment = "#|" s:(!"|#" sourcechar)* "|#" { return { type: 'COMMENT', contents: stringify(s) }; }
+blockComment = "#|" s:(!"|#" sourcechar)* "|#" { 
+	//return { type: 'COMMENT', contents: stringify(s) }; 
+	return ["comment", stringify(s)];
+}
+
 comment = lineComment / blockComment
 
-emptyList = _ "[" _ "]" { return { type: 'LITERAL_LIST', value: [] }; }
-atomList = _ "[" _ atoms:atom+ _ "]" { return { type: 'LITERAL_LIST', value: atoms }; }
+emptyList = _ "[" _ "]" { 
+	//return { type: 'LITERAL_LIST', value: [] }; 
+	return [];
+}
+
+atomList = _ "[" _ atoms:atom+ _ "]" { 
+	//return { type: 'LITERAL_LIST', value: atoms }; 
+	return atoms;
+}
+
 listLiteral = emptyList / atomList
 
 boolean = 't' / 'nil'
-booleanLiteral = b:boolean _ { let s = stringify(b); return { type: 'LITERAL_BOOL', value: b === 't' ? true : false }; }
+booleanLiteral = b:boolean _ { 
+	let s = stringify(b); 
+	//return s === 't' ? true : false; 
+	return {
+		role: "bool",
+		value: s === 't' ? true : false
+	};
+}
     
-integer	= i:([0-9]+) { return { type: 'LITERAL_INT', value: parseInt(i.join(''), 10) } }    
-float = ipart:([0-9]+) '.' fpart:([0-9]+) { return { type: 'LITERAL_FLOAT', value: parseFloat(stringify(ipart) + '.' + stringify(fpart)) }; }
-string = '"' d:(!'"' sourcechar)* '"' _ { return { type: 'LITERAL_STRING', value: stringify(d) }; }
-symbol = s:(symbolChar+) { return { type: 'LITERAL_SYMBOL', value: stringify(s) }; }
-reference = '`' r:(!'`' sourcechar)* '`' _ { return { type: 'LITERAL_REFERENCE', value: stringify(r) }; }
+integer	= i:([0-9]+) { 
+	//return parseInt(i.join(''), 10); 
+	return {
+		role: "num",
+		value: parseInt(i.join(''), 10)
+	};
+}    
+
+float = ipart:([0-9]+) '.' fpart:([0-9]+) { 
+	//return parseFloat(stringify(ipart) + '.' + stringify(fpart)); 
+	return {
+		role: "num",
+		value: parseFloat(stringify(ipart) + '.' + stringify(fpart))
+	};
+}
+
+string = '"' d:(!'"' sourcechar)* '"' _ { 
+	//return "str:" + stringify(d); 
+	return {
+		role: "str",
+		value: stringify(d)
+	};
+}
+
+symbol = s:(symbolChar+) { 
+	//return "sym:" + stringify(s); 
+	return {
+		role: "sym",
+		value: stringify(s)
+	};
+}
+
+reference = '`' r:(!'`' sourcechar)* '`' _ { 
+	//return "ref:" + stringify(r); 
+	return {
+		role: "ref",
+		value: stringify(r)
+	};
+}
 
 paren = "(" / ")"
 delimiter = paren / _

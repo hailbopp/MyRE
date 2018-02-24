@@ -9,39 +9,39 @@ export const parseSource = (source: string): ExpressionTree => {
     try {
         return parser.parse(source, {}) as ExpressionTree;
     } catch (e) {
-        console.error(e);
+        console.warn(e);
         return [];
     }
 }
 
-export const convertDisplaySourceToInternalFormat: (source: ProjectSource, devices: List<DeviceInfo>) => ProjectSource = (source, devices) => {
-    let newSource: ProjectSource = Object.assign({}, source);
+const refString = (baseString: string) => `\`${baseString}\``;
 
-    devices.forEach(d => {
-        if (d) {
-            newSource.Source = newSource.Source.replace(d.DisplayName, d.DeviceId);
-        }
-    });
+export const convertDisplaySourceToInternalFormat: (baseSource: ProjectSource, source: string, devices: DeviceInfo[]) => ProjectSource = (baseSource, source, devices) => {
+    const newSource: ProjectSource = Object.assign({}, baseSource);
+
+    for (var d of devices) {
+        newSource.Source = newSource.Source.replace(refString(d.DisplayName), refString(d.DeviceId));
+    }
+
     newSource.ExpressionTree = parseSource(newSource.Source);
 
     return newSource;
 }
 
-export const convertInternalSourceToDisplayFormat: (source: ProjectSource, devices: List<DeviceInfo>) => ProjectSource = (source, devices) => {
-    let newSource: ProjectSource = Object.assign({}, source);
+export const convertInternalSourceToDisplayFormat: (source: ProjectSource, devices: DeviceInfo[]) => ProjectSource = (source, devices) => {
+    const newSource: ProjectSource = Object.assign({}, source);
 
-    devices.forEach(d => {
-        if (d) {
-            newSource.Source = newSource.Source.replace(d.DeviceId, d.DisplayName);
-        }
-    });
+    for (var d of devices) {
+        newSource.Source = newSource.Source.replace(refString(d.DeviceId), refString(d.DisplayName));
+    }
+    
     newSource.ExpressionTree = parseSource(newSource.Source);
 
     return newSource;
 }
 
-type SyncProjectSourcesResult = { display: ProjectSource; internal: ProjectSource; };
-export const syncProjectSources = (display: ProjectSource, internal: ProjectSource, devices: List<DeviceInfo>): SyncProjectSourcesResult => ({
-    display: convertInternalSourceToDisplayFormat(internal, devices),
-    internal: convertDisplaySourceToInternalFormat(display, devices)
-});
+//type SyncProjectSourcesResult = { display: ProjectSource; internal: ProjectSource; };
+//export const syncProjectSources = (display: ProjectSource, internal: ProjectSource, devices: List<DeviceInfo>): SyncProjectSourcesResult => ({
+//    display: convertInternalSourceToDisplayFormat(internal, devices),
+//    internal: convertDisplaySourceToInternalFormat(display, devices)
+//});

@@ -46,7 +46,6 @@ export const reduceProjects = (fullState: Store.All, action: AppAction): Store.P
                 }
             } else if (action.requestType === 'API_REQUEST_INSTANCE_DEVICES_LIST') {
                 // Force a refresh of the active project so that we can properly display human-readable devices
-                newState.activeProject = none;
             }
 
             return newState;
@@ -70,34 +69,51 @@ export const reduceProjects = (fullState: Store.All, action: AppAction): Store.P
             return newState;
 
         case 'UI_CHANGE_PROJECT_SOURCE':
-            if (state.activeProject.isDefined && state.activeProject.get.projectId == action.projectId) {
-                let newSource = Object.assign({}, state.activeProject.get.source);
+            if (state.activeProject.isDefined && state.activeProject.get.internal.projectId == action.projectId) {
+                // Create new display source and then dehumanize it for internal
+                let newSource = Object.assign({}, state.activeProject.get.display.source);
                 newSource.Source = action.newSource;
                 newSource.ExpressionTree = parseSource(action.newSource);
+                let newDisplayProj = Object.assign({}, state.activeProject.get.display);
+                newDisplayProj.source = newSource;
 
-                let newProj = Object.assign({}, state.activeProject.get);
-                newProj.displaySource = newSource;
+                let newInternalSource = convertDisplaySourceToInternalFormat(newSource, action.newSource, action.availableDevices);
+                let newInternalProj = Object.assign({}, newDisplayProj);
+                newInternalProj.source = newInternalSource;
 
-                let newInternalSource = convertDisplaySourceToInternalFormat(newProj.displaySource, filterDevices(newProj.instanceId, fullState.instanceState));
-                newProj.source = newInternalSource;
-
-                newState.activeProject = some(newProj);
+                newState.activeProject = some({
+                    display: newDisplayProj,
+                    internal: newInternalProj
+                });
             }
             return newState;
 
         case 'UI_SET_ACTIVE_PROJECT':
-            const project = state.projects.getOrElse(List([])).find(p => !!p && p.projectId === action.projectId);
-            if (!!project) {
-                let newDisplaySource = Object.assign({}, project.source);
+            const internal = state.projects.getOrElse(List([])).find(p => !!p && p.projectId === action.projectId);
+            if (!!internal) {
+                let display = Object.assign({}, internal);
+                display.source = convertInternalSourceToDisplayFormat(internal.source, action.availableDevices);
 
-                let newActiveProject =
-                    Object.assign({
-                        displaySource: convertInternalSourceToDisplayFormat(newDisplaySource, filterDevices(project.instanceId, fullState.instanceState))
-                    }, JSON.parse(JSON.stringify(project)) as Store.Project);
-
-                newActiveProject.displaySource
-                newState.activeProject = some(newActiveProject);
+                newState.activeProject = some({
+                    internal,
+                    display
+                });
             }
+            
+            return newState;
+
+        case 'UI_REFRESH_ACTIVE_PROJECT':
+            if (state.activeProject.isDefined) {
+                let internal = state.activeProject.get.internal;
+                let display = Object.assign({}, internal);
+
+                display.source = convertInternalSourceToDisplayFormat(internal.source, action.availableDevices);
+                newState.activeProject = some({
+                    internal,
+                    display
+                });
+            }
+
             return newState;
             
         default:

@@ -13,31 +13,33 @@ import MyreLispAceMode, { MyreLispCompletions } from 'MyRE/Utils/Ace/MyreLispAce
 
 import 'brace/theme/kuroir';
 import { changeProjectSource } from 'MyRE/Actions/Projects';
-import { DeviceInfo } from 'MyRE/Api/Models';
+import { DeviceInfo, ProjectSource } from 'MyRE/Api/Models';
 import { filterDevices } from 'MyRE/Utils/Helpers/Instance';
-import { convertInternalSourceToDisplayFormat } from 'MyRE/Utils/Helpers/Project';
+import { convertInternalSourceToDisplayFormat, convertDisplaySourceToInternalFormat } from 'MyRE/Utils/Helpers/Project';
 
 interface IOwnProps {
-    project: Store.Project;
+    project: Store.ActiveProject;
 }
 
 interface IConnectedState {
     availableDevices: DeviceInfo[];
+    projectId: string;
 }
 
 interface IConnectedDispatch {
-    changeSource: (projectId: string, newSource: string) => void;
+    changeSource: (projectId: string, devices: DeviceInfo[], newSource: string) => void;
 }
 
 export type IProjectEditorProperties = IOwnProps & IConnectedState & IConnectedDispatch;
 
 const mapStateToProps = (state: Store.All, ownProps: IOwnProps): IConnectedState => ({
-    availableDevices: filterDevices(ownProps.project.instanceId, state.instanceState).toArray()
+    availableDevices: filterDevices(ownProps.project.internal.instanceId, state.instanceState).toArray(),
+    projectId: ownProps.project.internal.projectId
 });
 
 const mapDispatchToProps = (dispatch: Dispatch<Store.All>): IConnectedDispatch => ({
-    changeSource: (projectId, newSource) => {
-        dispatch(changeProjectSource(projectId, newSource));
+    changeSource: (projectId, devices, newSource) => {
+        dispatch(changeProjectSource(projectId, devices, newSource));
     }
 });
 
@@ -45,7 +47,7 @@ class ProjectEditorComponent extends React.PureComponent<IProjectEditorPropertie
     private aceEditor?: brace.Editor;
 
     private onChangeHandler = (value: string) => {
-        this.props.changeSource(this.props.project.projectId, value);
+        this.props.changeSource(this.props.projectId, this.props.availableDevices, value);
     }
 
     private setCompletionHandler() {
@@ -74,11 +76,8 @@ class ProjectEditorComponent extends React.PureComponent<IProjectEditorPropertie
         }
     }
 
-    private humanizeSource(src: ProjectSource): string {
-        return convertInternalSourceToDisplayFormat(src, List(this.props.availableDevices)).Source;
-    }
-
     public render() {
+        console.log(this.props.project.internal.source.ExpressionTree);
         return (
             <Row>
                 <AceEditor
@@ -86,9 +85,9 @@ class ProjectEditorComponent extends React.PureComponent<IProjectEditorPropertie
                     mode={"text"}
                     theme="kuroir"
                     width="100%"
-                    value={this.props.project.source.Source}
+                    value={this.props.project.display.source.Source}
                     onChange={this.onChangeHandler}
-                    name={"editor" + this.props.project.projectId}
+                    name={"editor" + this.props.project.display.projectId}
                     editorProps={{ $blockScrolling: true }}
                 />
             </Row>
