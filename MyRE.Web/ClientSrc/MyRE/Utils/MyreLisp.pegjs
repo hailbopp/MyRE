@@ -11,10 +11,10 @@ sexp
 			//return { type: 'S-EXPR', func: atoms[0], args: atoms.slice(1) }; 
 			return atoms;
 		}
-	/ _ v:listLiteral _ { return v; }
 
 atom
-	= _ a:sexp _ { return a; }
+	= _ v:listLiteral _ { return v; }
+	/ _ a:sexp _ { return a; }
     / _ a:integer _ { return a; }
     / _ a:float _ { return a; }
     / _ a:string _ { return a; }
@@ -34,14 +34,20 @@ blockComment = "#|" s:(!"|#" sourcechar)* "|#" {
 
 comment = lineComment / blockComment
 
-emptyList = _ "[" _ "]" { 
+emptyList = _ "'(" _ ")" { 
 	//return { type: 'LITERAL_LIST', value: [] }; 
-	return [];
+	return {
+		role: 'list',
+		value: []
+	};
 }
 
-atomList = _ "[" _ atoms:atom+ _ "]" { 
+atomList = _ "'(" _ atoms:atom+ _ ")" { 
 	//return { type: 'LITERAL_LIST', value: atoms }; 
-	return atoms;
+	return {
+		role: 'list',
+		value: atoms
+	};
 }
 
 listLiteral = emptyList / atomList

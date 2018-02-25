@@ -376,7 +376,12 @@ def getDeviceById() {
 /**
  * Replace child projects on this SmartApp instance with the projects in the input.
  * The assumed input format for this endpoint is a JSON object of type:
- * { projects: Array<{ projectId: string; name: string; description: string; expressionTree: Array<object> }> }
+ * { projects: Array<{
+ *          projectId: string;
+ *          name: string;
+ *          description: string;
+ *          expressionTree: Array<object>
+ *  }> }
  */
 def replaceProjects() {
     if(request.JSON) {
