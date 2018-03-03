@@ -661,38 +661,45 @@ def PRINT(exp) {
     pr_str(exp, true)
 }
 
-state.env = state.env?: Env()
-
 def REP(str) {
     PRINT(EVAL(READ(str), state.env))
 }
-ns.each { k,v ->
-    Env__set(state.env, Symbol(k), v)
-}
-Env__set(repl_env, Symbol("eval"), { a -> EVAL(a[0], state.env) })
-Env__set(repl_env, Symbol("*ARGV*"), [])
 
-// core.mal: defined using mal itself
-REP("(def! *host-language* \"groovy-smartthings\")")
-REP("(def! not (fn* (a) (if a false true)))")
-//REP("(def! load-file (fn* (f) (eval (read-string (str \"(do \" (slurp f) \")\")))))")
-REP("(defmacro! cond (fn* (& xs) (if (> (count xs) 0) (list 'if (first xs) (if (> (count xs) 1) (nth xs 1) (throw \"odd number of forms to cond\")) (cons 'cond (rest (rest xs)))))))");
-REP("(def! *gensym-counter* (atom 0))");
-REP("(def! gensym (fn* [] (symbol (str \"G__\" (swap! *gensym-counter* (fn* [x] (+ 1 x)))))))");
-REP("(defmacro! or (fn* (& xs) (if (empty? xs) nil (if (= 1 (count xs)) (first xs) (let* (condvar (gensym)) `(let* (~condvar ~(first xs)) (if ~condvar ~condvar (or ~@(rest xs)))))))))");
+def getInterpreter() {
+    state.env = state.env?: Env()
+
+
+    ns.each { k,v ->
+        Env__set(state.env, Symbol(k), v)
+    }
+    Env__set(repl_env, Symbol("eval"), { a -> EVAL(a[0], state.env) })
+    Env__set(repl_env, Symbol("*ARGV*"), [])
+
+    // core.mal: defined using mal itself
+    REP("(def! *host-language* \"groovy-smartthings\")")
+    REP("(def! not (fn* (a) (if a false true)))")
+    //REP("(def! load-file (fn* (f) (eval (read-string (str \"(do \" (slurp f) \")\")))))")
+    REP("(defmacro! cond (fn* (& xs) (if (> (count xs) 0) (list 'if (first xs) (if (> (count xs) 1) (nth xs 1) (throw \"odd number of forms to cond\")) (cons 'cond (rest (rest xs)))))))");
+    REP("(def! *gensym-counter* (atom 0))");
+    REP("(def! gensym (fn* [] (symbol (str \"G__\" (swap! *gensym-counter* (fn* [x] (+ 1 x)))))))");
+    REP("(defmacro! or (fn* (& xs) (if (empty? xs) nil (if (= 1 (count xs)) (first xs) (let* (condvar (gensym)) `(let* (~condvar ~(first xs)) (if ~condvar ~condvar (or ~@(rest xs)))))))))");
+
+    this.&REP
+}
 
 def interpret(str) {
-    REP(str)
+    def interpreter = getInterpreter()
+    interpreter(str)
 }
 ///// END interpreter implementation
 
 def getSummary() {
     [
-            appId: app.id,
-            projectId: state.projectId,
-            name: state.name,
-            description: state.desc,
-            source: state.src
+        appId: app.id,
+        projectId: state.projectId,
+        name: state.name,
+        description: state.desc,
+        source: state.src
     ]
 }
 
