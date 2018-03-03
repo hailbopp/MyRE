@@ -15,6 +15,7 @@ namespace MyRE.SmartApp.Api.Client
             public const string InstanceStatus = "status";
             public const string Devices = "devices";
             public static readonly Func<string, string> DeviceId = (deviceId) => $"devices/{deviceId}";
+            public const string Projects = "projects";
         }
 
         private const string BASE_ENDPOINT_PATH = "api/smartapps/installations/";
@@ -32,9 +33,8 @@ namespace MyRE.SmartApp.Api.Client
             Client.Dispose();
         }
 
-        private async Task<ApiResponse<T>> GetAsync<T>(string path)
+        private async Task<ApiResponse<T>> HandleResponse<T>(HttpResponseMessage response)
         {
-            var response = await Client.GetAsync(path);
             if (response.IsSuccessStatusCode)
             {
                 return new ApiResponse<T>()
@@ -54,8 +54,21 @@ namespace MyRE.SmartApp.Api.Client
             };
         }
 
+        private async Task<ApiResponse<T>> GetAsync<T>(string path)
+        {
+            var response = await Client.GetAsync(path);
+            return await HandleResponse<T>(response);
+        }
+
+        private async Task<ApiResponse<TResponse>> PostAsync<TResponse, TRequest>(string path, TRequest body)
+        {
+            var response = await Client.PostAsync(path, new StringContent(JsonConvert.SerializeObject(body)));
+            return await HandleResponse<TResponse>(response);
+        }
+
         public async Task<ApiResponse<InstanceStatus>> GetInstanceStatusAsync() => await GetAsync<InstanceStatus>(Routes.InstanceStatus);
         public async Task<ApiResponse<IEnumerable<DeviceInfo>>> ListDevicesAsync() => await GetAsync<IEnumerable<DeviceInfo>>(Routes.Devices);
         public async Task<ApiResponse<DeviceState>> GetDeviceStatusAsync(string deviceId) => await GetAsync<DeviceState>(Routes.DeviceId(deviceId));
+        public async Task<ApiResponse<ChildSmartApp>> CreateProjectAsync(CreateChildAppRequest request) => await PostAsync<ChildSmartApp, CreateChildAppRequest>(Routes.Projects, request);
     }
 }

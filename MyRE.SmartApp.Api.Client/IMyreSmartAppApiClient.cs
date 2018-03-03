@@ -10,5 +10,6 @@ namespace MyRE.SmartApp.Api.Client
         Task<ApiResponse<InstanceStatus>> GetInstanceStatusAsync();
         Task<ApiResponse<IEnumerable<DeviceInfo>>> ListDevicesAsync();
         Task<ApiResponse<DeviceState>> GetDeviceStatusAsync(string deviceId);
+        Task<ApiResponse<ChildSmartApp>> CreateProjectAsync(CreateChildAppRequest request);
     }
 }

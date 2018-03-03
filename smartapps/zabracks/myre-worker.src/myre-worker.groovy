@@ -35,6 +35,10 @@ def getAllDevices() {
     return parent.getManagedDevices()
 }
 
+def getDeviceById(deviceId) {
+    return parent.getDeviceStatusById(deviceId)
+}
+
 ///// Implementation of MyreLisp intepreter
 // I'm adapting much of MAL (https://github.com/kanaka/mal/blob/master/groovy) for this.
 // Due to limitations of the SmartThings API, we're forced to do things in a hacky way.
@@ -242,27 +246,25 @@ def tokenizer(String str) {
     }
     return tokens
 }
-def read_atom(Map rdr) {
-    def token = Reader__next(rdr)
-    def m = token =~ /(^-?[0-9]+$)|(^-?[0-9][0-9.]*$)|(^nil$)|(^true$)|(^false$)|^"(.*)"$|:(.*)|(^[^"]*$)/
-    if (!m.find()) {
-        return MyreLispException("unrecognized token '$token'")
-    }
-    if (m.group(1) != null) {
-        Integer.parseInt(m.group(1))
-    } else if (m.group(3) != null) {
+def read_atom() {
+    def mask = /(^-?[0-9]+$)|(^-?[0-9][0-9.]*$)|(^nil$)|(^true$)|(^false$)|^"(.*)"$|:(.*)|(^[^"]*$)/
+    def m = (token =~ mask)[0]
+
+    if (m[1] != null) {
+        Integer.parseInt(m[1])
+    } else if (m[3] != null) {
         null
-    } else if (m.group(4) != null) {
+    } else if (m[4] != null) {
         true
-    } else if (m.group(5) != null) {
+    } else if (m[5] != null) {
         false
-    } else if (m.group(6) != null) {
+    } else if (m[6] != null) {
         //StringEscapeUtils.unescapeJava(m.group(6))
-        m.group(6)
-    } else if (m.group(7) != null) {
-        "\u029e" + m.group(7)
-    } else if (m.group(8) != null) {
-        Symbol(m.group(8))
+        m[6]
+    } else if (m[7] != null) {
+        "\u029e" + m[7]
+    } else if (m[8] != null) {
+        Symbol(m[8])
     } else {
         return MyreLispException("unrecognized '${m.group(0)}'")
     }
@@ -390,6 +392,38 @@ def do_seq(args) {
     }
 }
 
+def tryGetProperty(o, propName) {
+    try {
+        o."${propName}"
+    } catch (Exception e) {
+        null
+    }
+}
+
+def tryGetMethod(o, methodName) {
+    try {
+        o.&"${methodName}"
+    } catch (e) {
+        null
+    }
+}
+
+def getMember(o, memberName) {
+    if(o instanceof Map) {
+        o[memberName]
+    } else {
+        def m = tryGetProperty(o, memberName)
+        if(m != null) {
+            return m
+        }
+        m = tryGetMethod(o, memberName)
+        if(m != null) {
+            return m
+        }
+        o."${memberName}"
+    }
+}
+
 def ns = [
         "=": { a -> a[0]==a[1]},
         "throw": { a -> return MyreLispException(a[0]) },
@@ -412,7 +446,7 @@ def ns = [
         "prn": this.&do_prn,
         "println": this.&do_println,
         "read-string": this.&read_str,
-        "readline": { a -> System.console().readLine(a[0]) },
+        //"readline": { a -> System.console().readLine(a[0]) },
         "slurp": { a ->
             //new File(a[0]).text
             ""
@@ -436,7 +470,13 @@ def ns = [
         "map?": { a -> hash_map_Q(a[0]) },
         "assoc": { a -> assoc_BANG(types.copy(a[0]), a.drop(1)) },
         "dissoc": { a -> dissoc_BANG(types.copy(a[0]), a.drop(1)) },
-        "get": { a ->  a[0] == null ? null : a[0][a[1]] },
+        "get": { a ->
+            if(a[0] instanceof Map) {
+                a[0] == null ? null : a[0][a[1]]
+            } else {
+                getMember(a[0], a[1])
+            }
+        },
         "contains?": { a -> a[0].containsKey(a[1]) },
         "keys": { a -> a[0].keySet() as List },
         "vals": { a -> a[0].values() as List },
@@ -461,7 +501,14 @@ def ns = [
         "atom?": { a -> a[0] instanceof Map && a[0]["__cls"] == "ATOM"},
         "deref": { a -> a[0].value },
         "reset!": { a -> a[0].value = a[1] },
-        "swap!": this.&do_swap_BANG
+        "swap!": this.&do_swap_BANG,
+
+        "dev": { a ->
+            def deviceId = a[0]
+            def device = parent.getDeviceById(deviceId)
+
+            device
+        },
 ]
 
 /// REPL
@@ -544,6 +591,14 @@ def EVAL(ast, env) {
                 env = let_env
                 ast = ast[2]
                 break // TCO
+            case { symbol_Q(it) && it['value'] == "subev" }:
+                def devicesList = EVAL(ast[1], env)
+                def eventName = EVAL(ast[2], env)
+                def handler = ast[3]
+
+                subscribe(devicesList, eventName, { e ->
+                    Function__call(handler, [e])
+                })
             case { symbol_Q(it) && it['value'] == "quote" }:
                 return ast[1]
             case { symbol_Q(it) && it['value'] == "quasiquote" }:
@@ -606,20 +661,21 @@ def PRINT(exp) {
     pr_str(exp, true)
 }
 
-def repl_env = Env()
+state.env = state.env?: Env()
+
 def REP(str) {
-    PRINT(EVAL(READ(str), repl_env))
+    PRINT(EVAL(READ(str), state.env))
 }
 ns.each { k,v ->
-    Env__set(repl_env, Symbol(k), v)
+    Env__set(state.env, Symbol(k), v)
 }
-Env__set(repl_env, Symbol("eval"), { a -> EVAL(a[0], repl_env) })
+Env__set(repl_env, Symbol("eval"), { a -> EVAL(a[0], state.env) })
 Env__set(repl_env, Symbol("*ARGV*"), [])
 
 // core.mal: defined using mal itself
 REP("(def! *host-language* \"groovy-smartthings\")")
 REP("(def! not (fn* (a) (if a false true)))")
-REP("(def! load-file (fn* (f) (eval (read-string (str \"(do \" (slurp f) \")\")))))")
+//REP("(def! load-file (fn* (f) (eval (read-string (str \"(do \" (slurp f) \")\")))))")
 REP("(defmacro! cond (fn* (& xs) (if (> (count xs) 0) (list 'if (first xs) (if (> (count xs) 1) (nth xs 1) (throw \"odd number of forms to cond\")) (cons 'cond (rest (rest xs)))))))");
 REP("(def! *gensym-counter* (atom 0))");
 REP("(def! gensym (fn* [] (symbol (str \"G__\" (swap! *gensym-counter* (fn* [x] (+ 1 x)))))))");
@@ -630,12 +686,23 @@ def interpret(str) {
 }
 ///// END interpreter implementation
 
+def getSummary() {
+    [
+            appId: app.id,
+            projectId: state.projectId,
+            name: state.name,
+            description: state.desc,
+            source: state.src
+    ]
+}
+
+
 Boolean setup(projectId, name, description, source) {
     if(projectId && name && description && source) {
         state.projectId = projectId
         state.name = name
-        state.description = description
-        state.source = source
+        state.desc = description
+        state.src = source
 
         state.inited = true
 
@@ -645,14 +712,25 @@ Boolean setup(projectId, name, description, source) {
     }
 }
 
+Boolean updateProject(name, description, source) {
+    if(name && description && source) {
+        unsubscribe()
+
+        state.name = name
+        state.desc = description
+        state.src = source
+
+        interpret(state.src)
+    }
+}
+
 def installed() {
     state.created = now()
     state.modified = now()
     state.active = true
-    state.variables = state.variables?: [:]
     state.subscriptions = state.subscriptions?: [:]
 
-    interpret(state.source)
+    interpret(state.src)
 
     return true
 }

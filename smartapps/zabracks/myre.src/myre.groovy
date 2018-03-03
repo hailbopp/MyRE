@@ -267,12 +267,23 @@ def getDeviceState(device) {
     ]
 }
 
+def mapChildApp(ca) {
+    [
+            appId: ca.getId(),
+            label: ca.getLabel()
+    ]
+}
+
+def getDeviceById(deviceId) {
+    getManagedDevices().find { it.id == deviceId }
+}
+
 def getManagedDevices() {
 	return settings.findAll{ it.key.startsWith("dev:") }.collect{ it.value }.flatten()
 }
 
 def getDeviceStatusById(deviceId) {
-    def device = getManagedDevices().find{ it.id == deviceId }
+    def device = getDeviceById(deviceId)
     if(device) {
         return getDeviceState(device)
     }
@@ -308,8 +319,18 @@ def generateUniqueChildName(String baseName) {
 
 def createProjectChildApp(proj) {
     def newSmartapp = addChildApp(NAMESPACE, WORKER_APP_NAME, generateUniqueChildName(proj.name))
-    def success = newSmartapp.setup(proj.name, proj.description, proj.expressionTree)
+    def success = newSmartapp.setup(proj.name, proj.description, proj.source)
     if(hubUID) newSmartapp.installed()
+    newSmartapp
+}
+
+def getChildAppByProjectId(projectId) {
+    getChildren().find { it.getSummary().projectId == projectId }
+}
+
+def updateProjectChildApp(projectId, name, desc, source) {
+    def childApp = getChildAppByProjectId(projectId)
+    childApp.updateProject(name, desc, source)
 }
 
 // Endpoints
@@ -331,9 +352,14 @@ mappings {
     }
     path("/projects") {
         action: [
-            PUT: 'replaceProjects'
+            POST: 'createProject'
         ]
-    }    
+    }
+    path("/projects/:projectId") {
+        action: [
+            PUT: 'updateProject'
+        ]
+    }
 }
 
 def renderJson(data) {
@@ -372,23 +398,30 @@ def getDeviceById() {
     }
 }
 
-// PUT /projects
+// POST /projects
 /**
- * Replace child projects on this SmartApp instance with the projects in the input.
+ * Add a new child app.
  * The assumed input format for this endpoint is a JSON object of type:
  * { projects: Array<{
  *          projectId: string;
  *          name: string;
  *          description: string;
- *          expressionTree: Array<object>
+ *          source: string;
  *  }> }
  */
-def replaceProjects() {
+def createProject() {
     if(request.JSON) {
-        
+        def newApp = createProjectChildApp(request.JSON)
+        renderJson newApp
     } else {
         return render(status: 400)
     }
+}
+
+// PUT /projects/:projectId
+def updateProject() {
+    def projectId = params?.projectId
+
 }
 
 
