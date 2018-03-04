@@ -490,7 +490,8 @@ def ns = [
         "empty?": { a -> a[0] == null || a[0].size() == 0 },
         "count": { a -> a[0] == null ? 0 : a[0].size() },
         "apply": this.&do_apply,
-        "map": { a -> a[1].collect { x -> a[0].call([x]) } },
+        "filter": { a -> a[1].findAll { x -> Function__call(a[0], [x]) } },
+        "map": { a -> a[1].collect { x -> Function__call(a[0], [x]) } },
 
         "conj": this.&do_conj,
         "seq": this.&do_seq,
@@ -499,15 +500,12 @@ def ns = [
         "with-meta": { a -> def b = types.copy(a[0]); b.getMetaClass().meta = a[1]; b },
         "atom": { a -> Atom(a[0]) },
         "atom?": { a -> a[0] instanceof Map && a[0]["__cls"] == "ATOM"},
-        "deref": { a -> a[0].value },
-        "reset!": { a -> a[0].value = a[1] },
+        "deref": { a -> a[0]['value'] },
+        "reset!": { a -> a[0]['value'] = a[1] },
         "swap!": this.&do_swap_BANG,
 
-        "dev": { a ->
-            def deviceId = a[0]
-            def device = parent.getDeviceById(deviceId)
-
-            device
+        "get-device-list": { a ->
+            getAllDevices()
         },
 ]
 
@@ -665,31 +663,47 @@ def REP(str) {
     PRINT(EVAL(READ(str), state.env))
 }
 
-def getInterpreter() {
+def initializeStateEnv() {
     state.env = state.env?: Env()
-
-
-    ns.each { k,v ->
-        Env__set(state.env, Symbol(k), v)
-    }
-    Env__set(repl_env, Symbol("eval"), { a -> EVAL(a[0], state.env) })
-    Env__set(repl_env, Symbol("*ARGV*"), [])
-
-    // core.mal: defined using mal itself
-    REP("(def! *host-language* \"groovy-smartthings\")")
-    REP("(def! not (fn* (a) (if a false true)))")
-    //REP("(def! load-file (fn* (f) (eval (read-string (str \"(do \" (slurp f) \")\")))))")
-    REP("(defmacro! cond (fn* (& xs) (if (> (count xs) 0) (list 'if (first xs) (if (> (count xs) 1) (nth xs 1) (throw \"odd number of forms to cond\")) (cons 'cond (rest (rest xs)))))))");
-    REP("(def! *gensym-counter* (atom 0))");
-    REP("(def! gensym (fn* [] (symbol (str \"G__\" (swap! *gensym-counter* (fn* [x] (+ 1 x)))))))");
-    REP("(defmacro! or (fn* (& xs) (if (empty? xs) nil (if (= 1 (count xs)) (first xs) (let* (condvar (gensym)) `(let* (~condvar ~(first xs)) (if ~condvar ~condvar (or ~@(rest xs)))))))))");
-
-    this.&REP
 }
+initializeStateEnv()
+
+ns.each { k,v ->
+    Env__set(state.env, Symbol(k), v)
+}
+Env__set(repl_env, Symbol("eval"), { a -> EVAL(a[0], state.env) })
+Env__set(repl_env, Symbol("*ARGV*"), [])
+
+// core.mal: defined using mal itself
+REP("(def! *host-language* \"groovy-smartthings\")")
+REP("(def! not (fn* (a) (if a false true)))")
+//REP("(def! load-file (fn* (f) (eval (read-string (str \"(do \" (slurp f) \")\")))))")
+REP("(defmacro! cond (fn* (& xs) (if (> (count xs) 0) (list 'if (first xs) (if (> (count xs) 1) (nth xs 1) (throw \"odd number of forms to cond\")) (cons 'cond (rest (rest xs)))))))");
+REP("(def! *gensym-counter* (atom 0))");
+REP("(def! gensym (fn* [] (symbol (str \"G__\" (swap! *gensym-counter* (fn* [x] (+ 1 x)))))))");
+REP("(defmacro! or (fn* (& xs) " +
+        "(if (empty? xs) " +
+        "nil " +
+        "(if (= 1 (count xs)) " +
+            "(first xs) " +
+            "(let* (condvar (gensym)) " +
+                "`(let* (~condvar ~(first xs)) " +
+                    "(if ~condvar ~condvar (or ~@(rest xs)))))))))");
+
+REP("(def! dev-by-name (fn* (name) (" +
+        "(filter (fn* (d) ( (= name (get d \"name\"))) ) " +
+            "(get-device-list)) " +
+        "))" +
+    ")")
+
+REP("(def! dev (fn* (identifier) (" +
+        "(filter (fn* (d) (" +
+            "(or (= identifier (get d name)) (= identifier (get d id)))" +
+        ") (get-device-list)))" +
+    ")))")
 
 def interpret(str) {
-    def interpreter = getInterpreter()
-    interpreter(str)
+    REP(str)
 }
 ///// END interpreter implementation
 

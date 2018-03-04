@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MyRE.Core.Extensions;
 using MyRE.Core.Models.Domain;
+using MyRE.Core.Models.Web;
 using MyRE.Core.Services;
 using MyRE.Web.Authorization;
 using Newtonsoft.Json;
@@ -23,15 +24,17 @@ namespace MyRE.Web.Controllers
         private readonly IAuthorizationService _authorizationService;
         private readonly IProjectService _project;
         private readonly IUserService _user;
+        private readonly ISmartAppService _smartApp;
 
         private readonly IProjectMappingService _projectMappingService;
 
-        public ProjectsController(IProjectService project, IUserService user, IAuthorizationService authorizationService, IProjectMappingService projectMappingService)
+        public ProjectsController(IProjectService project, IUserService user, IAuthorizationService authorizationService, IProjectMappingService projectMappingService, ISmartAppService smartApp)
         {
             _project = project;
             _user = user;
             _authorizationService = authorizationService;
             _projectMappingService = projectMappingService;
+            _smartApp = smartApp;
         }
 
         [HttpGet("")]
@@ -77,6 +80,24 @@ namespace MyRE.Web.Controllers
         {
             return await DeleteAuthenticatedResource(_authorizationService, () => _project.GetByIdAsync(projectId),
                 project => _project.DeleteAsync(projectId));
+        }
+
+        [HttpPost("Test")]
+        public async Task<IActionResult> TestProjectSource([FromBody] TestSourceRequest request)
+        {
+            var user = await _user.GetAuthenticatedUserFromContextAsync(HttpContext);
+
+            var instances = await _user.GetUserInstancesAsync(user.UserId);
+            var requestedInstance = instances.FirstOrDefault(i => i.AppInstanceId == request.InstanceId);
+
+            if (requestedInstance == null)
+            {
+                return NotFound();
+            }
+
+            var result = await _smartApp.TestSourceAsync(requestedInstance, request.Source);
+
+            return Ok(result);
         }
     }
 }

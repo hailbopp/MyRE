@@ -14,5 +14,7 @@ namespace MyRE.Core.Services
 
         Task<DeviceState> GetDeviceState(AppInstance instance, Guid remoteDeviceId);
         Task<DeviceState> GetDeviceState(User user, Guid remoteDeviceId);
+
+        Task<ResultResponse> TestSourceAsync(AppInstance instance, string source);
     }
 }

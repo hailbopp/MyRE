@@ -14,8 +14,10 @@ namespace MyRE.SmartApp.Api.Client
         {
             public const string InstanceStatus = "status";
             public const string Devices = "devices";
-            public static readonly Func<string, string> DeviceId = (deviceId) => $"devices/{deviceId}";
+            public static readonly Func<string, string> DeviceId = (deviceId) => $"{Devices}/{deviceId}";
             public const string Projects = "projects";
+            public const string TestProjectSource = "projects/test";
+
         }
 
         private const string BASE_ENDPOINT_PATH = "api/smartapps/installations/";
@@ -70,5 +72,9 @@ namespace MyRE.SmartApp.Api.Client
         public async Task<ApiResponse<IEnumerable<DeviceInfo>>> ListDevicesAsync() => await GetAsync<IEnumerable<DeviceInfo>>(Routes.Devices);
         public async Task<ApiResponse<DeviceState>> GetDeviceStatusAsync(string deviceId) => await GetAsync<DeviceState>(Routes.DeviceId(deviceId));
         public async Task<ApiResponse<ChildSmartApp>> CreateProjectAsync(CreateChildAppRequest request) => await PostAsync<ChildSmartApp, CreateChildAppRequest>(Routes.Projects, request);
+
+        public async Task<ApiResponse<ResultResponse>> TestProjectSourceCode(string source) =>
+            await PostAsync<ResultResponse, TestProjectSourceRequest>(Routes.TestProjectSource,
+                new TestProjectSourceRequest {Source = source});
     }
 }

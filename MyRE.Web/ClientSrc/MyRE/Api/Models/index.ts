@@ -41,6 +41,10 @@ export interface CreateProjectRequest {
     InstanceId: string;
 }
 
+export interface ResultResponse {
+    Result: any;
+}
+
 export interface Routine {
     RoutineId: string;
     Name: string;

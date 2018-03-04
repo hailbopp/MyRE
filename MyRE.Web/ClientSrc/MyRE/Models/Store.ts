@@ -60,6 +60,8 @@ export namespace Store {
     export interface ActiveProject {
         display: Project;
         internal: Project;
+
+        editorStatusMessage: Option<AlertMessage>;
     }
 
     export interface Projects {

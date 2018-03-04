@@ -1,6 +1,6 @@
-﻿import deepEqual = require('deep-equal');
-import { Store } from "MyRE/Models/Store";
+﻿import { Store } from "MyRE/Models/Store";
 import { AppAction, ApiRequestAction } from "MyRE/Actions";
+import { deepEqual } from "MyRE/Utils/Helpers/Core";
 
 const isApiRequestAction = (a: AppAction): a is ApiRequestAction => {
     let cast = a as ApiRequestAction;
@@ -14,7 +14,7 @@ export const reduceAsyncActions = (state: Store.AsyncActions, action: AppAction)
         };
     } else if (action.type === 'API_RESPONSE') {
         return {
-            currentAsyncActions: state.currentAsyncActions.filterNot(req => deepEqual(req, action.requestAction, { strict: true })).toList(),
+            currentAsyncActions: state.currentAsyncActions.filterNot(req => deepEqual(req, action.requestAction)).toList(),
         }
     }
 

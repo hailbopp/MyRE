@@ -1,4 +1,4 @@
-﻿import { ProjectListing, CreateProjectRequest, Routine, DeviceInfo } from "MyRE/Api/Models";
+﻿import { ProjectListing, CreateProjectRequest, Routine, DeviceInfo, ResultResponse } from "MyRE/Api/Models";
 import { List } from "immutable";
 import { ApiError } from "MyRE/Api/Models/Results";
 import { ApiResponseAction } from "MyRE/Actions";
@@ -75,6 +75,22 @@ export const deleteProject = (projectId: string): DeleteProjectRequestApiAction 
     projectId
 });
 
+export type TestProjectSourceRequestApiAction = {
+    type: 'API_TEST_PROJECT_SOURCE';
+    asyncActionType: 'API_REQUEST';
+    instanceId: string;
+    source: string;
+}
+
+export type TestProjectSourceResponseApiAction = ApiResponseAction<TestProjectSourceRequestApiAction, ResultResponse>;
+
+export const testProjectSource = (instanceId: string, source: string): TestProjectSourceRequestApiAction => ({
+    type: 'API_TEST_PROJECT_SOURCE',
+    asyncActionType: 'API_REQUEST',
+    instanceId,
+    source
+});
+
 export type ChangeProjectSourceAction = {
     type: 'UI_CHANGE_PROJECT_SOURCE';
     projectId: string;
@@ -118,12 +134,14 @@ export type ProjectApiRequestAction =
     | CreateNewProjectRequestApiAction
     | UpdateProjectRequestApiAction
     | DeleteProjectRequestApiAction
+    | TestProjectSourceRequestApiAction
 
 export type ProjectApiResponseAction =
     | ProjectListResponseApiAction
     | CreateNewProjectResponseApiAction
     | UpdateProjectResponseApiAction
     | DeleteProjectResponseApiAction
+    | TestProjectSourceResponseApiAction
 
 export type ProjectUIAction =
     | ToggleCreateProjectDialogUIAction

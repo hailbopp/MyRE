@@ -34,6 +34,24 @@ export const reduceProjects = (fullState: Store.All, action: AppAction): Store.P
                         message: action.response.message.getOrElse(action.response.status.toString()),
                     });
                 }
+            } else if (action.requestType === 'API_TEST_PROJECT_SOURCE') {
+                if (state.activeProject.isDefined) {
+                    let newActive = Object.assign({}, state.activeProject.get);
+                    if (action.response.result === 'error') {
+                        newActive.editorStatusMessage = some({
+                            level: 'default',
+                            message: JSON.stringify({
+                                message: action.response.message.getOrElse(""),
+                                status: action.response.status
+                            }),
+                        })
+                    } else {
+                        newActive.editorStatusMessage = some({
+                            level: 'default',
+                            message: JSON.stringify(action.response.data.Result),
+                        })
+                    }                    
+                }
             } else if (action.requestType === 'API_LOGOUT') {
                 if (action.response.result === "success") {
                     newState.projects = none;
@@ -83,7 +101,8 @@ export const reduceProjects = (fullState: Store.All, action: AppAction): Store.P
 
                 newState.activeProject = some({
                     display: newDisplayProj,
-                    internal: newInternalProj
+                    internal: newInternalProj,
+                    editorStatusMessage: state.activeProject.get.editorStatusMessage
                 });
             }
             return newState;
@@ -95,8 +114,9 @@ export const reduceProjects = (fullState: Store.All, action: AppAction): Store.P
                 display.source = convertInternalSourceToDisplayFormat(internal.source, action.availableDevices);
 
                 newState.activeProject = some({
+                    editorStatusMessage: none,
                     internal,
-                    display
+                    display,                    
                 });
             }
             
@@ -109,6 +129,7 @@ export const reduceProjects = (fullState: Store.All, action: AppAction): Store.P
 
                 display.source = convertInternalSourceToDisplayFormat(internal.source, action.availableDevices);
                 newState.activeProject = some({
+                    editorStatusMessage: state.activeProject.get.editorStatusMessage,
                     internal,
                     display
                 });

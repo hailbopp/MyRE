@@ -324,6 +324,13 @@ def createProjectChildApp(proj) {
     newSmartapp
 }
 
+def testProjectSourceCode(src) {
+    def newSmartapp = addChildApp(NAMESPACE, WORKER_APP_NAME, "Test SmartApp")
+    def result = newSmartapp.interpret(src)
+    app.deleteChildApp(newSmartapp)
+    result
+}
+
 def getChildAppByProjectId(projectId) {
     getChildren().find { it.getSummary().projectId == projectId }
 }
@@ -353,6 +360,11 @@ mappings {
     path("/projects") {
         action: [
             POST: 'createProject'
+        ]
+    }
+    path("/projects/test") {
+        action: [
+            POST: 'testProjectSource'
         ]
     }
     path("/projects/:projectId") {
@@ -413,6 +425,18 @@ def createProject() {
     if(request.JSON) {
         def newApp = createProjectChildApp(request.JSON)
         renderJson newApp
+    } else {
+        return render(status: 400)
+    }
+}
+
+// POST /projects/test
+def testProjectSource() {
+    if(request.JSON) {
+        def result = testProjectSourceCode(request.JSON.source)
+        renderJson([
+            result: result
+        ])
     } else {
         return render(status: 400)
     }
