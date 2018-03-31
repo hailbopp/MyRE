@@ -24,17 +24,15 @@ namespace MyRE.Web.Controllers
         private readonly IAuthorizationService _authorizationService;
         private readonly IProjectService _project;
         private readonly IUserService _user;
-        private readonly ISmartAppService _smartApp;
 
         private readonly IProjectMappingService _projectMappingService;
 
-        public ProjectsController(IProjectService project, IUserService user, IAuthorizationService authorizationService, IProjectMappingService projectMappingService, ISmartAppService smartApp)
+        public ProjectsController(IProjectService project, IUserService user, IAuthorizationService authorizationService, IProjectMappingService projectMappingService)
         {
             _project = project;
             _user = user;
             _authorizationService = authorizationService;
             _projectMappingService = projectMappingService;
-            _smartApp = smartApp;
         }
 
         [HttpGet("")]
@@ -52,8 +50,6 @@ namespace MyRE.Web.Controllers
         public async Task<IActionResult> CreateNewProject([FromBody]Project newProject)
         {
             var createdProject = await _project.CreateAsync(newProject.Name, newProject.Description, newProject.InstanceId);
-
-            var instanceProjectUpsertResult = await _smartApp.UpsertProjectAsync(createdProject);
 
             return Created(GetUriOfResource($"/api/Projects/{createdProject.ProjectId}"), _projectMappingService.ToDomain(createdProject));
         }
@@ -74,8 +70,6 @@ namespace MyRE.Web.Controllers
             var body = rawBody.ToObject<Project>();
 
             var localPersistResult = await _project.UpdateAsync(_projectMappingService.ToData((Project) body));
-
-            var instanceProjectUpsertResult = await _smartApp.UpsertProjectAsync(localPersistResult);
 
             return Ok(_projectMappingService.ToDomain(localPersistResult));
         }

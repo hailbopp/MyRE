@@ -10,6 +10,7 @@ namespace MyRE.Core.Services
     {
         private readonly IProjectRepository _projectRepository;
         private readonly IProjectSourceMappingService _projectSourceMapping;
+        private readonly ISmartAppService _smartApp;
 
         public ProjectService(IProjectRepository projectRepository, IProjectSourceMappingService projectSourceMapping)
         {
@@ -24,8 +25,12 @@ namespace MyRE.Core.Services
             return proj;
         }
 
-        public Task<Project> CreateAsync(string name, string description, Guid instanceId) =>
-            _projectRepository.CreateAsync(name, description, instanceId);
+        public async Task<Project> CreateAsync(string name, string description, Guid instanceId)
+        {
+            var createdLocalProject = await _projectRepository.CreateAsync(name, description, instanceId);
+            var instanceProjectUpsertResult = await _smartApp.UpsertProjectAsync(createdLocalProject);
+            return createdLocalProject;
+        }
 
         public async Task DeleteAsync(Guid projectId)
         {
@@ -34,7 +39,10 @@ namespace MyRE.Core.Services
 
         public async Task<Project> UpdateAsync(Project entity)
         {
-            return await _projectRepository.UpdateAsync(entity);
+            var localPersistResult = await _projectRepository.UpdateAsync(entity);
+            var instanceProjectUpsertResult = await _smartApp.UpsertProjectAsync(localPersistResult);
+
+            return localPersistResult;
         }
 
         public Task<ProjectSource> GetSource(Guid projectId)
