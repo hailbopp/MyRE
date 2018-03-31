@@ -53,6 +53,8 @@ namespace MyRE.Web.Controllers
         {
             var createdProject = await _project.CreateAsync(newProject.Name, newProject.Description, newProject.InstanceId);
 
+            var instanceProjectUpsertResult = await _smartApp.UpsertProjectAsync(createdProject);
+
             return Created(GetUriOfResource($"/api/Projects/{createdProject.ProjectId}"), _projectMappingService.ToDomain(createdProject));
         }
 
@@ -73,6 +75,7 @@ namespace MyRE.Web.Controllers
 
             var localPersistResult = await _project.UpdateAsync(_projectMappingService.ToData((Project) body));
 
+            var instanceProjectUpsertResult = await _smartApp.UpsertProjectAsync(localPersistResult);
 
             return Ok(_projectMappingService.ToDomain(localPersistResult));
         }
