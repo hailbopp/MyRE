@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using MyRE.Core.Models.Data;
 using MyRE.Core.Models.Domain;
 using MyRE.SmartApp.Api.Client.Models;
+using Project = MyRE.Core.Models.Data.Project;
 
 namespace MyRE.Core.Services
 {
@@ -14,7 +15,9 @@ namespace MyRE.Core.Services
 
         Task<DeviceState> GetDeviceState(AppInstance instance, Guid remoteDeviceId);
         Task<DeviceState> GetDeviceState(User user, Guid remoteDeviceId);
-
-        Task<ApiResponse<ResultResponse>> TestSourceAsync(AppInstance instance, string source);
+        
+        Task<ChildSmartApp> UpsertProjectAsync(Project project);
+        Task ExecuteProjectAsync(Project project);
+        Task DeleteProjectAsync(Project project);
     }
 }

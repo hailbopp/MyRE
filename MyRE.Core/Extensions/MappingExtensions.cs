@@ -1,4 +1,5 @@
-﻿using Domain = MyRE.Core.Models.Domain;
+﻿using Optional;
+using Domain = MyRE.Core.Models.Domain;
 using Data = MyRE.Core.Models.Data;
 
 namespace MyRE.Core.Extensions
@@ -15,3 +16,4 @@ namespace MyRE.Core.Extensions
         
     }
 }
+

@@ -269,10 +269,7 @@ def getDeviceState(device) {
 }
 
 def mapChildApp(ca) {
-    [
-            appId: ca.getId(),
-            label: ca.getLabel()
-    ]
+    ca.getSummary()
 }
 
 def getDeviceById(deviceId) {
@@ -307,6 +304,20 @@ def isProjectListValid(projList) {
     return isValid
 }
 
+def getChildProjects() {
+    getChildren().collect { mapChildApp(it) }
+}
+
+def getChildBy(Closure cl) {
+    getChildren().find(cl)
+}
+
+def deleteChildProjects() {
+    getChildren().each { ca ->
+        app.deleteChildApp(ca)
+    }
+}
+
 def generateUniqueChildName(String baseName) {
     List<String> childNames = getChildren().collect { it.getName() }
 
@@ -324,19 +335,6 @@ def createProjectChildApp(proj) {
     def success = newSmartapp.setup(proj['projectId'], proj['name'], proj['description'], proj['source'])
     //if(hubUID) newSmartapp.installed()
     newSmartapp
-}
-
-def testProjectSourceCode(src) {
-    def newSmartapp = createProjectChildApp([
-            name: "TestSmartApp",
-            projectId: "TestSmartApp",
-            description: "TestSmartApp",
-            source: src
-    ])
-
-    def result = newSmartapp.testSource()
-    app.deleteChildApp(newSmartapp)
-    return result
 }
 
 def getChildAppByProjectId(projectId) {
@@ -367,17 +365,20 @@ mappings {
     }
     path("/projects") {
         action: [
-                POST: 'createProject'
-        ]
-    }
-    path("/projects/test") {
-        action: [
-                POST: 'testProjectSource'
+                GET: 'listChildApps',
+                POST: 'createProject',
+                DELETE: 'deleteChildApps'
         ]
     }
     path("/projects/:projectId") {
         action: [
+                GET: 'retrieveProject',
                 PUT: 'updateProject'
+        ]
+    }
+    path("/projects/:projectId/run") {
+        action: [
+                POST: 'executeProject'
         ]
     }
 }
@@ -419,6 +420,21 @@ def getDeviceById() {
     }
 }
 
+// GET /projects
+def listChildApps() {
+    return getChildProjects()
+}
+
+// DELETE /projects
+def deleteChildApps() {
+    try {
+        deleteChildProjects()
+        return render(status: 200, data: "OK")
+    } catch(e) {
+        return render(status: 500, data: e)
+    }
+}
+
 // POST /projects
 /**
  * Add a new child app.
@@ -433,24 +449,45 @@ def getDeviceById() {
 def createProject() {
     if(request.JSON) {
         def newApp = createProjectChildApp(request.JSON)
-        renderJson newApp
+        renderJson newApp.getSummary()
     } else {
         return render(status: 400)
     }
 }
 
-// POST /projects/test
-def testProjectSource() {
-    def result = testProjectSourceCode(request.JSON.source)
-    return renderJson([
-            result: result
-    ])
+// POST /projects/:projectId/run
+def executeProject() {
+    def projectId = params?.projectId
+    def projectApp = getChildBy { it.getProjectId() == projectId }
+    if(projectApp) {
+        def executeResult = projectApp.execute()
+        return executeResult
+    } else {
+        return render(status: 404)
+    }
+}
+
+// GET /projects/:projectId
+def retrieveProject() {
+    def projectId = params?.projectId
+    def projectApp = getChildBy { it.getProjectId() == projectId }
+    if(projectApp) {
+        return projectApp.getSummary()
+    } else {
+        return render(status: 404)
+    }
 }
 
 // PUT /projects/:projectId
 def updateProject() {
     def projectId = params?.projectId
-
+    def projectApp = getChildBy { it.getProjectId() == projectId }
+    if(projectApp) {
+        projectApp.updateProject(proj['name'], proj['description'], proj['source'])
+        return projectApp.getSummary()
+    } else {
+        return render(status: 404)
+    }
 }
 
 

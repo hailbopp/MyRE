@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using MyRE.Core.Models.Data;
 using MyRE.Core.Models.Domain;
 using MyRE.SmartApp.Api.Client;
 using MyRE.SmartApp.Api.Client.Models;
+using Optional.Unsafe;
+using Project = MyRE.Core.Models.Data.Project;
 
 namespace MyRE.Core.Services
 {
@@ -72,12 +75,57 @@ namespace MyRE.Core.Services
             return result.FirstOrDefault(s => s != null);
         }
 
-        public async Task<ApiResponse<ResultResponse>> TestSourceAsync(AppInstance instance, string source)
+        public async Task<ChildSmartApp> UpsertProjectAsync(Project project)
         {
-            var client = CreateInstanceClient(instance);
-            var result = await client.TestProjectSourceCode(source);
+            var client = CreateInstanceClient(project.ParentInstance);
 
-            return result;
+            var existingProjectResponse = await client.GetProjectAsync(project.ProjectId.ToString());
+
+            ApiResponse<ChildSmartApp> upsertResult;
+
+            if (existingProjectResponse.Error.HasValue &&
+                existingProjectResponse.Error.ValueOrFailure().StatusCode == HttpStatusCode.NotFound)
+            {
+                // The project does not exist in its instance. We need to create it.
+                var createRequest = new CreateChildAppRequest()
+                {
+                    ProjectId = project.ProjectId.ToString(),
+                    Name = project.Name,
+                    Description = project.Description,
+                    Source = project.Source.Source
+                };
+
+                upsertResult = await client.CreateProjectAsync(createRequest);
+            }
+            else
+            {
+                // We need to update the existing project.
+                var updateRequest = new UpdateChildAppRequest()
+                {
+                    Name = project.Name,
+                    Description = project.Description,
+                    Source = project.Source.Source
+                };
+
+                upsertResult = await client.UpdateProjectAsync(project.ProjectId.ToString(), updateRequest);
+            }
+
+            if (upsertResult.Error.HasValue)
+            {
+                throw new Exception(upsertResult.Error.ValueOrFailure().Message);
+            }
+
+            return upsertResult.Data;
+        }
+
+        public Task ExecuteProjectAsync(Project project)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task DeleteProjectAsync(Project project)
+        {
+            throw new NotImplementedException();
         }
     }
 }

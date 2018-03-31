@@ -71,7 +71,10 @@ namespace MyRE.Web.Controllers
         {
             var body = rawBody.ToObject<Project>();
 
-            return Ok(_projectMappingService.ToDomain(await _project.UpdateAsync(_projectMappingService.ToData((Project)body))));
+            var localPersistResult = await _project.UpdateAsync(_projectMappingService.ToData((Project) body));
+
+
+            return Ok(_projectMappingService.ToDomain(localPersistResult));
         }
 
         [HttpDelete("{projectId:Guid}")]
@@ -80,24 +83,6 @@ namespace MyRE.Web.Controllers
         {
             return await DeleteAuthenticatedResource(_authorizationService, () => _project.GetByIdAsync(projectId),
                 project => _project.DeleteAsync(projectId));
-        }
-
-        [HttpPost("Test")]
-        public async Task<IActionResult> TestProjectSource([FromBody] TestSourceRequest request)
-        {
-            var user = await _user.GetAuthenticatedUserFromContextAsync(HttpContext);
-
-            var instances = await _user.GetUserInstancesAsync(user.UserId);
-            var requestedInstance = instances.FirstOrDefault(i => i.AppInstanceId == request.InstanceId);
-
-            if (requestedInstance == null)
-            {
-                return NotFound();
-            }
-
-            var result = await _smartApp.TestSourceAsync(requestedInstance, request.Source);
-
-            return Ok(result);
         }
     }
 }

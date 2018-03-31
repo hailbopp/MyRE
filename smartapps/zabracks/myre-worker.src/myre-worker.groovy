@@ -595,7 +595,7 @@ Map getPrimaryNamespace() {
                 def command = a[1]
                 def params = a[2]
 
-                log.info("Attempting to execute command $command on device ${d.name}")
+                log.info("Attempting to execute command '${d.label}'::'$command'")
 
                 if(params.size()) {
                     d."$command"(params as Object[])
@@ -870,27 +870,18 @@ def interpret(str) {
 
     clearTraces()
 
-    def res = REP(str, e)
-    state.env = e
+    try {
+        def res = REP(str, e)
+        state.env = e
+    } catch(exc) {
+        return MyreLispException(exc)
+    }
+
     return res
 }
 ///// END interpreter implementation
 
-def getSummary() {
-    [
-            appId: app.id,
-            projectId: state.projectId,
-            name: state.name,
-            description: state.desc,
-            source: state.src
-    ]
-}
-
-def getSource() {
-    return state.src
-}
-
-def testSource() {
+def execute() {
     state.traces = []
     state.env = Env()
     try {
@@ -936,6 +927,7 @@ Boolean updateProject(name, description, source) {
     if(name && description && source) {
         unsubscribe()
 
+        state.modified = now()
         state.name = name
         state.desc = description
         state.src = source
@@ -955,4 +947,28 @@ def installed() {
     //interpret(state.src)
 
     return true
+}
+
+def getSummary() {
+    [
+            appId: app.id,
+            projectId: state.projectId,
+            name: state.name,
+            description: state.desc,
+            createdAt: state.created,
+            modifiedAt: state.modified,
+            source: state.src
+    ]
+}
+
+def getSource() {
+    return state.src
+}
+
+def getProjectId() {
+    return state.projectId
+}
+
+def getCreatedAt() {
+    return state.created
 }
