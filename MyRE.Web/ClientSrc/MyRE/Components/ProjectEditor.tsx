@@ -88,9 +88,7 @@ class ProjectEditorComponent extends React.PureComponent<IProjectEditorPropertie
     public render() {
         return (
             <Container>
-                <Row>
-                    <AlertRow message={this.props.project.editorStatusMessage} />
-                </Row>
+                
                 <Row>
                     <AceEditor
                         ref={(ref) => { if (ref) this.aceEditor = (ref as any).editor as brace.Editor }}
@@ -107,6 +105,13 @@ class ProjectEditorComponent extends React.PureComponent<IProjectEditorPropertie
                     <Col xs="12" sm="2">
                         <Button color="primary" className="float-right" size="sm" onClick={this.onTestButtonClickHandler}>Test</Button>
                     </Col>
+                </Row>
+                <Row>
+                    {//<AlertRow message={this.props.project.editorStatusMessage} preformatted={true} />
+                    }
+                    <pre style={({whiteSpace: "pre-wrap"})}>{this.props.project.editorStatusMessage.isDefined ?
+                        JSON.stringify(JSON.parse(this.props.project.editorStatusMessage.get.message), undefined, 2) :
+                        ''}</pre>
                 </Row>
             </Container>
         );

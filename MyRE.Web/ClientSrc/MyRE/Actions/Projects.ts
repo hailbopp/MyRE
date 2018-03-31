@@ -1,4 +1,4 @@
-﻿import { ProjectListing, CreateProjectRequest, Routine, DeviceInfo, ResultResponse } from "MyRE/Api/Models";
+﻿import { ProjectListing, CreateProjectRequest, Routine, DeviceInfo, ResultResponse, SmartThingsApiResponse } from "MyRE/Api/Models";
 import { List } from "immutable";
 import { ApiError } from "MyRE/Api/Models/Results";
 import { ApiResponseAction } from "MyRE/Actions";
@@ -82,7 +82,7 @@ export type TestProjectSourceRequestApiAction = {
     source: string;
 }
 
-export type TestProjectSourceResponseApiAction = ApiResponseAction<TestProjectSourceRequestApiAction, ResultResponse>;
+export type TestProjectSourceResponseApiAction = ApiResponseAction<TestProjectSourceRequestApiAction, SmartThingsApiResponse<ResultResponse>>;
 
 export const testProjectSource = (instanceId: string, source: string): TestProjectSourceRequestApiAction => ({
     type: 'API_TEST_PROJECT_SOURCE',

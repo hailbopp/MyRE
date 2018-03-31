@@ -34,6 +34,7 @@
     <None Remove="ClientSrc\MyRE\Reducers\AsyncActions.ts" />
     <None Remove="ClientSrc\MyRE\Reducers\Projects.ts" />
     <None Remove="ClientSrc\MyRE\Utils\Ace\MyreLispAceMode.ts" />
+    <None Remove="ClientSrc\MyRE\Utils\Helpers\Core.ts" />
     <None Remove="ClientSrc\MyRE\Utils\Helpers\Instance.ts" />
     <None Remove="ClientSrc\MyRE\Utils\Helpers\Project.ts" />
     <None Remove="ClientSrc\Tests\MyRE\Api\Utilities.spec.ts" />
@@ -74,6 +75,7 @@
     <TypeScriptCompile Include="ClientSrc\MyRE\Reducers\AsyncActions.ts" />
     <TypeScriptCompile Include="ClientSrc\MyRE\Reducers\Projects.ts" />
     <TypeScriptCompile Include="ClientSrc\MyRE\Utils\Ace\MyreLispAceMode.ts" />
+    <TypeScriptCompile Include="ClientSrc\MyRE\Utils\Helpers\Core.ts" />
     <TypeScriptCompile Include="ClientSrc\MyRE\Utils\Helpers\Instance.ts" />
     <TypeScriptCompile Include="ClientSrc\MyRE\Utils\Helpers\Project.ts" />
     <TypeScriptCompile Include="ClientSrc\Tests\MyRE\Api\Utilities.spec.ts" />

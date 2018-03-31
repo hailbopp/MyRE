@@ -5,6 +5,7 @@ import { Row, Alert } from "reactstrap";
 
 interface IProps {
     message: Option<Store.AlertMessage>;
+    preformatted?: boolean;
 }
 
 export class AlertRow extends React.Component<IProps> {
@@ -13,7 +14,9 @@ export class AlertRow extends React.Component<IProps> {
             return (
                 <Row>
                     <Alert color={this.props.message.get.level}>
-                        {this.props.message.get.message}
+                        {this.props.preformatted && <pre>{this.props.message.get.message}</pre>}
+                        {(!this.props.preformatted) && this.props.message.get.message}
+
                     </Alert>
                 </Row>
             );

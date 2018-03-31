@@ -1,16 +1,19 @@
+import groovy.json.JsonBuilder
+import org.codehaus.groovy.runtime.MethodClosure
+
 def getNAMESPACE() { return "zabracks" }
 def getPARENT_NAME() { return "MyRE" }
 def getAPP_NAME() { return "${PARENT_NAME}-worker" }
 def getVERSION() { return "0.0.1" }
 
 definition(
-    name: APP_NAME,
-    namespace: NAMESPACE,
-    author: "Drew Worthey",
-    description: "MyRE worker app. Do not install directly.",
-    parent: "zabracks:${PARENT_NAME}",
-    category: "Convenience",
-    singleInstance: false
+        name: APP_NAME,
+        namespace: NAMESPACE,
+        author: "Drew Worthey",
+        description: "MyRE worker app. Do not install directly.",
+        parent: "zabracks:${PARENT_NAME}",
+        category: "Convenience",
+        singleInstance: false
 )
 
 preferences {
@@ -46,6 +49,51 @@ def getDeviceById(deviceId) {
 /// Types
 // Since ST doesn't allow class definitions, we're going to do everything with functions and maps...
 // for better or for worse.
+def trace(name, s, context=null) {
+    if(!state.traces) state.traces = []
+    state.traces.push([
+        timestamp: (new Date()).format("MM/dd/yyyy HH:mm:ss.SSS"),
+        name: name,
+        context: context,
+        msg: s
+    ])
+}
+
+def clearTraces() {
+    state.traces = []
+}
+
+def mlog(s, String level="info") {
+    if(!state.executionStack) state.executionStack = []
+    JsonBuilder builder = new JsonBuilder()
+
+    builder{
+        message s
+        //stack state.executionStack.reverse()
+    }
+
+    switch (level) {
+        case "debug":
+            return log.debug(builder.toString())
+        case "info":
+            return log.info(builder.toString())
+        case "error":
+            if(s instanceof Exception) {
+                return log.error(builder.toString(), s)
+            } else {
+                return log.error(builder.toString())
+            }
+        default:
+            return log.info(builder.toString())
+    }
+
+}
+
+Map MyreLispException(Object msg) {
+    mlog(msg, "error")
+    return [ __cls: "EXCEPTION", message: msg ]
+}
+
 Map Symbol(name) {
     [ __cls: "SYMBOL", value: name ]
 }
@@ -66,24 +114,36 @@ def atom_Q(o) {
 
 Map Function(_EVAL, _ast, _env, _params) {
     [
-        __cls: 'FUNC',
-        EVAL: _EVAL,
-        ast: _ast,
-        env: _env,
-        params: _params,
-        ismacro: false
+            __cls: 'FUNC',
+            EVAL: _EVAL,
+            ast: _ast,
+            env: _env,
+            params: _params,
+            ismacro: false
     ]
 }
 def function_Q(o) {
     return o instanceof Map && o.get("__cls", "") == "FUNC"
 }
 def Function__call(func, args) {
-    def new_env = Env(func['env'], func['params'], args)
-    return EVAL(func['ast'], new_env)
-}
 
-Map MyreLispException(String msg) {
-    [ __cls: "EXCEPTION", message: msg ]
+//    if(function_Q(func)) {
+        def new_env = Env(func['env'], func['params'], args)
+        try {
+            return func['EVAL'](func['ast'], new_env)
+        } catch (Exception ex) {
+            mlog(ex, "error")
+            return MyreLispException(ex)
+        }
+//    } else {
+//        try {
+//            return func(args)
+//        } catch (Exception ex) {
+//            mlog("Blew up trying to evaluate ${func}(${args}) as a function", "error")
+//            return MyreLispException(ex)
+//        }
+//
+//    }
 }
 
 def string_Q(o) {
@@ -99,16 +159,15 @@ def keyword(o) {
 
 def list_Q(o) {
     //return (o instanceof List || o instanceof Object[]) &&
-    return o instanceof List && !o.hasProperty("isvector")
+    return o instanceof List && !(o instanceof LinkedList)
 }
 
 def vector(o) {
-    def v = o.collect()
-    v.metaClass.isvector = true
+    def v = o.collect() as LinkedList
     v
 }
 def vector_Q(o) {
-    return o instanceof List && o.hasProperty("isvector") && o.isvector
+    return o instanceof LinkedList
 }
 def hash_map(lst) {
     def m = [:]
@@ -127,49 +186,56 @@ def dissoc_BANG(m, ks) {
     return m
 }
 def hash_map_Q(o) {
-    return o instanceof Map
+    return o instanceof Map && o.get("__cls", null) == null
 }
 
 def sequential_Q(o) {
-    return types.list_Q(o) || types.vector_Q(o)
+    return list_Q(o) || vector_Q(o)
 }
 
 /// Env
-Map Env(Map outer_env = null, binds = [], exprs = []) {
+Map Env(Map outer_env = null, binds = null, exprs = null) {
+    if(!binds) binds = []
+    if(!exprs) exprs = []
     def result = [:]
     result['outer'] = outer_env
     result['data'] = [:]
     for (int i=0; i<binds.size; i++) {
         if (binds[i].value == "&") {
-            result['data'][binds[i+1].value] = (exprs.size() > i) ? exprs[i..-1] : []
+            result['data'][binds[i+1]['value']] = (exprs.size() > i) ? exprs[i..-1] : []
             break
         } else {
-            result['data'][binds[i].value] = exprs[i]
+            result['data'][binds[i]['value']] = exprs[i]
         }
     }
+    result
 }
+
+def Env__prepareForJson(Map env) {
+    return [
+            data: env['data'],
+            outer: Env__prepareForJson(env['outer'])
+    ]
+}
+
 def Env__set(Map env, Map keySymbol, val) {
-    if(keySymbol['__cls'] == "SYMBOL") {
-        return MyreLispException("Expected symbol")
-    }
     env['data'][keySymbol['value']] = val
 }
-def Env__find(Map env, Map keySymbol) {
-    if(keySymbol['__cls'] == "SYMBOL") {
-        return MyreLispException("Expected symbol")
-    }
+
+def Env__find(Map env, Map keySymbol, int findDepth = 0) {
     if(env['data'].containsKey(keySymbol['value'])) {
-        env
+        return env
     } else if(env['outer'] != null) {
-        Env__find(env['outer'])
+        def result = Env__find(env['outer'], keySymbol, (findDepth + 1))
+        return result
     } else {
-        null
+        return null
     }
 }
 def Env__get(Map env, Map keySymbol) {
     def e = Env__find(env, keySymbol)
-    if(e == null) {
-        return MyreLispException("'${keySymbol['value']}' not found.")
+    if(!e) {
+        return MyreLispException("Failed to find '${keySymbol['value']}' in ${env}")
     } else {
         e['data'].get(keySymbol['value'])
     }
@@ -205,6 +271,8 @@ def pr_str(exp, Boolean print_readably) {
             } else {
                 return exp
             }
+        case MethodClosure:
+            return "MethodClosure"
         case null:
             return 'nil'
         default:
@@ -227,8 +295,9 @@ def Reader__next(reader) {
     if (reader['position'] >= reader['tokens'].size) {
         null
     } else {
-        reader['tokens'][reader['position']]
+        def nextToken = reader['tokens'][reader['position']]
         reader['position'] = reader['position'] + 1
+        nextToken
     }
 }
 def tokenizer(String str) {
@@ -246,7 +315,9 @@ def tokenizer(String str) {
     }
     return tokens
 }
-def read_atom() {
+def read_atom(Map rdr) {
+    String token = Reader__next(rdr)
+
     def mask = /(^-?[0-9]+$)|(^-?[0-9][0-9.]*$)|(^nil$)|(^true$)|(^false$)|^"(.*)"$|:(.*)|(^[^"]*$)/
     def m = (token =~ mask)[0]
 
@@ -266,14 +337,14 @@ def read_atom() {
     } else if (m[8] != null) {
         Symbol(m[8])
     } else {
-        return MyreLispException("unrecognized '${m.group(0)}'")
+        return MyreLispException("unrecognized '${m.group(0)}' at position ${rdr['position']}. Instead got ${token}.")
     }
 }
 def read_list(Map rdr, char start, char end) {
     String token = Reader__next(rdr)
     def lst = []
     if (token.charAt(0) != start) {
-        return MyreLispException("expected '${start}'")
+        return MyreLispException("expected '${start}' at position ${rdr['position']}. Instead got ${token}.")
     }
 
     while ((token = Reader__peek(rdr)) != null && token.charAt(0) != end) {
@@ -281,7 +352,7 @@ def read_list(Map rdr, char start, char end) {
     }
 
     if (token == null) {
-        return MyreLispException("expected '${end}', got EOF")
+        return MyreLispException("expected '${end}', got EOF at position ${rdr['position']}. Instead got ${token}.")
     }
     Reader__next(rdr)
 
@@ -322,15 +393,15 @@ def read_form(Map rdr) {
             return [Symbol("deref"), read_form(rdr)]
 
     // list
-        case ')': return MyreLispException("unexpected ')'")
+        case ')': return MyreLispException("unexpected ')' at position ${rdr['position']}")
         case '(': return read_list(rdr, '(' as char, ')' as char)
 
     // vector
-        case ']': return MyreLispException("unexpected ']'")
+        case ']': return MyreLispException("unexpected ']' at position ${rdr['position']}")
         case '[': return read_vector(rdr)
 
     // hash-map
-        case '}': return MyreLispException("unexpected '}'")
+        case '}': return MyreLispException("unexpected '}' at position ${rdr['position']}")
         case '{': return read_hash_map(rdr)
 
     // atom
@@ -349,48 +420,6 @@ def read_str(String str) {
 }
 
 /// Core
-def do_concat(args) {
-    args.inject([], { a, b -> a + (b as List) })
-}
-def do_nth(args) {
-    if (args[0].size() <= args[1]) {
-        return MyreLispException("nth: index out of range")
-    }
-    args[0][args[1]]
-}
-def do_apply(args) {
-    def start_args = args.drop(1).take(args.size()-2) as List
-    args[0](start_args + (args.last() as List))
-}
-
-def do_swap_BANG(args) {
-    def atm = args[0]
-    def f = args[1]
-    atm['value'] = f([atm.value] + (args.drop(2) as List))
-}
-
-def do_conj(args) {
-    if (types.list_Q(args[0])) {
-        args.drop(1).inject(args[0], { a, b -> [b] + a })
-    } else {
-        vector(args.drop(1).inject(args[0], { a, b -> a + [b] }))
-    }
-}
-def do_seq(args) {
-    def obj = args[0]
-    switch (obj) {
-        case { list_Q(obj) }:
-            return obj.size() == 0 ? null : obj
-        case { vector_Q(obj) }:
-            return obj.size() == 0 ? null : obj.clone()
-        case { string_Q(obj) }:
-            return obj.size() == 0 ? null : obj.collect{ it.toString() }
-        case null:
-            return null
-        default:
-            return MyreLispException("seq: called on non-sequence")
-    }
-}
 
 def tryGetProperty(o, propName) {
     try {
@@ -424,101 +453,176 @@ def getMember(o, memberName) {
     }
 }
 
-def ns = [
-        "=": { a -> a[0]==a[1]},
-        "throw": { a -> return MyreLispException(a[0]) },
+Map getPrimaryNamespace() {
+    [
+            "=": { a -> a[0]==a[1]},
+            "throw": { a -> return MyreLispException(a[0]) },
 
-        "nil?": { a -> a[0] == null },
-        "true?": { a -> a[0] == true },
-        "false?": { a -> a[0] == false },
-        "string?": { a -> string_Q(a[0]) },
-        "symbol": { a -> Symbol(a[0]) },
-        "symbol?": { a -> a[0] instanceof Map && a[0]['__cls'] == "SYMBOL"},
-        "keyword": { a -> keyword(a[0]) },
-        "keyword?": { a -> keyword_Q(a[0]) },
-        "number?": { a -> a[0] instanceof Integer },
-        "fn?": { a -> (a[0] instanceof Map && a[0]['__cls'] == "FUNC" && !a[0]['ismacro']) ||
-                a[0] instanceof Closure },
-        "macro?": { a -> a[0] instanceof Map && a[0]["__cls"] == "FUNC" && a[0]['ismacro'] },
+            "nil?": { a -> a[0] == null },
+            "true?": { a -> a[0] == true },
+            "false?": { a -> a[0] == false },
+            "string?": { a -> string_Q(a[0]) },
+            "symbol": { a -> Symbol(a[0]) },
+            "symbol?": { a -> a[0] instanceof Map && a[0]['__cls'] == "SYMBOL"},
+            "keyword": { a -> keyword(a[0]) },
+            "keyword?": { a -> keyword_Q(a[0]) },
+            "number?": { a -> a[0] instanceof Integer },
+            "fn?": { a -> (a[0] instanceof Map && a[0]['__cls'] == "FUNC" && !a[0]['ismacro']) ||
+                    a[0] instanceof Closure },
+            "macro?": { a -> a[0] instanceof Map && a[0]["__cls"] == "FUNC" && a[0]['ismacro'] },
 
-        "pr-str": this.&do_pr_str,
-        "str": this.&do_str,
-        "prn": this.&do_prn,
-        "println": this.&do_println,
-        "read-string": this.&read_str,
-        //"readline": { a -> System.console().readLine(a[0]) },
-        "slurp": { a ->
-            //new File(a[0]).text
-            ""
-        },
+            "pr-str": { a -> print_list(a, " ", true)},
+            "str": { a -> print_list(a, "", false)},
+            "prn": { a -> log.info(print_list(a, " ", true))},
+            "println": { a -> log.info(print_list(a, " ", false))},
+            "read-string": this.&read_str,
+            //"readline": { a -> System.console().readLine(a[0]) },
+            "slurp": { a ->
+                //new File(a[0]).text
+                ""
+            },
 
-        "<":  { a -> a[0]<a[1]},
-        "<=": { a -> a[0]<=a[1]},
-        ">":  { a -> a[0]>a[1]},
-        ">=": { a -> a[0]>=a[1]},
-        "+":  { a -> a[0]+a[1]},
-        "-":  { a -> a[0]-a[1]},
-        "*":  { a -> a[0]*a[1]},
-        "/":  { a -> a[0]/a[1]},  // /
-        "time-ms": { a -> System.currentTimeMillis() },
+            "<":  { a -> a[0]<a[1]},
+            "<=": { a -> a[0]<=a[1]},
+            ">":  { a -> a[0]>a[1]},
+            ">=": { a -> a[0]>=a[1]},
+            "+":  { a -> a[0]+a[1]},
+            "-":  { a -> a[0]-a[1]},
+            "*":  { a -> a[0]*a[1]},
+            "/":  { a -> a[0]/a[1]},  // /
+            "time-ms": { a -> System.currentTimeMillis() },
 
-        "list": { a -> a },
-        "list?": { a -> list_Q(a[0]) },
-        "vector": { a -> vector(a) },
-        "vector?": { a -> vector_Q(a[0]) },
-        "hash-map": { a -> hash_map(a) },
-        "map?": { a -> hash_map_Q(a[0]) },
-        "assoc": { a -> assoc_BANG(types.copy(a[0]), a.drop(1)) },
-        "dissoc": { a -> dissoc_BANG(types.copy(a[0]), a.drop(1)) },
-        "get": { a ->
-            if(a[0] instanceof Map) {
-                a[0] == null ? null : a[0][a[1]]
-            } else {
-                getMember(a[0], a[1])
+            "list": { a -> a },
+            "list?": { a -> list_Q(a[0]) },
+            "vector": { a -> vector(a) },
+            "vector?": { a -> vector_Q(a[0]) },
+            "hash-map": { a -> hash_map(a) },
+            "map?": { a -> hash_map_Q(a[0]) },
+            "assoc": { a -> assoc_BANG(types.copy(a[0]), a.drop(1)) },
+            "dissoc": { a -> dissoc_BANG(types.copy(a[0]), a.drop(1)) },
+            "get": { a ->
+                log.info("get called with args: ${a}")
+                def k
+                if(symbol_Q(a[1])) {
+                    k = a[1]['value']
+                } else if (string_Q(a[1])) {
+                    k = a[1]
+                }
+
+                if(a[0] instanceof Map) {
+                    a[0] == null ? null : a[0][a[1]]
+                } else {
+                    getMember(a[0], a[1])
+                }
+            },
+            "contains?": { a -> a[0].containsKey(a[1]) },
+            "keys": { a -> a[0].keySet() as List },
+            "vals": { a -> a[0].values() as List },
+
+            "sequential?": { a -> this.&sequential_Q(a[0]) },
+            "cons": { a -> [a[0]] + (a[1] as List) },
+            "concat": { args -> args.inject([], { a, b -> a + (b as List) }) },
+            "nth": {args ->
+                if (args[0].size() <= args[1]) {
+                    return MyreLispException("nth: index out of range at position ${rdr['position']}")
+                }
+                args[0][args[1]]
+            },
+            "first": { a -> a[0] == null || a[0].size() == 0 ? null : a[0][0] },
+            "rest": { a -> a[0] == null ? [] as List : a[0].drop(1) },
+            "empty?": { a -> a[0] == null || a[0].size() == 0 },
+            "count": { a -> a[0] == null ? 0 : a[0].size() },
+            "apply": {args ->
+                def start_args = args.drop(1).take(args.size()-2) as List
+                args[0](start_args + (args.last() as List))
+            },
+            "filter": { a -> a[1].findAll { x -> Function__call(a[0], [x]) } },
+            "map": { a -> a[1].collect { x -> Function__call(a[0], [x]) } },
+
+            "conj": { args ->
+                if (types.list_Q(args[0])) {
+                    args.drop(1).inject(args[0], { a, b -> [b] + a })
+                } else {
+                    vector(args.drop(1).inject(args[0], { a, b -> a + [b] }))
+                }
+            },
+            "seq": { args ->
+                def obj = args[0]
+                switch (obj) {
+                    case { list_Q(obj) }:
+                        return obj.size() == 0 ? null : obj
+                    case { vector_Q(obj) }:
+                        return obj.size() == 0 ? null : obj.clone()
+                    case { string_Q(obj) }:
+                        return obj.size() == 0 ? null : obj.collect{ it.toString() }
+                    case null:
+                        return null
+                    default:
+                        return MyreLispException("seq: called on non-sequence at position ${rdr['position']}")
+                }
+            },
+
+            // TODO: figure out another implementation of meta and with-meta
+            //"meta": { a -> a[0].hasProperty("meta") ? a[0].getProperties().meta : null },
+            //"with-meta": { a -> def b = types.copy(a[0]); b.getMetaClass().meta = a[1]; b },
+            "atom": { a -> Atom(a[0]) },
+            "atom?": { a -> a[0] instanceof Map && a[0]["__cls"] == "ATOM"},
+            "deref": { a -> a[0]['value'] },
+            "reset!": { a -> a[0]['value'] = a[1] },
+            "swap!": { args ->
+                def atm = args[0]
+                def f = args[1]
+                atm['value'] = f([atm.value] + (args.drop(2) as List))
+            },
+
+            "get-device-list": { a -> vector(getAllDevices()) },
+            "dev": { a ->
+                def identifier = a[0]
+                log.info("Attempting to get device ${identifier}")
+                def devices = getAllDevices()
+                def d = devices.find({ identifier == it.id || identifier == it.label })
+                if(d) {
+                    log.info("Retrieved device ${identifier}")
+                    return d;
+                } else {
+                    log.error("failed to retrieve device ${identifier}")
+                    return MyreLispException("Device with identifier '${identifier}' not found.")
+                }
+            },
+            "dev-cmd": { a ->
+                // (dev-cmd (dev "Button") "on" [])
+                def d = a[0]
+                def command = a[1]
+                def params = a[2]
+
+                log.info("Attempting to execute command $command on device ${d.name}")
+
+                if(params.size()) {
+                    d."$command"(params as Object[])
+                } else {
+                    d."$command"()
+                }
+
+                return null
             }
-        },
-        "contains?": { a -> a[0].containsKey(a[1]) },
-        "keys": { a -> a[0].keySet() as List },
-        "vals": { a -> a[0].values() as List },
-
-        "sequential?": { a -> this.&sequential_Q(a[0]) },
-        "cons": { a -> [a[0]] + (a[1] as List) },
-        "concat": this.&do_concat,
-        "nth": this.&do_nth,
-        "first": { a -> a[0] == null || a[0].size() == 0 ? null : a[0][0] },
-        "rest": { a -> a[0] == null ? [] as List : a[0].drop(1) },
-        "empty?": { a -> a[0] == null || a[0].size() == 0 },
-        "count": { a -> a[0] == null ? 0 : a[0].size() },
-        "apply": this.&do_apply,
-        "filter": { a -> a[1].findAll { x -> Function__call(a[0], [x]) } },
-        "map": { a -> a[1].collect { x -> Function__call(a[0], [x]) } },
-
-        "conj": this.&do_conj,
-        "seq": this.&do_seq,
-
-        "meta": { a -> a[0].hasProperty("meta") ? a[0].getProperties().meta : null },
-        "with-meta": { a -> def b = types.copy(a[0]); b.getMetaClass().meta = a[1]; b },
-        "atom": { a -> Atom(a[0]) },
-        "atom?": { a -> a[0] instanceof Map && a[0]["__cls"] == "ATOM"},
-        "deref": { a -> a[0]['value'] },
-        "reset!": { a -> a[0]['value'] = a[1] },
-        "swap!": this.&do_swap_BANG,
-
-        "get-device-list": { a ->
-            getAllDevices()
-        },
-]
+    ]
+}
 
 /// REPL
 def READ(str) {
+    trace("READ", str)
     read_str(str)
 }
 def macro_Q(ast, env) {
     if (list_Q(ast) &&
             ast.size() > 0 &&
-            ast[0]['__cls'] == "SYMBOL" &&
-            Env__find(env, ast[0])) {
-        def obj = Env__get(env, ast[0])
+            ast[0] instanceof Map &&
+            ast[0]['__cls'] == "SYMBOL") {
+        def eexist = Env__find(env, ast[0])
+        if(!eexist) {
+            return false
+        }
+        def obj = Env__get(eexist, ast[0])
         if (obj instanceof Map && obj['__cls'] == "FUNC" && obj['ismacro']) {
             return true
         }
@@ -551,36 +655,59 @@ def quasiquote(ast) {
 }
 def eval_ast(ast, env) {
     switch(ast) {
+        case { symbol_Q(it) }:
+            return Env__get(env, ast)
         case List:
             return vector_Q(ast) ?
                     vector(ast.collect { EVAL(it,env) }) :
                     ast.collect { EVAL(it,env) }
         case Map:
-            if(ast.get('__cls', "HASHMAP") == "SYMBOL") {
-                return Env__get(env, ast)
-            } else {
-                def new_hm = [:]
-                ast.each { k,v ->
-                    new_hm[EVAL(k, env)] = EVAL(v, env)
-                }
-                return new_hm
+            def new_hm = [:]
+            ast.each { k,v ->
+                new_hm[EVAL(k, env)] = EVAL(v, env)
             }
+            return new_hm
         default:
             return ast
     }
 }
+
 def EVAL(ast, env) {
+    if(!state.executionStack) state.executionStack = []
     while (true) {
+        trace("EVAL", ast)
+        state.executionStack.push(ast)
         //println("EVAL: ${printer.pr_str(ast,true)}")
-        if (! list_Q(ast)) return eval_ast(ast, env)
+        if (! list_Q(ast)) {
+            def result = eval_ast(ast, env)
+            state.executionStack.pop()
+            trace("EVAL-result", result, ast)
+            return result
+        }
 
         ast = macroexpand(ast, env)
-        if (! list_Q(ast)) return eval_ast(ast, env)
-        if (ast.size() == 0) return ast
+        if (! list_Q(ast)) {
+            def result = eval_ast(ast, env)
+            state.executionStack.pop()
+            trace("EVAL-result", result, ast)
+            return result
+        }
+        if (ast.size() == 0) {
+            state.executionStack.pop()
+            trace("EVAL-result", result, ast)
+            return ast
+        }
+
+//        if(symbol_Q(ast[0])) {
+//            log.info("Evaluating ${ast[0]['value']}")
+//        }
 
         switch (ast[0]) {
             case { symbol_Q(it) && it['value'] == "def!" }:
-                return Env__set(env, ast[1], EVAL(ast[2], env))
+                def result = Env__set(env, ast[1], EVAL(ast[2], env))
+                state.executionStack.pop()
+                trace("EVAL-result", result, ast)
+                return result
             case { symbol_Q(it) && it['value'] == "let*" }:
                 def let_env = Env(env)
                 for (int i=0; i < ast[1].size(); i += 2) {
@@ -594,10 +721,15 @@ def EVAL(ast, env) {
                 def eventName = EVAL(ast[2], env)
                 def handler = ast[3]
 
+                mlog("Received command to subscribe to event '${eventName}'" +
+                        " on devices '${devicesList}'.")
+
                 subscribe(devicesList, eventName, { e ->
                     Function__call(handler, [e])
                 })
+                break
             case { symbol_Q(it) && it['value'] == "quote" }:
+                state.executionStack.pop()
                 return ast[1]
             case { symbol_Q(it) && it['value'] == "quasiquote" }:
                 ast = quasiquote(ast[1])
@@ -605,9 +737,13 @@ def EVAL(ast, env) {
             case { symbol_Q(it) && it['value'] == "defmacro!" }:
                 def f = EVAL(ast[2], env)
                 f.ismacro = true
-                return env.set(ast[1], f)
+                state.executionStack.pop()
+                return Env__set(env, ast[1], f)
             case { symbol_Q(it) && it['value'] == "macroexpand" }:
-                return macroexpand(ast[1], env)
+                def result = macroexpand(ast[1], env)
+                state.executionStack.pop()
+                trace("EVAL-result", result, ast)
+                return result
             case { symbol_Q(it) && it['value'] == "try*" }:
                 def result = EVAL(ast[1], env)
                 if(result instanceof Map && result.get("__cls", "") == "EXCEPTION") {
@@ -616,10 +752,17 @@ def EVAL(ast, env) {
                             ast[2][0]['value'] == "catch*") {
                         def e = null
                         e = result['message']
-                        return EVAL(ast[2][2], Env(env, [ast[2][1]], [e]))
+                        def catchresult = EVAL(ast[2][2], Env(env, [ast[2][1]], [e]))
+                        state.executionStack.pop()
+                        trace("EVAL-result", catchresult, ast)
+                        return catchresult
                     } else {
-                        throw exc
+                        trace("EVAL-result", result, ast)
+                        return result
                     }
+                } else {
+                    trace("EVAL-result", result, ast)
+                    return result
                 }
             case { symbol_Q(it) && it['value'] == "do" }:
                 ast.size() > 2 ? eval_ast(ast[1..-2], env) : null
@@ -632,6 +775,7 @@ def EVAL(ast, env) {
                         ast = ast[3]
                         break // TCO
                     } else {
+                        state.executionStack.pop()
                         return null
                     }
                 } else {
@@ -639,84 +783,137 @@ def EVAL(ast, env) {
                     break // TCO
                 }
             case { symbol_Q(it) && it['value'] == "fn*" }:
-                return Function(EVAL, ast[2], env, ast[1])
+                def result = Function(EVAL, ast[2], env, ast[1])
+                state.executionStack.pop()
+                trace("EVAL-result", result, ast)
+                return result
             default:
                 def el = eval_ast(ast, env)
                 def f = el[0]
                 def args = el.drop(1)
+
+                //mlog("default handling for token '${f.dump()}' with args '${args.dump()}'")
+
                 if (function_Q(f)) {
                     env = Env(f['env'], f['params'], args)
                     ast = f['ast']
                     break // TCO
                 } else {
-                    return Function__call(f, args)
+                    def result =  f(args)
+                    //def result = Function__call(f, args)
+                    state.executionStack.pop()
+                    trace("EVAL-result", result, ast)
+                    return result
                 }
+//                else {
+//                    return f
+//                }
         }
+        state.executionStack.pop()
     }
 }
 
 def PRINT(exp) {
-    pr_str(exp, true)
+    exp
+    //return pr_str(exp, true)
+    //def json = new groovy.json.JsonBuilder(exp)
+    //json.toString()
 }
 
-def REP(str) {
-    PRINT(EVAL(READ(str), state.env))
+def REP(str, e = null) {
+    if(!e) {
+        e = state.env
+    }
+    return PRINT(EVAL(READ(str), e))
 }
 
 def initializeStateEnv() {
     state.env = state.env?: Env()
 }
-initializeStateEnv()
-
-ns.each { k,v ->
-    Env__set(state.env, Symbol(k), v)
-}
-Env__set(repl_env, Symbol("eval"), { a -> EVAL(a[0], state.env) })
-Env__set(repl_env, Symbol("*ARGV*"), [])
-
-// core.mal: defined using mal itself
-REP("(def! *host-language* \"groovy-smartthings\")")
-REP("(def! not (fn* (a) (if a false true)))")
-//REP("(def! load-file (fn* (f) (eval (read-string (str \"(do \" (slurp f) \")\")))))")
-REP("(defmacro! cond (fn* (& xs) (if (> (count xs) 0) (list 'if (first xs) (if (> (count xs) 1) (nth xs 1) (throw \"odd number of forms to cond\")) (cons 'cond (rest (rest xs)))))))");
-REP("(def! *gensym-counter* (atom 0))");
-REP("(def! gensym (fn* [] (symbol (str \"G__\" (swap! *gensym-counter* (fn* [x] (+ 1 x)))))))");
-REP("(defmacro! or (fn* (& xs) " +
-        "(if (empty? xs) " +
-        "nil " +
-        "(if (= 1 (count xs)) " +
-            "(first xs) " +
-            "(let* (condvar (gensym)) " +
-                "`(let* (~condvar ~(first xs)) " +
-                    "(if ~condvar ~condvar (or ~@(rest xs)))))))))");
-
-REP("(def! dev-by-name (fn* (name) (" +
-        "(filter (fn* (d) ( (= name (get d \"name\"))) ) " +
-            "(get-device-list)) " +
-        "))" +
-    ")")
-
-REP("(def! dev (fn* (identifier) (" +
-        "(filter (fn* (d) (" +
-            "(or (= identifier (get d name)) (= identifier (get d id)))" +
-        ") (get-device-list)))" +
-    ")))")
 
 def interpret(str) {
-    REP(str)
+    initializeStateEnv()
+
+    mlog("Interpreting ${str}", "debug")
+
+    def e
+    if(!!state.env.get('data', false)) {
+        e = state.env
+    } else {
+        e = Env()
+    }
+
+    getPrimaryNamespace().each { k,v ->
+        Env__set(e, Symbol(k), v)
+    }
+    Env__set(e, Symbol("eval"), { a -> EVAL(a[0], e) })
+    Env__set(e, Symbol("*ARGV*"), vector([]))
+
+    // core.mal: defined using mal itself
+    REP("(def! *host-language* \"groovy-smartthings\")", e)
+    REP("(def! not (fn* (a) (if a false true)))", e)
+    //REP("(def! load-file (fn* (f) (eval (read-string (str \"(do \" (slurp f) \")\")))))")
+    REP("(defmacro! cond (fn* (& xs) (if (> (count xs) 0)" +
+            " (list 'if (first xs) (if (> (count xs) 1) (nth xs 1)" +
+            " (throw \"odd number of forms to cond\"))" +
+            " (cons 'cond (rest (rest xs)))))))", e)
+    REP("(def! *gensym-counter* (atom 0))", e)
+    REP("(def! gensym (fn* [] (symbol (str \"G__\" (swap! *gensym-counter* (fn* [x] (+ 1 x)))))))", e)
+    REP("(defmacro! or (fn* (& xs) " +
+            "(if (empty? xs) " +
+            "nil " +
+            "(if (= 1 (count xs)) " +
+            "(first xs) " +
+            "(let* (condvar (gensym)) " +
+            "`(let* (~condvar ~(first xs)) " +
+            "(if ~condvar ~condvar (or ~@(rest xs)))))))))", e)
+
+    clearTraces()
+
+    def res = REP(str, e)
+    state.env = e
+    return res
 }
 ///// END interpreter implementation
 
 def getSummary() {
     [
-        appId: app.id,
-        projectId: state.projectId,
-        name: state.name,
-        description: state.desc,
-        source: state.src
+            appId: app.id,
+            projectId: state.projectId,
+            name: state.name,
+            description: state.desc,
+            source: state.src
     ]
 }
 
+def getSource() {
+    return state.src
+}
+
+def testSource() {
+    state.traces = []
+    state.env = Env()
+    try {
+        def res = interpret(state.src)
+        def traces = state.traces
+        state.traces = []
+        state.env = null
+        return [
+                result: res,
+                //traces: traces.reverse(),
+        ]
+    } catch (Exception ex) {
+        state.env = null
+        def traces = state.traces
+        state.traces = []
+
+        throw ex
+        return [
+            result: ex,
+            //traces: traces.reverse()
+        ]
+    }
+}
 
 Boolean setup(projectId, name, description, source) {
     if(projectId && name && description && source) {
@@ -724,6 +921,8 @@ Boolean setup(projectId, name, description, source) {
         state.name = name
         state.desc = description
         state.src = source
+        state.traces = []
+        state.env = Env()
 
         state.inited = true
 
@@ -741,7 +940,8 @@ Boolean updateProject(name, description, source) {
         state.desc = description
         state.src = source
 
-        interpret(state.src)
+        state.env = Env()
+        //interpret(state.src)
     }
 }
 
@@ -751,7 +951,8 @@ def installed() {
     state.active = true
     state.subscriptions = state.subscriptions?: [:]
 
-    interpret(state.src)
+    state.env = Env()
+    //interpret(state.src)
 
     return true
 }

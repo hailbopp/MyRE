@@ -45,6 +45,23 @@ export interface ResultResponse {
     Result: any;
 }
 
+export interface Optional<T> {
+    HasValue: boolean;
+    Value?: T;
+}
+
+export interface SmartThingsApiError {
+    StatusCode: number;
+    Message: string;
+}
+
+export interface SmartThingsApiResponse<T> {
+    Raw?: string;
+    Data: T;
+    Headers: Array<{ Key: string; Value: Array<string>; }>;
+    Error: Optional<SmartThingsApiError>;
+}
+
 export interface Routine {
     RoutineId: string;
     Name: string;

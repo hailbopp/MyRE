@@ -72,17 +72,12 @@ namespace MyRE.Core.Services
             return result.FirstOrDefault(s => s != null);
         }
 
-        public async Task<ResultResponse> TestSourceAsync(AppInstance instance, string source)
+        public async Task<ApiResponse<ResultResponse>> TestSourceAsync(AppInstance instance, string source)
         {
             var client = CreateInstanceClient(instance);
             var result = await client.TestProjectSourceCode(source);
 
-            if (result.Error.HasValue)
-            {
-                return null;
-            }
-
-            return result.Data;
+            return result;
         }
     }
 }

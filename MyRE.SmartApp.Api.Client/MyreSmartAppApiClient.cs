@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using MyRE.SmartApp.Api.Client.Models;
@@ -42,12 +43,14 @@ namespace MyRE.SmartApp.Api.Client
                 return new ApiResponse<T>()
                 {
                     //Raw = await response.Content.ReadAsStringAsync(),
-                    Data = JsonConvert.DeserializeObject<T>(await response.Content.ReadAsStringAsync())
+                    Data = JsonConvert.DeserializeObject<T>(await response.Content.ReadAsStringAsync()),
+                    Headers = response.Headers
                 };
             }
             return new ApiResponse<T>()
             {
                 Raw = await response.Content.ReadAsStringAsync(),
+                Headers = response.Headers,
                 Error = Option.Some(new ApiError()
                 {
                     Message = await response.Content.ReadAsStringAsync(),

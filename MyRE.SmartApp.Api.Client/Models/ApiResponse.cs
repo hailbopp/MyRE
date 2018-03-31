@@ -1,4 +1,5 @@
 ﻿using System.Net;
+using System.Net.Http.Headers;
 using Optional;
 
 namespace MyRE.SmartApp.Api.Client.Models
@@ -13,6 +14,7 @@ namespace MyRE.SmartApp.Api.Client.Models
     {
         public string Raw { get; set; }
         public T Data { get; set; }
+        public HttpResponseHeaders Headers { get; set; }
 
         public Option<ApiError> Error { get; set; } = Option.None<ApiError>();
     }

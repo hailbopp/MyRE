@@ -39,7 +39,7 @@ export const reduceProjects = (fullState: Store.All, action: AppAction): Store.P
                     let newActive = Object.assign({}, state.activeProject.get);
                     if (action.response.result === 'error') {
                         newActive.editorStatusMessage = some({
-                            level: 'default',
+                            level: 'danger',
                             message: JSON.stringify({
                                 message: action.response.message.getOrElse(""),
                                 status: action.response.status
@@ -48,9 +48,10 @@ export const reduceProjects = (fullState: Store.All, action: AppAction): Store.P
                     } else {
                         newActive.editorStatusMessage = some({
                             level: 'default',
-                            message: JSON.stringify(action.response.data.Result),
+                            message: JSON.stringify(action.response.data),
                         })
-                    }                    
+                    }    
+                    newState.activeProject = some(newActive);
                 }
             } else if (action.requestType === 'API_LOGOUT') {
                 if (action.response.result === "success") {
