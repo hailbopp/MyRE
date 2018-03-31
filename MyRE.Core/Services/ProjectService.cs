@@ -12,10 +12,11 @@ namespace MyRE.Core.Services
         private readonly IProjectSourceMappingService _projectSourceMapping;
         private readonly ISmartAppService _smartApp;
 
-        public ProjectService(IProjectRepository projectRepository, IProjectSourceMappingService projectSourceMapping)
+        public ProjectService(IProjectRepository projectRepository, IProjectSourceMappingService projectSourceMapping, ISmartAppService smartApp)
         {
             _projectRepository = projectRepository;
             _projectSourceMapping = projectSourceMapping;
+            _smartApp = smartApp;
         }
 
         public Task<IEnumerable<Project>> GetUserProjectsAsync(string userId) => _projectRepository.GetUserProjectsAsync(userId);
