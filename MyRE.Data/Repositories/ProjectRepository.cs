@@ -40,6 +40,8 @@ namespace MyRE.Data.Repositories
 
             var createNewSourceResult = await SetProjectSource(createResult.Entity.ProjectId, "", "[]");
 
+            await _dbContext.Entry(newEntity).Reference(p => p.ParentInstance).LoadAsync();
+
             return createResult.Entity;
         }
 
@@ -76,6 +78,8 @@ namespace MyRE.Data.Repositories
             existingSource.Source = entity.Source.Source;
 
             var saveResult = await _dbContext.SaveChangesAsync();
+
+            await _dbContext.Entry(existingProject).Reference(p => p.ParentInstance).LoadAsync();
 
             return existingProject;
         }

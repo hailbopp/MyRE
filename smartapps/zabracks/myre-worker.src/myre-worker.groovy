@@ -590,12 +590,15 @@ Map getPrimaryNamespace() {
                 }
             },
             "dev-cmd": { a ->
-                // (dev-cmd (dev "Button") "on" [])
+                // (dev-cmd (dev "Button") "on" [])         device command
+                // (dev-cmd (dev "Switch") "toggle" [])     virtual command
                 def d = a[0]
                 def command = a[1]
                 def params = a[2]
 
                 log.info("Attempting to execute command '${d.label}'::'$command'")
+
+                // TODO: Determine if it's a virtual command or a legit smartthings command
 
                 if(params.size()) {
                     d."$command"(params as Object[])
@@ -907,7 +910,9 @@ def execute() {
 }
 
 Boolean setup(projectId, name, description, source) {
-    if(projectId && name && description && source) {
+    log.info("Setting up ${projectId} ${name} ${description} ${source}")
+
+    if(projectId && name && source) {
         state.projectId = projectId
         state.name = name
         state.desc = description
@@ -924,7 +929,7 @@ Boolean setup(projectId, name, description, source) {
 }
 
 Boolean updateProject(name, description, source) {
-    if(name && description && source) {
+    if(name && source) {
         unsubscribe()
 
         state.modified = now()

@@ -451,7 +451,7 @@ def createProject() {
         def newApp = createProjectChildApp(request.JSON)
         renderJson newApp.getSummary()
     } else {
-        return render(status: 400)
+        return render(status: 400, data: "Did not provide proper inputs.")
     }
 }
 
@@ -463,7 +463,7 @@ def executeProject() {
         def executeResult = projectApp.execute()
         return executeResult
     } else {
-        return render(status: 404)
+        return render(status: 404, data: "Not Found")
     }
 }
 
@@ -474,7 +474,7 @@ def retrieveProject() {
     if(projectApp) {
         return projectApp.getSummary()
     } else {
-        return render(status: 404)
+        return render(status: 404, data: "Not Found")
     }
 }
 
@@ -482,11 +482,12 @@ def retrieveProject() {
 def updateProject() {
     def projectId = params?.projectId
     def projectApp = getChildBy { it.getProjectId() == projectId }
+    def proj = request.JSON
     if(projectApp) {
         projectApp.updateProject(proj['name'], proj['description'], proj['source'])
         return projectApp.getSummary()
     } else {
-        return render(status: 404)
+        return render(status: 404, data: "Not Found")
     }
 }
 
