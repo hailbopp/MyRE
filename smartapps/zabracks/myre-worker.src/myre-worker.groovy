@@ -634,8 +634,8 @@ Map getPrimaryNamespace() {
             "atom": { a -> Atom(a[0]) },
             "atom?": { a -> a[0] instanceof Map && a[0]["__cls"] == "ATOM"},
             "deref": { a -> a[0]['value'] },
-            "reset!": { a -> a[0]['value'] = a[1] },
-            "swap!": { args ->
+            "reset": { a -> a[0]['value'] = a[1] },
+            "swap": { args ->
                 def atm = args[0]
                 def f = args[1]
                 atm['value'] = f([atm.value] + (args.drop(2) as List))
@@ -773,13 +773,13 @@ def EVAL(ast, env) {
 //                def rootEnv = Env__getRoot(env)
 //                return EVAL(ast[1], rootEnv)
 //                break
-            case { symbol_Q(it) && it['value'] == "def!" }:
+            case { symbol_Q(it) && it['value'] == "def" }:
                 def assignResult = EVAL(ast[2], env)
 
                 def setResult = Env__set(env, ast[1], assignResult)
 
                 return setResult
-            case { symbol_Q(it) && it['value'] == "let*" }:
+            case { symbol_Q(it) && it['value'] == "let" }:
                 def let_env = Env(env)
                 for (int i=0; i < ast[1].size(); i += 2) {
                     Env__set(let_env, ast[1][i], EVAL(ast[1][i+1], let_env))
@@ -826,12 +826,12 @@ def EVAL(ast, env) {
             case { symbol_Q(it) && it['value'] == "macroexpand" }:
                 def result = macroexpand(ast[1], env)
                 return result
-            case { symbol_Q(it) && it['value'] == "try*" }:
+            case { symbol_Q(it) && it['value'] == "try" }:
                 def result = EVAL(ast[1], env)
                 if(result instanceof Map && result.get("__cls", "") == "EXCEPTION") {
                     if (ast.size() > 2 &&
                             symbol_Q(ast[2][0]) &&
-                            ast[2][0]['value'] == "catch*") {
+                            ast[2][0]['value'] == "catch") {
                         def e = null
                         e = result['message']
                         def catchresult = EVAL(ast[2][2], Env(env, [ast[2][1]], [e]))
@@ -859,7 +859,7 @@ def EVAL(ast, env) {
                     ast = ast[2]
                     break // TCO
                 }
-            case { symbol_Q(it) && it['value'] == "fn*" }:
+            case { symbol_Q(it) && it['value'] == "fn" }:
                 def result = Function(EVAL, ast[2], env, ast[1])
                 return result
             default:
@@ -911,21 +911,21 @@ def REP_ALL(str, e) {
 def interpret(str, e) {
     mlog("Interpreting ${str}", "debug")
     try {
-        REP("(def! not (fn* (a) (if a false true)))", e)
+        REP("(def not (fn* (a) (if a false true)))", e)
         //REP("(def! load-file (fn* (f) (eval (read-string (str \"(do \" (slurp f) \")\")))))")
-        REP("(defmacro! cond (fn* (& xs) (if (> (count xs) 0)" +
+        REP("(defmacro! cond (fn (& xs) (if (> (count xs) 0)" +
                 " (list 'if (first xs) (if (> (count xs) 1) (nth xs 1)" +
                 " (throw \"odd number of forms to cond\"))" +
                 " (cons 'cond (rest (rest xs)))))))", e)
-        REP("(def! *gensym-counter* (atom 0))", e)
-        REP("(def! gensym (fn* [] (symbol (str \"G__\" (swap! *gensym-counter* (fn* [x] (+ 1 x)))))))", e)
-        REP("(defmacro! or (fn* (& xs) " +
+        REP("(def *gensym-counter* (atom 0))", e)
+        REP("(def gensym (fn [] (symbol (str \"G__\" (swap *gensym-counter* (fn* [x] (+ 1 x)))))))", e)
+        REP("(defmacro or (fn (& xs) " +
                 "(if (empty? xs) " +
                 "nil " +
                 "(if (= 1 (count xs)) " +
                 "(first xs) " +
-                "(let* (condvar (gensym)) " +
-                "`(let* (~condvar ~(first xs)) " +
+                "(let (condvar (gensym)) " +
+                "`(let (~condvar ~(first xs)) " +
                 "(if ~condvar ~condvar (or ~@(rest xs)))))))))", e)
 
 
