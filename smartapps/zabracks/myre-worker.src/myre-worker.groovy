@@ -753,23 +753,6 @@ def eval_ast(ast, env) {
     }
 }
 
-def eventHandler(event) {
-    def deviceId = event.deviceId
-    def eventName = event.name
-
-    // TODO: handle myre events with no device ID
-
-    def validSubs = state.subs.findAll({ s -> deviceId in s["devs"] && eventName == s["ev"] })
-    validSubs.each({
-        def decoded = it["fn"]
-
-        mlog("Found event subscription for event $deviceId :: $eventName", "info", decoded)
-
-        // decoded should now be a Function map
-        Function__call(decoded, args)
-    })
-}
-
 def EVAL(ast, env) {
     while (true) {
         if (! list_Q(ast)) {
@@ -947,8 +930,6 @@ def interpret(str, e) {
 
 
         def res = REP_ALL(str, e)
-        //def res = REP(str, state.env)
-        //def res = REP(str, e)
         return res
     } catch(exc) {
         return MyreLispException(exc)
@@ -982,8 +963,26 @@ def execute() {
         state.traces = []
         return [
                 result: res,
-                //traces: traces.reverse(),
         ]
+    }
+}
+
+def eventHandler(event) {
+    if(state.active == true) {
+        def deviceId = event.deviceId
+        def eventName = event.name
+
+        // TODO: handle myre events with no device ID
+
+        def validSubs = state.subs.findAll({ s -> deviceId in s["devs"] && eventName == s["ev"] })
+        validSubs.each({
+            def decoded = it["fn"]
+
+            mlog("Found event subscription for event $deviceId :: $eventName", "info", decoded)
+
+            // decoded should now be a Function map
+            Function__call(decoded, args)
+        })
     }
 }
 
