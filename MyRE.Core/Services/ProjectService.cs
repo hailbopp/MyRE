@@ -46,6 +46,12 @@ namespace MyRE.Core.Services
             return localPersistResult;
         }
 
+        public async Task<object> ExecuteAsync(Project entity)
+        {
+            var result = await _smartApp.ExecuteProjectAsync(entity);
+            return result;
+        }
+
         public Task<ProjectSource> GetSource(Guid projectId)
         {
             return _projectRepository.GetSourceById(projectId);

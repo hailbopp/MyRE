@@ -75,20 +75,18 @@ export const deleteProject = (projectId: string): DeleteProjectRequestApiAction 
     projectId
 });
 
-export type TestProjectSourceRequestApiAction = {
-    type: 'API_TEST_PROJECT_SOURCE';
+export type ExecuteProjectRequestApiAction = {
+    type: 'API_EXECUTE_PROJECT';
     asyncActionType: 'API_REQUEST';
-    instanceId: string;
-    source: string;
+    projectId: string;
 }
 
-export type TestProjectSourceResponseApiAction = ApiResponseAction<TestProjectSourceRequestApiAction, SmartThingsApiResponse<ResultResponse>>;
+export type ExecuteProjectResponseApiAction = ApiResponseAction<ExecuteProjectRequestApiAction, SmartThingsApiResponse<ResultResponse>>;
 
-export const testProjectSource = (instanceId: string, source: string): TestProjectSourceRequestApiAction => ({
-    type: 'API_TEST_PROJECT_SOURCE',
+export const executeProject = (projectId: string): ExecuteProjectRequestApiAction => ({
+    type: 'API_EXECUTE_PROJECT',
     asyncActionType: 'API_REQUEST',
-    instanceId,
-    source
+    projectId
 });
 
 export type ChangeProjectSourceAction = {
@@ -134,14 +132,14 @@ export type ProjectApiRequestAction =
     | CreateNewProjectRequestApiAction
     | UpdateProjectRequestApiAction
     | DeleteProjectRequestApiAction
-    | TestProjectSourceRequestApiAction
+    | ExecuteProjectRequestApiAction
 
 export type ProjectApiResponseAction =
     | ProjectListResponseApiAction
     | CreateNewProjectResponseApiAction
     | UpdateProjectResponseApiAction
     | DeleteProjectResponseApiAction
-    | TestProjectSourceResponseApiAction
+    | ExecuteProjectResponseApiAction
 
 export type ProjectUIAction =
     | ToggleCreateProjectDialogUIAction

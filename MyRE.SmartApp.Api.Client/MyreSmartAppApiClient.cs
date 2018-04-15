@@ -16,9 +16,12 @@ namespace MyRE.SmartApp.Api.Client
             public const string InstanceStatus = "status";
             public const string Devices = "devices";
             public static readonly Func<string, string> DeviceId = (deviceId) => $"{Devices}/{deviceId}";
+
             public const string Projects = "projects";
-            public static readonly Func<string, string> IndividualProject = (projectId) => $"projects/{projectId}";
-            public static readonly Func<string, string> ExecuteProject = (projectId) => $"projects/{projectId}/run";
+            public static readonly Func<string, string> IndividualProject = (projectId) => $"{Projects}/{projectId}";
+            public static readonly Func<string, string> HaltProject = (projectId) => $"{Projects}/{projectId}/stop";
+            public static readonly Func<string, string> ResumeProject = (projectId) => $"{Projects}/{projectId}/resume";
+            public static readonly Func<string, string> ExecuteProject = (projectId) => $"{Projects}/{projectId}/run";
 
         }
 
@@ -96,7 +99,12 @@ namespace MyRE.SmartApp.Api.Client
         public async Task<ApiResponse<ChildSmartApp>> GetProjectAsync(string projectId) => await GetAsync<ChildSmartApp>(Routes.IndividualProject(projectId));
         public async Task<ApiResponse<ChildSmartApp>> CreateProjectAsync(CreateChildAppRequest request) => 
             await PostAsync<ChildSmartApp, CreateChildAppRequest>(Routes.Projects, request);
-        public async Task<ApiResponse<ResultResponse>> ExecuteProject(string projectId) => await PostAsync<ResultResponse>(Routes.ExecuteProject(projectId));
+
+        public async Task<ApiResponse<ResultResponse<string>>> HaltProjectAsync(string projectId) => await PostAsync<ResultResponse<string>>(Routes.HaltProject(projectId));
+
+        public async Task<ApiResponse<ResultResponse<string>>> ResumeProjectAsync(string projectId) => await PostAsync<ResultResponse<string>>(Routes.ResumeProject(projectId));
+
+        public async Task<ApiResponse<ResultResponse<object>>> ExecuteProject(string projectId) => await PostAsync<ResultResponse<object>>(Routes.ExecuteProject(projectId));
 
         public async Task<ApiResponse<ChildSmartApp>> UpdateProjectAsync(string projectId, UpdateChildAppRequest request) =>
             await PutAsync<ChildSmartApp, UpdateChildAppRequest>(Routes.IndividualProject(projectId), request);

@@ -17,7 +17,9 @@ namespace MyRE.Core.Services
         Task<DeviceState> GetDeviceState(User user, Guid remoteDeviceId);
         
         Task<ChildSmartApp> UpsertProjectAsync(Project project);
-        Task ExecuteProjectAsync(Project project);
+        Task<object> ExecuteProjectAsync(Project project);
+        Task HaltProjectAsync(Project project);
+        Task ResumeProjectAsync(Project project);
         Task DeleteProjectAsync(Project project);
     }
 }

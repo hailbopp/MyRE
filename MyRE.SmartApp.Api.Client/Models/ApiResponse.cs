@@ -17,5 +17,7 @@ namespace MyRE.SmartApp.Api.Client.Models
         public HttpResponseHeaders Headers { get; set; }
 
         public Option<ApiError> Error { get; set; } = Option.None<ApiError>();
+
+        public ApiError ErrorData => this.Error.ValueOr(() => null);
     }
 }

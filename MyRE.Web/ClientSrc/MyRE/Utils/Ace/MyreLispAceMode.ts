@@ -40,7 +40,14 @@ export class MyreLispCompletions {
         constantLanguage.map((s: string): ICompletion => ({ value: s, meta: "constant", score: 1 })).forEach(c => this.baseLanguageCompletions.push(c));
         supportFunctions.map((s: string): ICompletion => ({ value: s, meta: "builtin", score: 1 })).forEach(c => this.baseLanguageCompletions.push(c));
 
-        devices.map(d => ({ value: d.DisplayName, meta: 'device', score: 1 })).forEach(d => this.deviceCompletions.push(d));
+        [...new Set(devices.map(item => item.DeviceId))]
+            .map(deviceId => devices.find(d => d.DeviceId === deviceId))
+            .map(d => d ? ({ value: d.DisplayName, meta: 'device', score: 1 }) : undefined)
+            .forEach(d => {
+                if (d) {
+                    this.deviceCompletions.push(d);
+                }
+            });
     }
 
     private isGetterOnReference(session: brace.IEditSession, pos: brace.Position) {
@@ -87,6 +94,25 @@ export class MyreLispCompletions {
 
         return completions;
     }
+
+    private isDeviceIdentifier(session: brace.IEditSession, pos: brace.Position) {
+        var iter: brace.TokenIterator = new TokenIterator(session, pos.row, pos.column);
+
+        var token = iter.getCurrentToken();
+
+        if (token.type !== "string") {
+            return false;
+        }
+
+        var previousToken = iter.stepBackward();
+        while (previousToken.value === " ") previousToken = iter.stepBackward();
+
+        if (previousToken.value === "dev") {
+            return true;
+        }
+
+        return false;
+    }
     
     public getCompletions(editor: brace.Editor, session: brace.IEditSession, pos: brace.Position, prefix: string, callback: (a: any, completions: ICompletion[]) => void): void {
         var token = session.getTokenAt(pos.row, pos.column);
@@ -96,7 +122,7 @@ export class MyreLispCompletions {
             return callback(null, results);
         }
         
-        if (token.type === "reference") {
+        if (this.isDeviceIdentifier(session, pos)) {
             return sendResults(this.deviceCompletions);
         }
 
@@ -161,11 +187,6 @@ export class MyreLispHighlightRules extends TextModeRules {
                         token: "string",
                         regex: '"(?=.)',
                         next: "qqstring"
-                    },
-                    {
-                        token: "reference",
-                        regex: '`(?=.)',
-                        next: "refstring"
                     }
                 ],
                 "qqstring": [
@@ -183,24 +204,6 @@ export class MyreLispHighlightRules extends TextModeRules {
                     }, {
                         token: "string",
                         regex: '"|$',
-                        next: "start"
-                    }
-                ],
-                "refstring": [
-                    {
-                        token: "constant.character.escape.myre",
-                        regex: "\\\\."
-                    },
-                    {
-                        token: "reference",
-                        regex: '[^`\\\\]+'
-                    }, {
-                        token: "reference",
-                        regex: "\\\\$",
-                        next: "refstring"
-                    }, {
-                        token: "reference",
-                        regex: '`',
                         next: "start"
                     }
                 ]

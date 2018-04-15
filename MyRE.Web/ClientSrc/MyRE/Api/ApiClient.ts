@@ -25,7 +25,7 @@ export class MyREApiClient {
         createProject: '/api/Projects',
         updateProject: (project: ProjectListing) => `/api/Projects/${project.ProjectId}`,
         deleteProject: (projectId: string) => `/api/Projects/${projectId}`,
-        testProjectSource: '/api/Projects/Test',
+        executeProject: (projectId: string) => `/api/Projects/${projectId}/execute`,
 
         listDevices: '/api/Devices',
         getDeviceState: (deviceId: string) => `/api/Devices/${deviceId}`,
@@ -129,9 +129,9 @@ export class MyREApiClient {
 
     public deleteProject = async (projectId: string): Promise<ApiResult<any>> =>
         this.delete(this.paths.deleteProject(projectId));
-
-    public testProjectSource = async (instanceId: string, source: string): Promise<ApiResult<SmartThingsApiResponse<ResultResponse>>> =>
-        this.post<SmartThingsApiResponse<ResultResponse>>(this.paths.testProjectSource, { InstanceId: instanceId, Source: source });
+    
+    public executeProject = async (projectId: string): Promise<ApiResult<SmartThingsApiResponse<ResultResponse>>> =>
+        this.post<SmartThingsApiResponse<ResultResponse>>(this.paths.executeProject(projectId));
     
     public listInstanceDevices = async (instanceId: string): Promise<ApiResult<List<DeviceInfo>>> => 
         this.get<Array<DeviceInfo>>(this.paths.listDevices, { instanceId }).then(convertArrayToImmutableList);

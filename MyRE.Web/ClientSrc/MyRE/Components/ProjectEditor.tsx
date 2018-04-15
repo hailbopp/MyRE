@@ -12,7 +12,7 @@ import 'brace/ext/language_tools'
 import MyreLispAceMode, { MyreLispCompletions } from 'MyRE/Utils/Ace/MyreLispAceMode';
 
 import 'brace/theme/kuroir';
-import { changeProjectSource, testProjectSource } from 'MyRE/Actions/Projects';
+import { changeProjectSource, executeProject } from 'MyRE/Actions/Projects';
 import { DeviceInfo, ProjectSource } from 'MyRE/Api/Models';
 import { filterDevices } from 'MyRE/Utils/Helpers/Instance';
 import { convertInternalSourceToDisplayFormat, convertDisplaySourceToInternalFormat } from 'MyRE/Utils/Helpers/Project';
@@ -29,7 +29,7 @@ interface IConnectedState {
 
 interface IConnectedDispatch {
     changeSource: (projectId: string, devices: DeviceInfo[], newSource: string) => void;
-    testSource: (instanceId: string, source: string) => void;
+    execute: (projectId: string) => void;
 }
 
 export type IProjectEditorProperties = IOwnProps & IConnectedState & IConnectedDispatch;
@@ -43,8 +43,8 @@ const mapDispatchToProps = (dispatch: Dispatch<Store.All>): IConnectedDispatch =
     changeSource: (projectId, devices, newSource) => {
         dispatch(changeProjectSource(projectId, devices, newSource));
     },
-    testSource: (instanceId, source) => {
-        dispatch(testProjectSource(instanceId, source));
+    execute: (projectId) => {
+        dispatch(executeProject(projectId));
     }
 });
 
@@ -56,7 +56,7 @@ class ProjectEditorComponent extends React.PureComponent<IProjectEditorPropertie
     }
 
     private onTestButtonClickHandler = () => {
-        this.props.testSource(this.props.project.internal.instanceId, this.props.project.internal.source.Source);
+        this.props.execute(this.props.projectId);
     }
 
     private setCompletionHandler() {
@@ -88,7 +88,6 @@ class ProjectEditorComponent extends React.PureComponent<IProjectEditorPropertie
     public render() {
         return (
             <Container>
-                
                 <Row>
                     <AceEditor
                         ref={(ref) => { if (ref) this.aceEditor = (ref as any).editor as brace.Editor }}
@@ -103,15 +102,18 @@ class ProjectEditorComponent extends React.PureComponent<IProjectEditorPropertie
                 </Row>
                 <Row>
                     <Col xs="12" sm="2">
-                        <Button color="primary" className="float-right" size="sm" onClick={this.onTestButtonClickHandler}>Test</Button>
+                        <Button color="primary" className="float-right" size="sm" onClick={this.onTestButtonClickHandler}>Run</Button>
                     </Col>
                 </Row>
+                <AlertRow message={this.props.project.editorStatusMessage} preformatted={true} />
                 <Row>
                     {//<AlertRow message={this.props.project.editorStatusMessage} preformatted={true} />
-                    }
+                    /*
                     <pre style={({whiteSpace: "pre-wrap"})}>{this.props.project.editorStatusMessage.isDefined ?
                         JSON.stringify(JSON.parse(this.props.project.editorStatusMessage.get.message), undefined, 2) :
-                        ''}</pre>
+                            ''}</pre>
+                    */
+                    }
                 </Row>
             </Container>
         );

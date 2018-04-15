@@ -8,7 +8,7 @@ import { retrieveCurrentUser, clearAuthMessages, attemptLogin, RegisterRequestAp
 import { some } from "ts-option";
 import { List } from "immutable";
 import { Instance, ProjectListing } from "MyRE/Api/Models";
-import { requestProjectList, ProjectListRequestApiAction, CreateNewProjectRequestApiAction, DeleteProjectRequestApiAction, UpdateProjectRequestApiAction, refreshActiveProject, TestProjectSourceRequestApiAction } from "MyRE/Actions/Projects";
+import { requestProjectList, ProjectListRequestApiAction, CreateNewProjectRequestApiAction, DeleteProjectRequestApiAction, UpdateProjectRequestApiAction, refreshActiveProject, ExecuteProjectRequestApiAction } from "MyRE/Actions/Projects";
 import { UserInstanceListRequestApiAction, InstanceDevicesRequestApiAction, listInstanceDevices } from "MyRE/Actions/Instances";
 
 function isAction(a: AppAction): a is AppAction {
@@ -117,7 +117,8 @@ export const ApiServiceMiddleware: ExtendedMiddleware<Store.All> = <S extends St
 
                 case 'API_UPDATE_PROJECT':
                     ApiClient.updateProject(action.updatedEntity)
-                        .then(result => dispatch(apiResponse(action as UpdateProjectRequestApiAction, result)));
+                        .then(result => dispatch(apiResponse(action as UpdateProjectRequestApiAction, result)))
+                        .then(result => dispatch(requestProjectList()));
                     break;
 
                 case 'API_DELETE_PROJECT':
@@ -126,9 +127,9 @@ export const ApiServiceMiddleware: ExtendedMiddleware<Store.All> = <S extends St
                             .then(_ => { if (result.result === "success") dispatch(requestProjectList()); }))
                     break;
 
-                case 'API_TEST_PROJECT_SOURCE':
-                    ApiClient.testProjectSource(action.instanceId, action.source)
-                        .then((result) => dispatch(apiResponse(action as TestProjectSourceRequestApiAction, result)));
+                case 'API_EXECUTE_PROJECT':
+                    ApiClient.executeProject(action.projectId)
+                        .then((result) => dispatch(apiResponse(action as ExecuteProjectRequestApiAction, result)));
                     break;
 
                 default:

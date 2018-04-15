@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using MyRE.Core.Models.Data;
@@ -14,5 +15,7 @@ namespace MyRE.Core.Services
         Task<bool> UserCanAccessUserDataAsync(User accessingUser, string userId);
 
         Task<IEnumerable<AppInstance>> GetUserInstancesAsync(string userId);
+
+        Task<AppInstance> GetAppInstanceByIdAsync(Guid instanceId);
     }
 }

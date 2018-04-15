@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using MyRE.Data;
@@ -72,6 +73,8 @@ namespace MyRE.Web
             services.AddTransient<IProjectSourceMappingService, ProjectModelMappingService>();
 
             services.AddTransient<IAuthorizationHandler, ProjectAuthorizationHandler>();
+
+            services.AddSingleton<IProjectLogRepository>(p => new JsonProjectLogRepository("/tmp/data/myre/ProjectLogs"));
 
             services.AddSingleton<IServiceProvider, ServiceProvider>(provider => services.BuildServiceProvider());
         }

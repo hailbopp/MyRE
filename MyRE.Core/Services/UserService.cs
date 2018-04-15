@@ -28,5 +28,8 @@ namespace MyRE.Core.Services
         public async Task<User> GetUserAsync(string userId) => await _userRepository.GetUserAsync(userId);
 
         public async Task<IEnumerable<AppInstance>> GetUserInstancesAsync(string userId) => (await _instanceRepository.GetByUserIdAsync(userId));
+
+        public async Task<AppInstance> GetAppInstanceByIdAsync(Guid instanceId) =>
+            await _instanceRepository.GetByInstanceIdAsync(instanceId);
     }
 }

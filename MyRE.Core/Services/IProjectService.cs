@@ -14,6 +14,7 @@ namespace MyRE.Core.Services
         Task DeleteAsync(Guid projectId);
 
         Task<Project> UpdateAsync(Project entity);
+        Task<object> ExecuteAsync(Project entity);
 
         Task<ProjectSource> GetSource(Guid projectId);
     }

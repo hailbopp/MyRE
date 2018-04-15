@@ -23,6 +23,12 @@ namespace MyRE.Core.Services
             _user = user;
         }
 
+        private async Task<IMyreSmartAppApiClient> CreateInstanceClientAsync(Guid instanceId)
+        {
+            var instance = await _user.GetAppInstanceByIdAsync(instanceId);
+            return CreateInstanceClient(instance);
+        }
+
         private IMyreSmartAppApiClient CreateInstanceClient(AppInstance instance)
         {
             var hasEmptyPrereqs = new[]
@@ -38,6 +44,18 @@ namespace MyRE.Core.Services
             }
 
             return _smartappClientFactory.Create(instance.InstanceServerBaseUri, instance.RemoteAppId, instance.AccessToken);
+        }
+
+        private async Task<IMyreSmartAppApiClient> CreateProjectClientAsync(Project project)
+        {
+            if (project.ParentInstance == null && Guid.Empty != project.ParentInstanceId)
+            {
+                return await CreateInstanceClientAsync(project.ParentInstanceId);
+            }
+            else
+            {
+                return CreateInstanceClient(project.ParentInstance);
+            }
         }
 
         public async Task<IEnumerable<DeviceInfo>> ListInstanceDevicesAsync(AppInstance instance) => (await CreateInstanceClient(instance).ListDevicesAsync()).Data;
@@ -77,7 +95,7 @@ namespace MyRE.Core.Services
 
         public async Task<ChildSmartApp> UpsertProjectAsync(Project project)
         {
-            var client = CreateInstanceClient(project.ParentInstance);
+            var client = await CreateProjectClientAsync(project);
 
             var existingProjectResponse = await client.GetProjectAsync(project.ProjectId.ToString());
 
@@ -99,7 +117,9 @@ namespace MyRE.Core.Services
             }
             else
             {
-                // We need to update the existing project.
+                // We need to update the existing project. First, we need to stop its execution. Then we can update it and resume.
+                //var stopResult = await client.HaltProjectAsync(project.ProjectId.ToString());
+
                 var updateRequest = new UpdateChildAppRequest()
                 {
                     Name = project.Name,
@@ -115,17 +135,35 @@ namespace MyRE.Core.Services
                 throw new Exception(upsertResult.Error.ValueOrFailure().Message);
             }
 
+            // TODO: Don't resume if the user has explicitly halted execution.
+            //var resumeResult = await client.ResumeProjectAsync(project.ProjectId.ToString());
+
             return upsertResult.Data;
         }
 
-        public Task ExecuteProjectAsync(Project project)
+        public async Task<object> ExecuteProjectAsync(Project project)
         {
-            throw new NotImplementedException();
+            var client = await CreateProjectClientAsync(project);
+            var result = await client.ExecuteProject(project.ProjectId.ToString());
+            return result;
         }
 
-        public Task DeleteProjectAsync(Project project)
+        public async Task HaltProjectAsync(Project project)
         {
-            throw new NotImplementedException();
+            var client = await CreateProjectClientAsync(project);
+            var result = await client.HaltProjectAsync(project.ProjectId.ToString());
+        }
+
+        public async Task ResumeProjectAsync(Project project)
+        {
+            var client = await CreateProjectClientAsync(project);
+            var result = await client.ResumeProjectAsync(project.ProjectId.ToString());
+        }
+        
+        public async Task DeleteProjectAsync(Project project)
+        {
+            var client = await CreateProjectClientAsync(project);
+            var result = client.DeleteProjectAsync(project.ProjectId.ToString());
         }
     }
 }

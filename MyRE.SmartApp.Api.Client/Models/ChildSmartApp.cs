@@ -11,5 +11,6 @@ namespace MyRE.SmartApp.Api.Client.Models
         public long CreatedAt { get; set; }
         public long ModifiedAt { get; set; }
         public string Source { get; set; }
+        public bool Running { get; set; }
     }
 }

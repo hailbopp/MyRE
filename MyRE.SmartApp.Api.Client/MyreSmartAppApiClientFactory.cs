@@ -2,9 +2,6 @@
 {
     public class MyreSmartAppApiClientFactory: IMyreSmartAppApiClientFactory
     {
-        public IMyreSmartAppApiClient Create(string baseUri, string instanceId, string accessToken)
-        {
-            return new MyreSmartAppApiClient(baseUri, instanceId, accessToken);
-        }
+        public IMyreSmartAppApiClient Create(string baseUri, string instanceId, string accessToken) => new MyreSmartAppApiClient(baseUri, instanceId, accessToken);
     }
 }

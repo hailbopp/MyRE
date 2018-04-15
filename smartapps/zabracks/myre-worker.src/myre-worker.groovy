@@ -1,6 +1,8 @@
 import groovy.json.JsonBuilder
 import org.codehaus.groovy.runtime.MethodClosure
 
+include 'asynchttp_v1'
+
 def getNAMESPACE() { return "zabracks" }
 def getPARENT_NAME() { return "MyRE" }
 def getAPP_NAME() { return "${PARENT_NAME}-worker" }
@@ -49,44 +51,53 @@ def getDeviceById(deviceId) {
 /// Types
 // Since ST doesn't allow class definitions, we're going to do everything with functions and maps...
 // for better or for worse.
-def trace(name, s, context=null) {
-    if(!state.traces) state.traces = []
-    state.traces.push([
-        timestamp: (new Date()).format("MM/dd/yyyy HH:mm:ss.SSS"),
-        name: name,
-        context: context,
-        msg: s
+def getUriForEndpoint(path) {
+    return parent.getConsoleBaseUrl() + path
+}
+
+def handleLogResponse(response, data) {
+    log.info(response.data)
+}
+
+public String mem(showBytes = true) {
+    def bytes = toJson(state).length()
+    return Math.round(100.00 * (bytes/ 100000.00)) + "%${showBytes ? " ($bytes bytes)" : ""}"
+}
+
+def sendProjectLog(String projectId, Map logData) {
+    def uri = getUriForEndpoint("api/Projects/$projectId/logs")
+    def params = [
+            uri: uri,
+            body: logData
+    ]
+
+    try {
+        asynchttp_v1.post(handleLogResponse, params)
+    } catch (ex) {
+        log.error("Error while attempting to do the things.", ex)
+    }
+}
+
+def mlog(s, String level="info", context=[:]) {
+    sendProjectLog(state.projectId, [
+            message: s,
+            level: level,
+            context: context,
+            bytesUsed: mem()
     ])
 }
 
-def clearTraces() {
-    state.traces = []
+String toJson(o) {
+    (new groovy.json.JsonBuilder(o)).toString()
 }
 
-def mlog(s, String level="info") {
-    if(!state.executionStack) state.executionStack = []
-    JsonBuilder builder = new JsonBuilder()
+Map fromJson(s) {
+    parseJson(s)
+}
 
-    builder{
-        message s
-        //stack state.executionStack.reverse()
-    }
-
-    switch (level) {
-        case "debug":
-            return log.debug(builder.toString())
-        case "info":
-            return log.info(builder.toString())
-        case "error":
-            if(s instanceof Exception) {
-                return log.error(builder.toString(), s)
-            } else {
-                return log.error(builder.toString())
-            }
-        default:
-            return log.info(builder.toString())
-    }
-
+def deepcopy(orig) {
+    def result = fromJson(toJson(orig))
+    return result
 }
 
 Map MyreLispException(Object msg) {
@@ -115,9 +126,9 @@ def atom_Q(o) {
 Map Function(_EVAL, _ast, _env, _params) {
     [
             __cls: 'FUNC',
-            EVAL: _EVAL,
+            //EVAL: _EVAL,
             ast: _ast,
-            env: _env,
+            env: deepcopy(_env),
             params: _params,
             ismacro: false
     ]
@@ -126,24 +137,67 @@ def function_Q(o) {
     return o instanceof Map && o.get("__cls", "") == "FUNC"
 }
 def Function__call(func, args) {
-
-//    if(function_Q(func)) {
         def new_env = Env(func['env'], func['params'], args)
         try {
-            return func['EVAL'](func['ast'], new_env)
+            return EVAL(func['ast'], new_env)
         } catch (Exception ex) {
             mlog(ex, "error")
             return MyreLispException(ex)
         }
-//    } else {
-//        try {
-//            return func(args)
-//        } catch (Exception ex) {
-//            mlog("Blew up trying to evaluate ${func}(${args}) as a function", "error")
-//            return MyreLispException(ex)
-//        }
-//
-//    }
+}
+
+def GlobalClosureReference(name) {
+    [
+            __cls: 'GFUNC',
+            name: name
+    ]
+}
+
+def globalClosure_Q(o) {
+    return o instanceof Map && o.get("__cls", "") == "GFUNC"
+}
+
+def GlobalClosureReference__call(gfunc, args) {
+    Map ns = getPrimaryNamespace()
+    def closure = ns.get(gfunc['name'], null)
+    if(!closure) {
+        return MyreException("Attempted to call non-existent global reference ${gfunc['name']}")
+    } else {
+        return closure(args)
+    }
+}
+
+def DeviceReference(devId) {
+    return [
+        __cls: "DEVREF",
+        devId: devId
+    ]
+}
+
+def device_Q(d) {
+    d instanceof Map && d.get("__cls", "") == "DEVREF"
+}
+
+def DeviceReference__get(dref) {
+    def devices = getAllDevices()
+    def d = devices.find({ dref["devId"] == it.id })
+    if(d) {
+        return d
+    } else {
+        log.error("failed to retrieve device ${dref}")
+        return MyreLispException("Device with identifier '${dref}' not found.")
+    }
+}
+
+def DeviceReference__fromIdentifier(identifier) {
+    def devices = getAllDevices()
+    def d = devices.find({ identifier == it.id || identifier == it.label })
+    if(d) {
+        return DeviceReference(d.id)
+    } else {
+        log.error("failed to retrieve device ${dref}")
+        return MyreLispException("Device with identifier '${dref}' not found.")
+    }
 }
 
 def string_Q(o) {
@@ -158,7 +212,6 @@ def keyword(o) {
 }
 
 def list_Q(o) {
-    //return (o instanceof List || o instanceof Object[]) &&
     return o instanceof List && !(o instanceof LinkedList)
 }
 
@@ -211,15 +264,12 @@ Map Env(Map outer_env = null, binds = null, exprs = null) {
     result
 }
 
-def Env__prepareForJson(Map env) {
-    return [
-            data: env['data'],
-            outer: Env__prepareForJson(env['outer'])
-    ]
-}
-
 def Env__set(Map env, Map keySymbol, val) {
-    env['data'][keySymbol['value']] = val
+    try {
+        return env['data'][keySymbol['value']] = val
+    } catch (e) {
+        mlog(e, "error", env)
+    }
 }
 
 def Env__find(Map env, Map keySymbol, int findDepth = 0) {
@@ -229,6 +279,12 @@ def Env__find(Map env, Map keySymbol, int findDepth = 0) {
         def result = Env__find(env['outer'], keySymbol, (findDepth + 1))
         return result
     } else {
+        Map pns = getPrimaryNamespace()
+        if(pns.containsKey(keySymbol["value"])) {
+            mlog("found builtin ${keySymbol["value"]}")
+            return Env(null, [keySymbol], [pns[keySymbol['value']]])
+        }
+
         return null
     }
 }
@@ -239,6 +295,11 @@ def Env__get(Map env, Map keySymbol) {
     } else {
         e['data'].get(keySymbol['value'])
     }
+}
+
+def Env__getRoot(Map env) {
+    if(env["outer"] != null) return Env__getRoot(env["outer"])
+    return env["outer"]
 }
 
 /// Printer
@@ -273,6 +334,8 @@ def pr_str(exp, Boolean print_readably) {
             }
         case MethodClosure:
             return "MethodClosure"
+        case Closure:
+            return "Closure"
         case null:
             return 'nil'
         default:
@@ -386,7 +449,7 @@ def read_form(Map rdr) {
             return [Symbol("splice-unquote"), read_form(rdr)]
         case '^':
             Reader__next(rdr)
-            def meta = read_form(rdr);
+            def meta = read_form(rdr)
             return [Symbol("with-meta"), read_form(rdr), meta]
         case '@':
             Reader__next(rdr)
@@ -414,7 +477,6 @@ def read_str(String str) {
     if (tokens.size() == 0) {
         return null
     }
-    //println "tokens ${tokens}"
     def rdr = Reader(tokens)
     read_form(rdr)
 }
@@ -439,7 +501,11 @@ def tryGetMethod(o, methodName) {
 
 def getMember(o, memberName) {
     if(o instanceof Map) {
-        o[memberName]
+        if(device_Q(o)) {
+            return getMember(DeviceReference__get(o), memberName)
+        } else {
+            o[memberName]
+        }
     } else {
         def m = tryGetProperty(o, memberName)
         if(m != null) {
@@ -473,8 +539,8 @@ Map getPrimaryNamespace() {
 
             "pr-str": { a -> print_list(a, " ", true)},
             "str": { a -> print_list(a, "", false)},
-            "prn": { a -> log.info(print_list(a, " ", true))},
-            "println": { a -> log.info(print_list(a, " ", false))},
+            "prn": { a -> mlog(print_list(a, " ", true), "info")},
+            "println": { a -> mlog(print_list(a, " ", false), "info")},
             "read-string": this.&read_str,
             //"readline": { a -> System.console().readLine(a[0]) },
             "slurp": { a ->
@@ -509,7 +575,7 @@ Map getPrimaryNamespace() {
                     k = a[1]
                 }
 
-                if(a[0] instanceof Map) {
+                if(a[0] instanceof Map && !device_Q(a[0])) {
                     a[0] == null ? null : a[0][a[1]]
                 } else {
                     getMember(a[0], a[1])
@@ -575,30 +641,24 @@ Map getPrimaryNamespace() {
                 atm['value'] = f([atm.value] + (args.drop(2) as List))
             },
 
-            "get-device-list": { a -> vector(getAllDevices()) },
-            "dev": { a ->
-                def identifier = a[0]
-                log.info("Attempting to get device ${identifier}")
-                def devices = getAllDevices()
-                def d = devices.find({ identifier == it.id || identifier == it.label })
-                if(d) {
-                    log.info("Retrieved device ${identifier}")
-                    return d;
-                } else {
-                    log.error("failed to retrieve device ${identifier}")
-                    return MyreLispException("Device with identifier '${identifier}' not found.")
-                }
-            },
+            "get-device-list": { a -> vector(getAllDevices().collect { DeviceReference(it.id) }) },
+            "dev": { a -> DeviceReference__fromIdentifier(a[0]) },
             "dev-cmd": { a ->
                 // (dev-cmd (dev "Button") "on" [])         device command
                 // (dev-cmd (dev "Switch") "toggle" [])     virtual command
-                def d = a[0]
+                def devRef = a[0]
+                def d = DeviceReference__get(devRef)
+
                 def command = a[1]
                 def params = a[2]
 
-                log.info("Attempting to execute command '${d.label}'::'$command'")
+                mlog("Attempting to execute command '${d.label}'::'$command'")
 
                 // TODO: Determine if it's a virtual command or a legit smartthings command
+
+                if(params == null) {
+                    mlog("Parameters were not provided when calling device command: $command", "error")
+                }
 
                 if(params.size()) {
                     d."$command"(params as Object[])
@@ -607,15 +667,33 @@ Map getPrimaryNamespace() {
                 }
 
                 return null
+            },
+            "dev-attr": { a ->
+                // (dev-attr (dev "button") "switch")
+                def devRef = a[0]
+                def attrName = a[1]
+
+                def d = DeviceReference__get(devRef)
+                return d."current$attrName"
             }
     ]
 }
 
+def getCoreEnv() {
+    def e = Env()
+    getPrimaryNamespace().each {
+        k, v ->
+            Env__set(e, Symbol(k), GlobalClosureReference(k))
+    }
+    e
+}
+
 /// REPL
 def READ(str) {
-    trace("READ", str)
-    read_str(str)
+    def result = read_str(str)
+    result
 }
+
 def macro_Q(ast, env) {
     if (list_Q(ast) &&
             ast.size() > 0 &&
@@ -675,42 +753,49 @@ def eval_ast(ast, env) {
     }
 }
 
+def eventHandler(event) {
+    def deviceId = event.deviceId
+    def eventName = event.name
+
+    // TODO: handle myre events with no device ID
+
+    def validSubs = state.subs.findAll({ s -> deviceId in s["devs"] && eventName == s["ev"] })
+    validSubs.each({
+        def decoded = it["fn"]
+
+        mlog("Found event subscription for event $deviceId :: $eventName", "info", decoded)
+
+        // decoded should now be a Function map
+        Function__call(decoded, args)
+    })
+}
+
 def EVAL(ast, env) {
-    if(!state.executionStack) state.executionStack = []
     while (true) {
-        trace("EVAL", ast)
-        state.executionStack.push(ast)
-        //println("EVAL: ${printer.pr_str(ast,true)}")
         if (! list_Q(ast)) {
             def result = eval_ast(ast, env)
-            state.executionStack.pop()
-            trace("EVAL-result", result, ast)
             return result
         }
 
         ast = macroexpand(ast, env)
         if (! list_Q(ast)) {
             def result = eval_ast(ast, env)
-            state.executionStack.pop()
-            trace("EVAL-result", result, ast)
             return result
         }
         if (ast.size() == 0) {
-            state.executionStack.pop()
-            trace("EVAL-result", result, ast)
             return ast
         }
-
-//        if(symbol_Q(ast[0])) {
-//            log.info("Evaluating ${ast[0]['value']}")
-//        }
-
         switch (ast[0]) {
+//            case { symbol_Q(it) && it['value'] == "eval" }:
+//                def rootEnv = Env__getRoot(env)
+//                return EVAL(ast[1], rootEnv)
+//                break
             case { symbol_Q(it) && it['value'] == "def!" }:
-                def result = Env__set(env, ast[1], EVAL(ast[2], env))
-                state.executionStack.pop()
-                trace("EVAL-result", result, ast)
-                return result
+                def assignResult = EVAL(ast[2], env)
+
+                def setResult = Env__set(env, ast[1], assignResult)
+
+                return setResult
             case { symbol_Q(it) && it['value'] == "let*" }:
                 def let_env = Env(env)
                 for (int i=0; i < ast[1].size(); i += 2) {
@@ -719,20 +804,34 @@ def EVAL(ast, env) {
                 env = let_env
                 ast = ast[2]
                 break // TCO
-            case { symbol_Q(it) && it['value'] == "subev" }:
+            case { symbol_Q(it) && it['value'] == "subscribe" }:
                 def devicesList = EVAL(ast[1], env)
                 def eventName = EVAL(ast[2], env)
-                def handler = ast[3]
+                def handler = EVAL(ast[3], env)
 
-                mlog("Received command to subscribe to event '${eventName}'" +
-                        " on devices '${devicesList}'.")
+                if(device_Q(devicesList)) {
+                    devicesList = [devicesList]
+                }
 
-                subscribe(devicesList, eventName, { e ->
-                    Function__call(handler, [e])
-                })
+                devicesList = devicesList.collect {DeviceReference__get(it)}
+
+                def sub = [
+                        devs: devicesList.collect({ it.id }),
+                        ev: eventName,
+                        fn: handler
+                ]
+
+                mlog("subev call", "info", [
+                            size: toJson(sub).length(),
+                            sub: sub,
+                        ])
+
+                state.subs.push(sub)
+
+                subscribe(devicesList, eventName, "eventHandler")
+                return null
                 break
             case { symbol_Q(it) && it['value'] == "quote" }:
-                state.executionStack.pop()
                 return ast[1]
             case { symbol_Q(it) && it['value'] == "quasiquote" }:
                 ast = quasiquote(ast[1])
@@ -740,12 +839,9 @@ def EVAL(ast, env) {
             case { symbol_Q(it) && it['value'] == "defmacro!" }:
                 def f = EVAL(ast[2], env)
                 f.ismacro = true
-                state.executionStack.pop()
                 return Env__set(env, ast[1], f)
             case { symbol_Q(it) && it['value'] == "macroexpand" }:
                 def result = macroexpand(ast[1], env)
-                state.executionStack.pop()
-                trace("EVAL-result", result, ast)
                 return result
             case { symbol_Q(it) && it['value'] == "try*" }:
                 def result = EVAL(ast[1], env)
@@ -756,15 +852,11 @@ def EVAL(ast, env) {
                         def e = null
                         e = result['message']
                         def catchresult = EVAL(ast[2][2], Env(env, [ast[2][1]], [e]))
-                        state.executionStack.pop()
-                        trace("EVAL-result", catchresult, ast)
                         return catchresult
                     } else {
-                        trace("EVAL-result", result, ast)
                         return result
                     }
                 } else {
-                    trace("EVAL-result", result, ast)
                     return result
                 }
             case { symbol_Q(it) && it['value'] == "do" }:
@@ -778,7 +870,6 @@ def EVAL(ast, env) {
                         ast = ast[3]
                         break // TCO
                     } else {
-                        state.executionStack.pop()
                         return null
                     }
                 } else {
@@ -787,124 +878,111 @@ def EVAL(ast, env) {
                 }
             case { symbol_Q(it) && it['value'] == "fn*" }:
                 def result = Function(EVAL, ast[2], env, ast[1])
-                state.executionStack.pop()
-                trace("EVAL-result", result, ast)
                 return result
             default:
                 def el = eval_ast(ast, env)
                 def f = el[0]
                 def args = el.drop(1)
 
-                //mlog("default handling for token '${f.dump()}' with args '${args.dump()}'")
-
                 if (function_Q(f)) {
                     env = Env(f['env'], f['params'], args)
                     ast = f['ast']
                     break // TCO
-                } else {
+                } else if (globalClosure_Q(f)) {
+                    def result = GlobalClosureReference__call(f, args)
+                    return result
+                } else if (f instanceof Closure) {
                     def result =  f(args)
-                    //def result = Function__call(f, args)
-                    state.executionStack.pop()
-                    trace("EVAL-result", result, ast)
                     return result
                 }
-//                else {
-//                    return f
-//                }
+                return f
         }
-        state.executionStack.pop()
     }
 }
 
 def PRINT(exp) {
-    exp
-    //return pr_str(exp, true)
-    //def json = new groovy.json.JsonBuilder(exp)
-    //json.toString()
+    return exp
 }
 
-def REP(str, e = null) {
-    if(!e) {
-        e = state.env
+def REP(str, e) {
+    def readResult = READ(str)
+    mlog("READ", "debug", readResult)
+    def evalResult = EVAL(readResult, e)
+    mlog("EVAL", "debug", evalResult)
+
+    def result = PRINT(evalResult)
+    return result
+}
+
+def REP_ALL(str, e) {
+    READ("[$str]").collect {
+        mlog("EVALEXPR", "debug", it)
+
+        def result = EVAL(it, e)
+        def outputResult = PRINT(result)
+        mlog("PRINT", "debug", outputResult)
+        return outputResult
     }
-    return PRINT(EVAL(READ(str), e))
 }
 
-def initializeStateEnv() {
-    state.env = state.env?: Env()
-}
-
-def interpret(str) {
-    initializeStateEnv()
-
+def interpret(str, e) {
     mlog("Interpreting ${str}", "debug")
-
-    def e
-    if(!!state.env.get('data', false)) {
-        e = state.env
-    } else {
-        e = Env()
-    }
-
-    getPrimaryNamespace().each { k,v ->
-        Env__set(e, Symbol(k), v)
-    }
-    Env__set(e, Symbol("eval"), { a -> EVAL(a[0], e) })
-    Env__set(e, Symbol("*ARGV*"), vector([]))
-
-    // core.mal: defined using mal itself
-    REP("(def! *host-language* \"groovy-smartthings\")", e)
-    REP("(def! not (fn* (a) (if a false true)))", e)
-    //REP("(def! load-file (fn* (f) (eval (read-string (str \"(do \" (slurp f) \")\")))))")
-    REP("(defmacro! cond (fn* (& xs) (if (> (count xs) 0)" +
-            " (list 'if (first xs) (if (> (count xs) 1) (nth xs 1)" +
-            " (throw \"odd number of forms to cond\"))" +
-            " (cons 'cond (rest (rest xs)))))))", e)
-    REP("(def! *gensym-counter* (atom 0))", e)
-    REP("(def! gensym (fn* [] (symbol (str \"G__\" (swap! *gensym-counter* (fn* [x] (+ 1 x)))))))", e)
-    REP("(defmacro! or (fn* (& xs) " +
-            "(if (empty? xs) " +
-            "nil " +
-            "(if (= 1 (count xs)) " +
-            "(first xs) " +
-            "(let* (condvar (gensym)) " +
-            "`(let* (~condvar ~(first xs)) " +
-            "(if ~condvar ~condvar (or ~@(rest xs)))))))))", e)
-
-    clearTraces()
-
     try {
-        def res = REP(str, e)
-        state.env = e
+        REP("(def! not (fn* (a) (if a false true)))", e)
+        //REP("(def! load-file (fn* (f) (eval (read-string (str \"(do \" (slurp f) \")\")))))")
+        REP("(defmacro! cond (fn* (& xs) (if (> (count xs) 0)" +
+                " (list 'if (first xs) (if (> (count xs) 1) (nth xs 1)" +
+                " (throw \"odd number of forms to cond\"))" +
+                " (cons 'cond (rest (rest xs)))))))", e)
+        REP("(def! *gensym-counter* (atom 0))", e)
+        REP("(def! gensym (fn* [] (symbol (str \"G__\" (swap! *gensym-counter* (fn* [x] (+ 1 x)))))))", e)
+        REP("(defmacro! or (fn* (& xs) " +
+                "(if (empty? xs) " +
+                "nil " +
+                "(if (= 1 (count xs)) " +
+                "(first xs) " +
+                "(let* (condvar (gensym)) " +
+                "`(let* (~condvar ~(first xs)) " +
+                "(if ~condvar ~condvar (or ~@(rest xs)))))))))", e)
+
+
+        def res = REP_ALL(str, e)
+        //def res = REP(str, state.env)
+        //def res = REP(str, e)
+        return res
     } catch(exc) {
         return MyreLispException(exc)
     }
-
-    return res
 }
 ///// END interpreter implementation
+def halt() {
+    log.info("Halting.")
+    unsubscribe()
+    state.subs = []
+    state.active = false
+    return true
+}
+
+def resume() {
+    log.info("Resuming.")
+    state.active = true
+
+    def result = execute()
+    log.info("Result: ${result}")
+    return result
+}
 
 def execute() {
-    state.traces = []
-    state.env = Env()
-    try {
-        def res = interpret(state.src)
-        def traces = state.traces
+    mlog("Received request to execute. Active: ${state.active}")
+    unsubscribe()
+    if(state.active == true) {
+        state.subs = []
         state.traces = []
-        state.env = null
+        def res = interpret(state.src, Env())
+        state.traces = []
         return [
                 result: res,
                 //traces: traces.reverse(),
-        ]
-    } catch (Exception ex) {
-        state.env = null
-        def traces = state.traces
-        state.traces = []
-
-        throw ex
-        return [
-            result: ex,
-            //traces: traces.reverse()
         ]
     }
 }
@@ -918,7 +996,6 @@ Boolean setup(projectId, name, description, source) {
         state.desc = description
         state.src = source
         state.traces = []
-        state.env = Env()
 
         state.inited = true
 
@@ -931,14 +1008,12 @@ Boolean setup(projectId, name, description, source) {
 Boolean updateProject(name, description, source) {
     if(name && source) {
         unsubscribe()
+        state.subs = []
 
         state.modified = now()
         state.name = name
         state.desc = description
         state.src = source
-
-        state.env = Env()
-        //interpret(state.src)
     }
 }
 
@@ -946,9 +1021,6 @@ def installed() {
     state.created = now()
     state.modified = now()
     state.active = true
-    state.subscriptions = state.subscriptions?: [:]
-
-    state.env = Env()
     //interpret(state.src)
 
     return true
@@ -962,7 +1034,8 @@ def getSummary() {
             description: state.desc,
             createdAt: state.created,
             modifiedAt: state.modified,
-            source: state.src
+            source: state.src,
+            running: state.active
     ]
 }
 

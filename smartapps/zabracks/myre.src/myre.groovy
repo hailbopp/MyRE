@@ -1,7 +1,6 @@
 import groovy.json.JsonOutput
-import groovy.json.JsonSlurper
-import groovy.transform.TypeChecked
-import groovy.transform.CompileStatic
+
+include 'asynchttp_v1'
 
 String getNAMESPACE() { return "zabracks" }
 String getAPP_NAME() { return "MyRE" }
@@ -381,6 +380,16 @@ mappings {
                 POST: 'executeProject'
         ]
     }
+    path("/projects/:projectId/resume") {
+        action: [
+                POST: 'resumeProject'
+        ]
+    }
+    path("/projects/:projectId/stop") {
+        action: [
+                POST: 'stopProject'
+        ]
+    }
 }
 
 def renderJson(data) {
@@ -460,8 +469,37 @@ def executeProject() {
     def projectId = params?.projectId
     def projectApp = getChildBy { it.getProjectId() == projectId }
     if(projectApp) {
-        def executeResult = projectApp.execute()
-        return executeResult
+        try{
+            def executeResult = projectApp.execute()
+            return executeResult
+        } catch(ex) {
+            return ex
+        }
+
+    } else {
+        return render(status: 404, data: "Not Found")
+    }
+}
+
+// POST /projects/:projectId/resume
+def resumeProject() {
+    def projectId = params?.projectId
+    def projectApp = getChildBy { it.getProjectId() == projectId }
+    if(projectApp) {
+        def resumeResult = projectApp.resume()
+        return render(status: 200, data: '{result: "OK"}')
+    } else {
+        return render(status: 404, data: "Not Found")
+    }
+}
+
+// POST /projects/:projectId/stop
+def stopProject() {
+    def projectId = params?.projectId
+    def projectApp = getChildBy { it.getProjectId() == projectId }
+    if(projectApp) {
+        def haltResult = projectApp.halt()
+        return render(status: 200, data: '{result: "OK"}')
     } else {
         return render(status: 404, data: "Not Found")
     }

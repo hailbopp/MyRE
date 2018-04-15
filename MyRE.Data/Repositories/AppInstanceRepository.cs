@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
@@ -22,6 +23,11 @@ namespace MyRE.Data.Repositories
             var saveResult = await _myreContext.SaveChangesAsync();
 
             return result.Entity;
+        }
+
+        public Task<AppInstance> GetByInstanceIdAsync(Guid instanceId)
+        {
+            return _myreContext.AppInstances.FirstOrDefaultAsync(i => i.AppInstanceId == instanceId);
         }
 
         public async Task<AppInstance> GetAppInstanceByRemoteIdAsync(string remoteAppId) => await _myreContext.AppInstances.FirstOrDefaultAsync(i => i.RemoteAppId == remoteAppId);

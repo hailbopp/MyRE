@@ -34,7 +34,7 @@ export const reduceProjects = (fullState: Store.All, action: AppAction): Store.P
                         message: action.response.message.getOrElse(action.response.status.toString()),
                     });
                 }
-            } else if (action.requestType === 'API_TEST_PROJECT_SOURCE') {
+            } else if (action.requestType === 'API_EXECUTE_PROJECT') {
                 if (state.activeProject.isDefined) {
                     let newActive = Object.assign({}, state.activeProject.get);
                     if (action.response.result === 'error') {
@@ -48,7 +48,7 @@ export const reduceProjects = (fullState: Store.All, action: AppAction): Store.P
                     } else {
                         newActive.editorStatusMessage = some({
                             level: 'default',
-                            message: JSON.stringify(action.response.data),
+                            message: "Execution completed. Result:\n\n" + JSON.stringify(action.response.data.Data ? action.response.data.Data.Result : "An unexpected error occurred.", null, 2),
                         })
                     }    
                     newState.activeProject = some(newActive);

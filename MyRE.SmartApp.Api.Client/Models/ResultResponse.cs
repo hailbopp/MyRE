@@ -2,8 +2,8 @@
 
 namespace MyRE.SmartApp.Api.Client.Models
 {
-    public class ResultResponse
+    public class ResultResponse<T>
     {
-        public Object Result { get; set; }
+        public T Result { get; set; }
     }
 }
