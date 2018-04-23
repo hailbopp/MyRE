@@ -7,3 +7,5 @@ MyRE.Web/wwwroot/*
 MyRE.Web/node_modules/
 PublishProfiles/
 MyRE.Web/appsettings.Development.json
+
+*.user

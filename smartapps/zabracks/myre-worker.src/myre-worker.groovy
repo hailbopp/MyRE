@@ -102,14 +102,14 @@ def deepcopy(orig) {
 
 Map MyreLispException(Object msg) {
     mlog(msg, "error")
-    return [ __cls: "EXCEPTION", message: msg ]
+    return [ t: "EX", message: msg ]
 }
 
 Map Symbol(name) {
-    [ __cls: "SYMBOL", value: name ]
+    [ t: "SYMBOL", value: name ]
 }
 def symbol_Q(o) {
-    return o instanceof Map && o.get("__cls", "") == "SYMBOL"
+    return o instanceof Map && o.get("t", "") == "SYMBOL"
 }
 
 int Symbol__compare(a, b) {
@@ -117,15 +117,15 @@ int Symbol__compare(a, b) {
 }
 
 Map Atom(value) {
-    [ __cls: 'ATOM', value: value ]
+    [ t: 'ATOM', value: value ]
 }
 def atom_Q(o) {
-    return o instanceof Map && o.get("__cls", "") == "ATOM"
+    return o instanceof Map && o.get("t", "") == "ATOM"
 }
 
 Map Function(_EVAL, _ast, _env, _params) {
     [
-            __cls: 'FUNC',
+            t: 'FUNC',
             //EVAL: _EVAL,
             ast: _ast,
             env: deepcopy(_env),
@@ -134,7 +134,7 @@ Map Function(_EVAL, _ast, _env, _params) {
     ]
 }
 def function_Q(o) {
-    return o instanceof Map && o.get("__cls", "") == "FUNC"
+    return o instanceof Map && o.get("t", "") == "FUNC"
 }
 def Function__call(func, args) {
         def new_env = Env(func['env'], func['params'], args)
@@ -148,13 +148,13 @@ def Function__call(func, args) {
 
 def GlobalClosureReference(name) {
     [
-            __cls: 'GFUNC',
+            t: 'GFUNC',
             name: name
     ]
 }
 
 def globalClosure_Q(o) {
-    return o instanceof Map && o.get("__cls", "") == "GFUNC"
+    return o instanceof Map && o.get("t", "") == "GFUNC"
 }
 
 def GlobalClosureReference__call(gfunc, args) {
@@ -169,13 +169,13 @@ def GlobalClosureReference__call(gfunc, args) {
 
 def DeviceReference(devId) {
     return [
-        __cls: "DEVREF",
+        t: "DEVREF",
         devId: devId
     ]
 }
 
 def device_Q(d) {
-    d instanceof Map && d.get("__cls", "") == "DEVREF"
+    d instanceof Map && d.get("t", "") == "DEVREF"
 }
 
 def DeviceReference__get(dref) {
@@ -239,7 +239,7 @@ def dissoc_BANG(m, ks) {
     return m
 }
 def hash_map_Q(o) {
-    return o instanceof Map && o.get("__cls", null) == null
+    return o instanceof Map && o.get("t", null) == null
 }
 
 def sequential_Q(o) {
@@ -345,7 +345,7 @@ def pr_str(exp, Boolean print_readably) {
 
 /// Reader
 Map Reader(tokens) {
-    [ __cls: 'READER', tokens: tokens, position: 0 ]
+    [ t: 'READER', tokens: tokens, position: 0 ]
 }
 def Reader__peek(Map reader) {
     if (reader['position'] >= reader['tokens'].size) {
@@ -529,24 +529,19 @@ Map getPrimaryNamespace() {
             "false?": { a -> a[0] == false },
             "string?": { a -> string_Q(a[0]) },
             "symbol": { a -> Symbol(a[0]) },
-            "symbol?": { a -> a[0] instanceof Map && a[0]['__cls'] == "SYMBOL"},
+            "symbol?": { a -> a[0] instanceof Map && a[0]['t'] == "SYMBOL"},
             "keyword": { a -> keyword(a[0]) },
             "keyword?": { a -> keyword_Q(a[0]) },
             "number?": { a -> a[0] instanceof Integer },
-            "fn?": { a -> (a[0] instanceof Map && a[0]['__cls'] == "FUNC" && !a[0]['ismacro']) ||
+            "fn?": { a -> (a[0] instanceof Map && a[0]['t'] == "FUNC" && !a[0]['ismacro']) ||
                     a[0] instanceof Closure },
-            "macro?": { a -> a[0] instanceof Map && a[0]["__cls"] == "FUNC" && a[0]['ismacro'] },
+            "macro?": { a -> a[0] instanceof Map && a[0]["t"] == "FUNC" && a[0]['ismacro'] },
 
             "pr-str": { a -> print_list(a, " ", true)},
             "str": { a -> print_list(a, "", false)},
             "prn": { a -> mlog(print_list(a, " ", true), "info")},
             "println": { a -> mlog(print_list(a, " ", false), "info")},
             "read-string": this.&read_str,
-            //"readline": { a -> System.console().readLine(a[0]) },
-            "slurp": { a ->
-                //new File(a[0]).text
-                ""
-            },
 
             "<":  { a -> a[0]<a[1]},
             "<=": { a -> a[0]<=a[1]},
@@ -632,7 +627,7 @@ Map getPrimaryNamespace() {
             //"meta": { a -> a[0].hasProperty("meta") ? a[0].getProperties().meta : null },
             //"with-meta": { a -> def b = types.copy(a[0]); b.getMetaClass().meta = a[1]; b },
             "atom": { a -> Atom(a[0]) },
-            "atom?": { a -> a[0] instanceof Map && a[0]["__cls"] == "ATOM"},
+            "atom?": { a -> a[0] instanceof Map && a[0]["t"] == "ATOM"},
             "deref": { a -> a[0]['value'] },
             "reset": { a -> a[0]['value'] = a[1] },
             "swap": { args ->
@@ -641,7 +636,7 @@ Map getPrimaryNamespace() {
                 atm['value'] = f([atm.value] + (args.drop(2) as List))
             },
 
-            "get-device-list": { a -> vector(getAllDevices().collect { DeviceReference(it.id) }) },
+            "get-devices": { a -> vector(getAllDevices().collect { DeviceReference(it.id) }) },
             "dev": { a -> DeviceReference__fromIdentifier(a[0]) },
             "dev-cmd": { a ->
                 // (dev-cmd (dev "Button") "on" [])         device command
@@ -658,6 +653,7 @@ Map getPrimaryNamespace() {
 
                 if(params == null) {
                     mlog("Parameters were not provided when calling device command: $command", "error")
+                    params = []
                 }
 
                 if(params.size()) {
@@ -698,13 +694,13 @@ def macro_Q(ast, env) {
     if (list_Q(ast) &&
             ast.size() > 0 &&
             ast[0] instanceof Map &&
-            ast[0]['__cls'] == "SYMBOL") {
+            ast[0]['t'] == "SYMBOL") {
         def eexist = Env__find(env, ast[0])
         if(!eexist) {
             return false
         }
         def obj = Env__get(eexist, ast[0])
-        if (obj instanceof Map && obj['__cls'] == "FUNC" && obj['ismacro']) {
+        if (obj instanceof Map && obj['t'] == "FUNC" && obj['ismacro']) {
             return true
         }
     }
@@ -724,10 +720,10 @@ def quasiquote(ast) {
     if (! pair_Q(ast)) {
         [Symbol("quote"), ast]
     } else if (ast[0] != null &&
-            ast[0]["__cls"] == "SYMBOL" &&
+            ast[0]["t"] == "SYMBOL" &&
             ast[0]["value"] == "unquote") {
         ast[1]
-    } else if (pair_Q(ast[0]) && ast[0][0]['__cls'] == "SYMBOL" &&
+    } else if (pair_Q(ast[0]) && ast[0][0]['t'] == "SYMBOL" &&
             ast[0][0]['value'] == "splice-unquote") {
         [Symbol("concat"), ast[0][1], quasiquote(ast.drop(1))]
     } else {
@@ -819,7 +815,7 @@ def EVAL(ast, env) {
             case { symbol_Q(it) && it['value'] == "quasiquote" }:
                 ast = quasiquote(ast[1])
                 break // TCO
-            case { symbol_Q(it) && it['value'] == "defmacro!" }:
+            case { symbol_Q(it) && it['value'] == "defmacro" }:
                 def f = EVAL(ast[2], env)
                 f.ismacro = true
                 return Env__set(env, ast[1], f)
@@ -828,7 +824,7 @@ def EVAL(ast, env) {
                 return result
             case { symbol_Q(it) && it['value'] == "try" }:
                 def result = EVAL(ast[1], env)
-                if(result instanceof Map && result.get("__cls", "") == "EXCEPTION") {
+                if(result instanceof Map && result.get("t", "") == "EXCEPTION") {
                     if (ast.size() > 2 &&
                             symbol_Q(ast[2][0]) &&
                             ast[2][0]['value'] == "catch") {
