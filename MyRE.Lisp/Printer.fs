@@ -24,11 +24,13 @@ let print profile nodes =
         | String(str) -> appendStr str
         | Bool(true) -> appendStr "true"
         | Bool(false) -> appendStr "false"
-        | BuiltInFunc(_, tag, _) | Func(_, tag, _, _, _, _) ->
+        | BuiltinReference(name) -> pr_builtin name
+        | DeviceReference(devId) -> pr_devRef devId
+        | DeviceState(devState) -> pr_devState devState
+        | Func(_, tag, _, _, _) ->
             pr_func "func" tag
-        | Macro(_, tag, _, _, _, _) -> pr_func "macro" tag
+        | Macro(_, tag, _, _, _) -> pr_func "macro" tag
         | Atom(tag, r) -> pr_atom tag !r
-        | DeviceReference(devId) -> appendStr devId
 
     and pr separator prefix node =
         appendStr prefix
@@ -50,6 +52,15 @@ let print profile nodes =
         appendStr "\""
         str |> Seq.iter appendChar
         appendStr "\""
+
+    and pr_devRef devId =
+        sprintf "(dev-ref \"%s\")" devId |> appendStr
+
+    and pr_devState dev =
+        sprintf "(dev-state \"%s\")" dev.Label |> appendStr
+
+    and pr_builtin name = 
+        sprintf "#<builtin %s>" name |> appendStr
 
     and pr_func ftype tag =
         sprintf "#<%s %d>" ftype tag |> appendStr

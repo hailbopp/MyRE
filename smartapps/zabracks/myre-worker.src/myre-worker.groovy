@@ -762,7 +762,7 @@ def EVAL(ast, env) {
             return result
         }
         if (ast.size() == 0) {
-            return ast
+            return ast`
         }
         switch (ast[0]) {
 //            case { symbol_Q(it) && it['value'] == "eval" }:

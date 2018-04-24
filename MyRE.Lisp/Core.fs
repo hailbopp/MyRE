@@ -3,6 +3,8 @@
 open System
 open Types
 
+type Evaluator = EnvChain -> Node -> Node
+
 let inline toBool b = if b then Node.TRUE else Node.FALSE
 
 let inline twoNumberOp (f : int64 -> int64 -> Node) = function
@@ -23,6 +25,15 @@ let le = twoNodeOp (fun a b -> a <= b |> toBool)
 let ge = twoNodeOp (fun a b -> a >= b |> toBool)
 let gt = twoNodeOp (fun a b -> a > b |> toBool)
 let eq = twoNodeOp (fun a b -> a = b |> toBool)
+
+let callFunction (evaluator: Evaluator) node args =
+    match node with
+    | Macro(_, _, body, binds, outerEnv)
+    | Func(_, _, body, binds, outerEnv) ->
+        let innerEnv = Env.makeNew outerEnv binds args
+        evaluator innerEnv body
+    
+    | _ -> Error.expectedX "func" |> raise
 
 let time_ms _ =
     DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond |> int64 |> Number
@@ -118,20 +129,18 @@ let throw = function
     | [node] -> raise <| Error.MyreLispException(node)
     | _ -> raise <| Error.wrongArity ()
 
-let map = function
-    | [BuiltInFunc(_, _, f); Node.Seq seq]
-    | [Func(_, _, f, _, _, _); Node.Seq seq] ->
-        seq |> Seq.map (fun node -> f [node]) |> List.ofSeq |> Node.makeList
+let map eval = function
+    | [Func(_, _, _, _, _) as f; Node.Seq seq] ->
+        seq |> Seq.map (fun node -> callFunction eval f [node]) |> List.ofSeq |> Node.makeList
     | [_; _] -> raise <| Error.argMismatch ()
     | _ -> raise <| Error.wrongArity ()
 
-let apply = function
-    | BuiltInFunc(_, _, f)::rest
-    | Func(_, _, f, _, _, _)::rest ->
+let apply eval = function
+    | f::rest & Func(_, _, _, _, _)::_ ->
         let rec getArgsAndCall acc = function
             | [] -> raise <| Error.wrongArity ()
             | [Node.Seq seq] ->
-                seq |> Seq.fold (fun acc node -> node::acc) acc |> List.rev |> f
+                seq |> Seq.fold (fun acc node -> node::acc) acc |> List.rev |> callFunction eval f
             | [_] -> raise <| Error.argMismatch ()
             | h::rest -> getArgsAndCall (h::acc) rest
         getArgsAndCall [] rest
@@ -150,8 +159,8 @@ let isSymbol = isPattern (function Symbol(_) -> true | _ -> false)
 let isKeyword = isPattern (function Keyword(_) -> true | _ -> false)
 let isString = isPattern (function String(_) -> true | _ -> false)
 let isNumber = isPattern (function Number(_) -> true | _ -> false)
-let isFn = isPattern (function BuiltInFunc(_, _, _) | Func(_, _, _, _, _, _) -> true | _ -> false)
-let isMacro = isPattern (function Macro(_, _, _, _, _, _) -> true | _ -> false)
+let isFn = isPattern (function Func(_, _, _, _, _) -> true | _ -> false)
+let isMacro = isPattern (function Macro(_, _, _, _, _) -> true | _ -> false)
 let isSequential = isPattern (function Node.Seq(_) -> true | _ -> false)
 let isVector = isPattern (function Vector(_, _) -> true | _ -> false)
 let isMap = isPattern (function Map(_, _) -> true | _ -> false)
@@ -218,9 +227,7 @@ let contains = mapOp1 containsKey
 let keys = mapKV (fun (k, v) -> k)
 let vals = mapKV (fun (k, v) -> v)
 
-let atom nextValue = function
-    | [node] -> Atom((nextValue ()), ref node)
-    | _ -> raise <| Error.wrongArity ()
+let atom = Env.makeAtom
 
 let deref = function
     | [Atom(_, r)] -> !r
@@ -234,11 +241,9 @@ let reset = function
     | [_; _] -> raise <| Error.argMismatch ()
     | _ -> raise <| Error.wrongArity ()
 
-let swap = function
-    | Atom(_, r)
-        ::(BuiltInFunc(_, _, f) | Func(_, _, f, _, _, _))
-        ::rest ->
-            r := f (!r::rest)
+let swap eval = function
+    | Atom(_, r)::f::rest & Atom(_, _)::Func(_, _, _, _, _)::_ ->
+            r := callFunction eval f (!r::rest)
             !r
     | [_; _] -> raise <| Error.argMismatch ()
     | _ -> raise <| Error.wrongArity ()
@@ -282,9 +287,8 @@ let withMeta = function
     | [List(_, lst); m] -> List(m, lst)
     | [Vector(_, seg); m] -> Vector(m, seg)
     | [Map(_, map); m] -> Map(m, map)
-    | [BuiltInFunc(_, tag, f); m] -> BuiltInFunc(m, tag, f)
-    | [Func(_, tag, f, a, b, c); m] -> Func(m, tag, f, a, b, c)
-    | [Macro(_, tag, f, a, b, c); m] -> Macro(m, tag, f, a, b, c)
+    | [Func(_, tag, a, b, c); m] -> Func(m, tag, a, b, c)
+    | [Macro(_, tag, a, b, c); m] -> Macro(m, tag, a, b, c)
     | [_; _] -> raise <| Error.argMismatch ()
     | _ -> raise <| Error.wrongArity ()
 
@@ -292,8 +296,14 @@ let meta = function
     | [List(m, _)]
     | [Vector(m, _)]
     | [Map(m, _)]
-    | [BuiltInFunc(m, _, _)]
-    | [Func(m, _, _, _, _, _)]
-    | [Macro(m, _, _, _, _, _)] -> m
+    | [Func(m, _, _, _, _)]
+    | [Macro(m, _, _, _, _)] -> m
     | [_] -> Node.NIL
     | _ -> raise <| Error.wrongArity ()
+
+let rec iterPairs f = function
+    | Node.Pair(first, second, t) ->
+        f first second
+        iterPairs f t
+    | Node.Empty -> ()
+    | _ -> raise <| Error.errExpectedX "list or vector"

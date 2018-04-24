@@ -64,19 +64,21 @@ Declare a new function.
 #### macroexpand
 
 ### SmartThings
-#### set-instance
-Sets the active instance.
 #### get-devices
 Returns a list of all device references.
-#### using-dev [symbol] [device reference, label, or ID] [block body]
-Gets the current device state and stores it in [symbol], then executes
-the body.
-#### dev [label or ID]
-Returns a device reference for a given device label or ID.
-#### dev-attr [device reference] [command name]
+
+#### dev-ref [label or ID]
+Returns a device reference for a given device label or ID. Device references can be passed to other functions without
+making a call to get attributes or commands.
+
+#### dev-state [label or ID]
+Returns the current state of a given device, including all attribute states, capabilities, and available commands.
+
+#### dev-attr [devref or devstate] [command name]
 Returns the current state of an attribute on the device.
-#### dev-cmd [device reference(s)] [command name] [argument list]
+#### dev-cmd [devref(s) or devstate(s)] [command name] [argument list]
 Execute the named device command, providing any necessary parameters.
 
 ### Utility Functions
-#### [placeholder]
+#### to-json / from-json
+#### 

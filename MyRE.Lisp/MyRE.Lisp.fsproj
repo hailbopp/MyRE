@@ -11,13 +11,17 @@
     <Compile Include="Tokenizer.fs" />
     <Compile Include="Reader.fs" />
     <Compile Include="Printer.fs" />
-    <Compile Include="Core.fs" />
     <Compile Include="Env.fs" />
+    <Compile Include="Core.fs" />
+    <Compile Include="SmartApp.fs" />
+    <Compile Include="Builtins.fs" />
     <Compile Include="Interpreter.fs" />
+    <Compile Include="Serialization.fs" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Mono.Terminal" Version="5.4.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
   </ItemGroup>
 
   <ItemGroup>

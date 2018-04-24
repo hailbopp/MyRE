@@ -1,21 +1,25 @@
 ﻿module MyRE.Lisp.Types
 
+open MyRE.SmartApp.Api.Client.Models
+
 [<CustomEquality; CustomComparison>]
 type Node =
     | Nil
-    | List of Metadata * items: Node list
-    | Vector of Metadata * items: Node System.ArraySegment
-    | Map of Metadata * items: Collections.Map<Node, Node>
+    | List of meta: Metadata * items: Node list
+    | Vector of meta: Metadata * items: Node System.ArraySegment
+    | Map of meta: Metadata * items: Collections.Map<Node, Node>
     | Symbol of value: string
     | Keyword of value: string
     | Number of value: int64
     | String of value: string
     | Bool of value: bool
-    | BuiltInFunc of Metadata * uid: int * f: (Node list -> Node)
-    | Func of Metadata * uid: int * f: (Node list -> Node) * body: Node * binds: Node list * env: EnvChain
-    | Macro of Metadata * uid: int * f: (Node list -> Node) * body: Node * binds: Node list * env: EnvChain
+    //| BuiltInFunc of Metadata * uid: int * f: (Node list -> Node)
+    | BuiltinReference of name: string
+    | Func of meta: Metadata * uid: int * body: Node * binds: Node list * env: EnvChain
+    | Macro of meta: Metadata * uid: int * body: Node * binds: Node list * env: EnvChain
     | Atom of uid: int * value: Node Ref
     | DeviceReference of deviceId: string
+    | DeviceState of state: DeviceState
 
     static member private hashSeq (s : seq<Node>) =
         let iter st node = (st * 397) ^^^ node.GetHashCode()
@@ -60,9 +64,10 @@ type Node =
         | Number(_) -> 6
         | String(_) -> 7
         | Bool(_) -> 8
-        | BuiltInFunc(_, _, _)
-        | Func(_, _, _, _, _, _)
-        | Macro(_, _, _, _, _, _) -> 9
+        | BuiltinReference(_)
+        | Func(_, _, _, _, _)
+        | Macro(_, _, _, _, _) -> 9
+        | DeviceState(_)
         | DeviceReference(_) -> 10
         | Atom(_, _) -> 11
 
@@ -79,9 +84,11 @@ type Node =
         | Number(a), Number(b) -> a = b
         | String(a), String(b) -> a = b
         | Bool(a), Bool(b) -> a = b
-        | (BuiltInFunc(_, a, _) | Func(_, a, _, _, _, _) | Macro(_, a, _, _, _, _)),
-            (BuiltInFunc(_, b, _) | Func(_, b, _, _, _, _) | Macro(_, b, _, _, _, _)) ->
+        | BuiltinReference(a), BuiltinReference(b) -> a = b
+        | (Func(_, a, _, _, _) | Macro(_, a, _, _, _)),
+            (Func(_, b, _, _, _) | Macro(_, b, _, _, _)) ->
             a = b
+        | DeviceState(a), DeviceState(b) -> a = b
         | DeviceReference(a), DeviceReference(b) -> a = b
         | Atom(a, _), Atom(b, _) -> a = b
         | _, _ -> false
@@ -99,12 +106,16 @@ type Node =
         | Number(a), Number(b) -> compare a b
         | String(a), String(b) -> compare a b
         | Bool(a), Bool(b) -> compare a b
-        | (BuiltInFunc(_, a, _) | Func(_, a, _, _, _, _) | Macro(_, a, _, _, _, _)),
-            (BuiltInFunc(_, b, _) | Func(_, b, _, _, _, _) | Macro(_, b, _, _, _, _)) ->
-            compare a b
+        | DeviceState(a), DeviceState(b) -> compare (hash a) (hash b)
         | DeviceReference(a), DeviceReference(b) -> compare a b
+        | (Func(_, a, _, _, _) | Macro(_, a, _, _, _)),
+            (Func(_, b, _, _, _) | Macro(_, b, _, _, _)) ->
+            compare a b
         | Atom(a, _), Atom(b, _) -> compare a b
         | a, b -> compare (Node.rank a) (Node.rank b)
+
+    override x.ToString() =
+        "Node"
 
     override x.Equals yobj =
         match yobj with
@@ -122,8 +133,10 @@ type Node =
         | Number(num) -> hash num
         | String(str) -> hash str
         | Bool(b) -> hash b
-        | BuiltInFunc(_, tag, _) | Func(_, tag, _, _, _, _) | Macro(_, tag, _, _, _, _) ->
+        | BuiltinReference(name) -> hash name
+        | Func(_, tag, _, _, _) | Macro(_, tag, _, _, _) ->
             hash tag
+        | DeviceState(d) -> hash d
         | DeviceReference(d) -> hash d
         | Atom(tag, _) -> hash tag
 
