@@ -23,9 +23,11 @@ namespace MyRE.SmartApp.Api.Client
 
         Task<ApiResponse<ResultResponse<string>>> HaltProjectAsync(string projectId);
         Task<ApiResponse<ResultResponse<string>>> ResumeProjectAsync(string projectId);
-        Task<ApiResponse<ResultResponse<object>>> ExecuteProject(string projectId);
+        Task<ApiResponse<ResultResponse<object>>> ExecuteProjectAsync(string projectId);
 
         Task<ApiResponse<ChildSmartApp>> UpdateProjectAsync(string projectId, UpdateChildAppRequest request);
         Task<ApiResponse<object>> DeleteProjectAsync(string projectId);
+
+        Task<ApiResponse<ResultResponse<string>>> ExecuteDeviceCommandAsync(string deviceId, string commandName, ExecuteDeviceCommandRequest request);
     }
 }

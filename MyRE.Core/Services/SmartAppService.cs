@@ -144,7 +144,7 @@ namespace MyRE.Core.Services
         public async Task<object> ExecuteProjectAsync(Project project)
         {
             var client = await CreateProjectClientAsync(project);
-            var result = await client.ExecuteProject(project.ProjectId.ToString());
+            var result = await client.ExecuteProjectAsync(project.ProjectId.ToString());
             return result;
         }
 

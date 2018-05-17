@@ -87,6 +87,11 @@ def mlog(s, String level="info", context=[:]) {
     ])
 }
 
+String toBase64(s) {
+    // If this doesn't work, look here: https://community.smartthings.com/t/posting-emails-w-base64-attachments-from-smartapps/5668/3
+    s.bytes.encodeBase64()
+}
+
 String toJson(o) {
     (new groovy.json.JsonBuilder(o)).toString()
 }
@@ -762,7 +767,7 @@ def EVAL(ast, env) {
             return result
         }
         if (ast.size() == 0) {
-            return ast`
+            return ast
         }
         switch (ast[0]) {
 //            case { symbol_Q(it) && it['value'] == "eval" }:

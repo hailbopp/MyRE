@@ -1,6 +1,7 @@
 ﻿module MyRE.Lisp.Node
 
 open Types
+open MyRE.Lisp
 
 let TRUE = Bool(true)
 let SomeTRUE = Some(TRUE)
@@ -8,7 +9,7 @@ let FALSE = Bool(false)
 let SomeFALSE = Some(FALSE)
 let NIL = Nil
 let SomeNIL = Some(NIL)
-let ZERO = Number(0L)
+let ZERO = Number(0m)
 
 let makeVector seg = Vector(NIL, seg)
 let makeList lst = List(NIL, lst)
@@ -86,3 +87,24 @@ let inline (|Seq|_|) node =
     | List(_, lst) -> Some(Seq.ofList lst)
     | Vector(_, seg) -> Some(seg :> Node seq)
     | _ -> None
+
+type ConvertibleValue =
+    | ConvertibleString of string
+    | ConvertibleBool of bool
+    | ConvertibleNumber of NumberType
+    | ConvertibleDict of ConvertibleMap
+and ConvertibleMap = Map<string, ConvertibleValue>
+
+let rec convertToInternalMap (m: ConvertibleMap) =
+    m   |> Map.toList
+        |> List.map (fun (k, v) -> 
+            let newValue = match v with
+                            | ConvertibleString(s) -> Node.String s
+                            | ConvertibleBool(b) -> Node.Bool b
+                            | ConvertibleNumber(n) -> Node.Number n
+                            | ConvertibleDict(d) -> convertToInternalMap d
+
+            (Symbol(k), newValue))
+        |> Map.ofList
+        |> (fun newMap -> Node.Map(NIL, newMap))
+    

@@ -18,7 +18,7 @@ type InterpreterState = {
 
 type Interpreter = {
     REPL: string array -> int;
-    REYL: InterpreterState option seq;
+    REYL: unit -> InterpreterState option seq;
     readEvalOutputAll: (string) -> (Node * string seq * Env list) list;
 }
 
@@ -62,6 +62,9 @@ let createInterpreter (smartAppClient: IMyreSmartAppApiClient) =
                     | List(_, Symbol("get-devices")::rest) -> smartApp.getAllDeviceReferences eval env rest
                     | List(_, Symbol("dev-ref")::rest) -> smartApp.getDeviceReference eval env rest
                     | List(_, Symbol("dev-state")::rest) -> smartApp.getDeviceState eval env rest
+
+                    | List(_, Symbol("dev-attr")::rest) -> smartApp.getAttributeState eval env rest
+
 
                     | List(_, _) as node ->
                         let resolved = eval_ast env node
@@ -135,28 +138,27 @@ let createInterpreter (smartAppClient: IMyreSmartAppApiClient) =
         | [_] -> raise <| Error.argMismatch ()
         | _ -> raise <| Error.wrongArity ()
 
-    let configureEnv args mode =
+    let configureEnv args =
         let env = Env.makeEmptyChain()
 
         //Env.set env "eval" <| Env.makeBuiltInFunc (eval_func env)
         //Env.set env "*ARGV*" <| argv_func args
         //Env.set env "readline" <| Env.makeBuiltInFunc (readline_func mode)
 
-        RE env """
-            (def not (fn (a) (if a false true)))
+        RE env """(def not (fn (a) (if a false true)))
             (def load-file (fn (f) (eval (read-string (slurp f)))))
             (defmacro cond (fn (& xs) (if (> (count xs) 0) (list 'if (first xs) (if (> (count xs) 1) (nth xs 1) (throw "odd number of forms to cond")) (cons 'cond (rest (rest xs)))))))
             (def *gensym-counter* (atom 0))
             (def gensym (fn [] (symbol (str "G__" (swap *gensym-counter* (fn [x] (+ 1 x)))))))
-            (defmacro or (fn (& xs) (if (empty? xs) nil (if (= 1 (count xs)) (first xs) (let (condvar (gensym)) `(let (~condvar ~(first xs)) (if ~condvar ~condvar (or ~@(rest xs)))))))))
-            """ |> Seq.iter ignore
+            (defmacro or (fn (& xs) (if (empty? xs) nil (if (= 1 (count xs)) (first xs) (let (condvar (gensym)) `(let (~condvar ~(first xs)) (if ~condvar ~condvar (or ~@(rest xs)))))))))""" 
+            |> Seq.iter ignore
 
         env
 
     let REPL args =
         let mode = getReadlineMode args
         let args = Seq.ofArray args |> Seq.filter (fun e -> e <> "--raw") |> List.ofSeq
-        let env = configureEnv args mode
+        let env = configureEnv args
 
         match args with
         | file::_ ->
@@ -181,8 +183,8 @@ let createInterpreter (smartAppClient: IMyreSmartAppApiClient) =
             Some { input = input; output = out; printed = Seq.map STRINGIFY out; env = env }
 
     // REYL: READ-EVAL-YIELD-LOOP
-    let REYL =
-        let env = configureEnv List.empty Reader.RawInput
+    let REYL () =
+        let env = configureEnv List.empty
 
         let rep = ignore >> Console.ReadLine >> mapInterpreterState env
 
@@ -191,8 +193,7 @@ let createInterpreter (smartAppClient: IMyreSmartAppApiClient) =
             |> Seq.takeWhile Option.isSome
 
     let readEvalOutputAll src =
-        let mode = Reader.RawInput
-        let env = configureEnv List.empty mode
+        let env = configureEnv List.empty
 
         let parsedInputs = R src
         let outputs = 

@@ -2,24 +2,26 @@
 
 open MyRE.SmartApp.Api.Client.Models
 
+type NumberType = decimal
+type DeviceId = string
+
 [<CustomEquality; CustomComparison>]
 type Node =
     | Nil
-    | List of meta: Metadata * items: Node list
-    | Vector of meta: Metadata * items: Node System.ArraySegment
-    | Map of meta: Metadata * items: Collections.Map<Node, Node>
+    | List of meta: Metadata * value: Node list
+    | Vector of meta: Metadata * value: Node System.ArraySegment
+    | Map of meta: Metadata * value: Collections.Map<Node, Node>
     | Symbol of value: string
     | Keyword of value: string
-    | Number of value: int64
+    | Number of value: NumberType
     | String of value: string
     | Bool of value: bool
-    //| BuiltInFunc of Metadata * uid: int * f: (Node list -> Node)
-    | BuiltinReference of name: string
+    | BuiltinReference of value: string
     | Func of meta: Metadata * uid: int * body: Node * binds: Node list * env: EnvChain
     | Macro of meta: Metadata * uid: int * body: Node * binds: Node list * env: EnvChain
     | Atom of uid: int * value: Node Ref
-    | DeviceReference of deviceId: string
-    | DeviceState of state: DeviceState
+    | DeviceReference of deviceId: DeviceId * label: string
+    | DeviceState of deviceId: DeviceId * state: Node
 
     static member private hashSeq (s : seq<Node>) =
         let iter st node = (st * 397) ^^^ node.GetHashCode()
@@ -88,8 +90,8 @@ type Node =
         | (Func(_, a, _, _, _) | Macro(_, a, _, _, _)),
             (Func(_, b, _, _, _) | Macro(_, b, _, _, _)) ->
             a = b
-        | DeviceState(a), DeviceState(b) -> a = b
-        | DeviceReference(a), DeviceReference(b) -> a = b
+        | DeviceState(a, b), DeviceState(c, d) -> a = c && b = d
+        | DeviceReference(a, _), DeviceReference(b, _) -> a = b
         | Atom(a, _), Atom(b, _) -> a = b
         | _, _ -> false
 
@@ -106,8 +108,8 @@ type Node =
         | Number(a), Number(b) -> compare a b
         | String(a), String(b) -> compare a b
         | Bool(a), Bool(b) -> compare a b
-        | DeviceState(a), DeviceState(b) -> compare (hash a) (hash b)
-        | DeviceReference(a), DeviceReference(b) -> compare a b
+        | DeviceState(a, m), DeviceState(b, n)-> compare (hash (a, m)) (hash (b, n))
+        | DeviceReference(a, _), DeviceReference(b, _) -> compare a b
         | (Func(_, a, _, _, _) | Macro(_, a, _, _, _)),
             (Func(_, b, _, _, _) | Macro(_, b, _, _, _)) ->
             compare a b
@@ -136,8 +138,8 @@ type Node =
         | BuiltinReference(name) -> hash name
         | Func(_, tag, _, _, _) | Macro(_, tag, _, _, _) ->
             hash tag
-        | DeviceState(d) -> hash d
-        | DeviceReference(d) -> hash d
+        | DeviceState(d, m) -> hash (d, m)
+        | DeviceReference(d, _) -> hash d
         | Atom(tag, _) -> hash tag
 
     interface System.IComparable with
@@ -146,7 +148,7 @@ type Node =
             | :? Node as y -> Node.compare x y
             | _ -> invalidArg "yobj" "Cannot compare values of different types."
 
-
+and AttributeState = AttributeState of value: Node * timestamp: NumberType
 and Env = System.Collections.Generic.Dictionary<string, Node>
 and EnvChain = Env list
 and Metadata = Node

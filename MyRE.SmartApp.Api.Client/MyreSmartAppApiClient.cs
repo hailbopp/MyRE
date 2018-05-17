@@ -16,6 +16,7 @@ namespace MyRE.SmartApp.Api.Client
             public const string InstanceStatus = "status";
             public const string Devices = "devices";
             public static readonly Func<string, string> DeviceId = (deviceId) => $"{Devices}/{deviceId}";
+            public static readonly Func<string, string, string> ExecuteDeviceCommand = (deviceId, command) => $"/devices/{deviceId}/commands/{command}";
 
             public const string Projects = "projects";
             public static readonly Func<string, string> IndividualProject = (projectId) => $"{Projects}/{projectId}";
@@ -104,11 +105,14 @@ namespace MyRE.SmartApp.Api.Client
 
         public async Task<ApiResponse<ResultResponse<string>>> ResumeProjectAsync(string projectId) => await PostAsync<ResultResponse<string>>(Routes.ResumeProject(projectId));
 
-        public async Task<ApiResponse<ResultResponse<object>>> ExecuteProject(string projectId) => await PostAsync<ResultResponse<object>>(Routes.ExecuteProject(projectId));
+        public async Task<ApiResponse<ResultResponse<object>>> ExecuteProjectAsync(string projectId) => await PostAsync<ResultResponse<object>>(Routes.ExecuteProject(projectId));
 
         public async Task<ApiResponse<ChildSmartApp>> UpdateProjectAsync(string projectId, UpdateChildAppRequest request) =>
             await PutAsync<ChildSmartApp, UpdateChildAppRequest>(Routes.IndividualProject(projectId), request);
 
         public Task<ApiResponse<object>> DeleteProjectAsync(string projectId) => DeleteAsync<object>(Routes.IndividualProject(projectId));
+
+        public async Task<ApiResponse<ResultResponse<string>>> ExecuteDeviceCommandAsync(string deviceId, string commandName, ExecuteDeviceCommandRequest request) =>
+            await PostAsync<ResultResponse<string>, ExecuteDeviceCommandRequest>(Routes.ExecuteDeviceCommand(deviceId, commandName), request);
     }
 }

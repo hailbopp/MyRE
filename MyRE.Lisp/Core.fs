@@ -7,7 +7,7 @@ type Evaluator = EnvChain -> Node -> Node
 
 let inline toBool b = if b then Node.TRUE else Node.FALSE
 
-let inline twoNumberOp (f : int64 -> int64 -> Node) = function
+let inline twoNumberOp (f : NumberType -> NumberType -> Node) = function
     | [Number(a); Number(b)] -> f a b
     | [_; _] -> raise <| Error.argMismatch ()
     | _ -> raise <| Error.wrongArity ()
@@ -36,7 +36,7 @@ let callFunction (evaluator: Evaluator) node args =
     | _ -> Error.expectedX "func" |> raise
 
 let time_ms _ =
-    DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond |> int64 |> Number
+    DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond |> NumberType |> Number
 
 let list = Node.makeList
 let isList = function
@@ -50,8 +50,8 @@ let isEmpty = function
     | _ -> Node.FALSE
 
 let count = function
-    | [List(_, lst)] -> lst |> List.length |> int64 |> Number
-    | [Vector(_, seg)] -> seg.Count |> int64 |> Number
+    | [List(_, lst)] -> lst |> List.length |> NumberType |> Number
+    | [Vector(_, seg)] -> seg.Count |> NumberType |> Number
     | [Nil] -> Node.ZERO
     | [_] -> raise <| Error.argMismatch ()
     | _ -> raise <| Error.wrongArity ()
@@ -96,11 +96,11 @@ let nth = function
     | [List(_, lst); Number(n)] ->
         let rec nth_list n = function
             | [] -> raise <| Error.indexOutOfBounds ()
-            | h::_ when n = 0L -> h
-            | _::t -> nth_list (n - 1L) t
+            | h::_ when n = 0m -> h
+            | _::t -> nth_list (n - 1m) t
         nth_list n lst
     | [Vector(_, seg); Number(n)] ->
-        if n < 0L || n >= int64(seg.Count) then
+        if n < 0m || n >= NumberType(seg.Count) then
             raise <| Error.indexOutOfBounds ()
         else
             seg.Array.[int(n)]

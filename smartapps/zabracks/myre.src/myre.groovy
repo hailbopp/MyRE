@@ -214,6 +214,25 @@ def getChildren() {
 }
 
 /// API Logic
+
+def getLocationInfo() {
+	def loc = getLocation()
+	[
+		id: loc.id,
+		name: loc.name,
+		contactBookEnabled: loc.getContactBookEnabled(),
+		availableModes: loc.getModes().collect { it.name },
+		activeMode: loc.getMode(),
+		position: [
+			latitude: loc.getLatitude(),
+			longitude: loc.getLongitude()
+		],
+		tempScale: loc.getTemperatureScale(),
+		timeZoneStandardOffsetMs: loc.getTimeZone().getRawOffset(),
+		postalCode: loc.getZipCode()
+	]
+}
+
 def mapAttributeInfo(attribute) {
     return [
             name: attribute.getName(),
@@ -362,6 +381,11 @@ mappings {
                 GET: 'getDeviceById'
         ]
     }
+    path("/devices/:deviceId/commands/:commandName") {
+        action: [
+                POST: 'executeDeviceCommand'
+        ]
+    }
     path("/projects") {
         action: [
                 GET: 'listChildApps',
@@ -400,9 +424,10 @@ def renderJson(data) {
 // GET /status
 def getInstanceStatus() {
     def response = [
-            instanceId: app.id,
-            accountId: app.getAccountId(),
-            instanceName: settings.instanceName,
+        instanceId: app.id,
+        accountId: app.getAccountId(),
+        instanceName: settings.instanceName,
+		location: getLocationInfo(),
     ]
 
     response.timestamp = now()
@@ -426,6 +451,26 @@ def getDeviceById() {
         return result
     } else {
         return render(status: 404, data: "Device with that ID does not exist.")
+    }
+}
+
+// POST /devices/:deviceId/commands/:commandName
+def executeDeviceCommand() {
+    def deviceId = params?.deviceId
+    def command = params?.commandName
+    def d = getDeviceById(deviceId)
+
+    def params = request.JSON.params
+
+    try {
+        if (params.size()) {
+            d."$command"(params as Object[])
+        } else {
+            d."$command"()
+        }
+        return render(status: 200, data: '{result: "OK"}')
+    } catch (e) {
+        return render(status: 500, data: e)
     }
 }
 

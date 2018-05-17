@@ -1,0 +1,14 @@
+version: "3"
+services:
+  web:
+    image: "microsoft/dotnet:2.0.0-sdk"
+    ports:
+      - "5000:5000"
+    volumes:
+      - ".:/opt/myre"
+    command: "cd /opt/myre/Myre.Web && dotnet run"
+  frontend:
+    image: node:8-alpine    
+    volumes:
+      - ".:/opt/myre"
+    command: "cd /opt/myre/Myre.Web && npm install && npm run watch"

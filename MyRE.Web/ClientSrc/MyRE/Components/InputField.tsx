@@ -44,8 +44,6 @@ interface InputFieldProps {
 
 export class InputField extends React.Component<InputFieldProps> {
     public render() {
-
-
         return (
             <FormGroup row={this.props.row}>
                 <Label for={this.props.name}>{this.props.label}</Label>

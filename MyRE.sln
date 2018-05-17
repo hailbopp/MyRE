@@ -11,7 +11,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MyRE.Data", "MyRE.Data\MyRE
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MyRE.SmartApp.Api.Client", "MyRE.SmartApp.Api.Client\MyRE.SmartApp.Api.Client.csproj", "{C386B897-2C72-4151-ABE4-3C3460ADD195}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "MyRE.Lisp", "MyRE.Lisp\MyRE.Lisp.fsproj", "{B1A0B036-72D4-4224-A721-AD0CD95E461D}"
+Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "MyRE.Lisp", "MyRE.Lisp\MyRE.Lisp.fsproj", "{B1A0B036-72D4-4224-A721-AD0CD95E461D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

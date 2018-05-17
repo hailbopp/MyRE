@@ -78,7 +78,7 @@ let rec readForm = function
         | Token("false")::rest -> Node.SomeFALSE, rest
         | Tokenizer.String(str)::rest -> Some(String(str)), rest
         | Tokenizer.Keyword(kw)::rest -> Some(Keyword(kw)), rest
-        | Tokenizer.Number(num)::rest -> Some(Number(Int64.Parse(num))), rest
+        | Tokenizer.Number(num)::rest -> Some(Number(NumberType.Parse(num))), rest
         | Token(sym)::rest -> Some(Symbol(sym)), rest
         | [] -> None, []
         | _ -> raise <| Error.invalidToken ()
